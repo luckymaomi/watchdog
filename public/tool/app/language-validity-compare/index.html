@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英语汉语有效期比对</title>
+  <script src="../../../theme.js"></script>
+  <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../theme.css">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <a href="../../../index.html" class="back-link">返回工具索引</a>
+      <div><h1>英语汉语有效期比对</h1><p>按姓名匹配人员信息与局方执照备注，核对两项语言能力有效期。</p></div>
+    </header>
+    <section class="section-card upload-card">
+      <h2>上传两份 Excel</h2>
+      <div class="upload-grid">
+        <label class="file-box" for="personnelFile"><span class="file-title">1. 南货航飞行实力表</span><span class="file-hint">读取“人员信息”工作表的 M/N 列</span><input id="personnelFile" type="file" accept=".xls,.xlsx"><span id="personnelFileName" class="file-name">尚未选择</span></label>
+        <label class="file-box" for="caacFile"><span class="file-title">2. CAAC 局方数据</span><span class="file-hint">读取“飞行员信息”工作表 AK 列执照备注</span><input id="caacFile" type="file" accept=".xls,.xlsx"><span id="caacFileName" class="file-name">尚未选择</span></label>
+      </div>
+      <div id="statusLine" class="status-line status-info" aria-live="polite">请选择两份 Excel 文件。</div>
+      <div class="action-row"><button id="compareButton" type="button" class="btn btn-primary" disabled>开始比对</button><button id="exportButton" type="button" class="btn btn-outline-primary" disabled>导出 Excel</button></div>
+    </section>
+    <section id="resultSection" class="section-card" hidden>
+      <div class="section-heading"><div><h2>比对结果</h2><p class="section-note">匹配键为姓名；员工号和飞行员 ID 仅作为来源信息保留。</p></div></div>
+      <div id="summaryGrid" class="summary-grid"></div>
+      <div class="result-toolbar"><div id="selectedSummary" class="section-note"></div><div class="filter-row"><label for="languageSelect">语言</label><select id="languageSelect" class="form-select form-select-sm"><option>全部</option></select><label for="statusFilter">状态</label><select id="statusFilter" class="form-select form-select-sm"><option value="需关注">需关注</option><option value="all">全部</option><option value="双方一致">双方一致</option><option value="日期不一致">日期不一致</option><option value="仅人员信息">仅人员信息</option><option value="仅局方数据">仅局方数据</option><option value="均无有效期">均无有效期</option><option value="人员未匹配">人员未匹配</option><option value="局方未匹配">局方未匹配</option></select></div></div>
+      <div class="small text-muted mb-2">当前显示 <span id="detailCount">0</span> 条</div>
+      <div class="table-shell"><table class="table table-hover align-middle detail-table"><thead><tr><th>姓名</th><th>语言</th><th>状态</th><th>员工号</th><th>飞行员 ID</th><th>人员信息原值</th><th>局方备注提取值</th><th>人员日期</th><th>局方日期</th><th>人员来源</th><th>局方来源</th></tr></thead><tbody id="detailBody"></tbody></table></div>
+    </section>
+    <section class="section-card"><div class="section-heading"><h2>数据问题（<span id="issueCount">0</span>）</h2></div><div class="table-shell"><table class="table table-sm issue-table"><thead><tr><th>来源</th><th>问题类型</th><th>语言</th><th>姓名</th><th>说明</th><th>位置</th></tr></thead><tbody id="issueBody"><tr><td colspan="6" class="empty-cell">比对后显示数据问题</td></tr></tbody></table></div></section>
+  </main>
+  <script src="../../../libs/xlsx.bundle.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

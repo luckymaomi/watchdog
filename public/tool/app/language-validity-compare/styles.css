@@ -1,0 +1,46 @@
+* { box-sizing: border-box; }
+body { min-width: 320px; margin: 0; padding: 22px; background: var(--watchdog-page-bg); color: var(--watchdog-text); }
+.page-shell { width: min(1540px, 100%); margin: 0 auto; }
+.page-header, .section-card { border: 2px solid var(--watchdog-border); background: var(--watchdog-surface); box-shadow: var(--watchdog-shadow-md); }
+.page-header { display: flex; align-items: flex-start; gap: 24px; padding: 18px 20px; margin-bottom: 18px; }
+.back-link { flex: 0 0 auto; color: var(--watchdog-link); text-decoration: none; font-size: 13px; }
+h1, h2, p { margin: 0; }
+h1 { font-size: 25px; line-height: 1.25; }
+h2 { font-size: 17px; line-height: 1.3; }
+.page-header p, .section-note, .file-hint { color: var(--watchdog-text-muted); font-size: 13px; }
+.page-header p { margin-top: 6px; }
+.section-card { margin-bottom: 18px; padding: 18px; }
+.upload-card h2, .section-heading { padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid var(--watchdog-divider); }
+.upload-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.file-box { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1px solid var(--watchdog-border); background: var(--watchdog-surface-soft); cursor: pointer; }
+.file-title { font-weight: 700; }
+.file-box input { width: 100%; margin-top: 4px; }
+.file-name { min-height: 20px; color: var(--watchdog-text-muted); font-size: 12px; overflow-wrap: anywhere; }
+.status-line { margin-top: 14px; padding: 9px 11px; border: 1px solid var(--watchdog-info-border); background: var(--watchdog-info-bg); color: var(--watchdog-info-text); }
+.status-success { border-color: var(--watchdog-success-border); background: var(--watchdog-success-bg); color: var(--watchdog-success-text); }
+.status-danger { border-color: var(--watchdog-danger-border); background: var(--watchdog-danger-bg); color: var(--watchdog-danger-text); }
+.action-row { display: flex; gap: 10px; margin-top: 14px; }
+.summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+.summary-item { min-width: 0; padding: 12px; border: 1px solid var(--watchdog-border); background: var(--watchdog-surface-soft); }
+.summary-item span { display: block; color: var(--watchdog-text-muted); font-size: 12px; }
+.summary-item strong { display: block; margin-top: 3px; font-size: 24px; }
+.result-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.filter-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.filter-row label { color: var(--watchdog-text-muted); font-size: 12px; }
+.filter-row select { width: 140px; }
+.table-shell { max-height: 530px; overflow: auto; border: 1px solid var(--watchdog-border); }
+table { margin: 0 !important; }
+.detail-table { min-width: 1420px; }
+.issue-table { min-width: 760px; }
+th { position: sticky; top: 0; z-index: 1; white-space: nowrap; background: var(--watchdog-surface-muted) !important; }
+td, th { padding: 8px 10px !important; vertical-align: top; }
+.detail-table th:nth-child(1), .detail-table td:nth-child(1) { width: 100px; }
+.detail-table th:nth-child(2), .detail-table td:nth-child(2) { width: 62px; }
+.detail-table th:nth-child(3), .detail-table td:nth-child(3) { width: 112px; }
+.detail-table th:nth-child(6), .detail-table td:nth-child(6), .detail-table th:nth-child(7), .detail-table td:nth-child(7) { min-width: 220px; white-space: normal; }
+.status-tag { display: inline-block; padding: 2px 6px; border: 1px solid var(--watchdog-border); white-space: nowrap; font-size: 12px; }
+.status-ok { border-color: var(--watchdog-success-border); background: var(--watchdog-success-bg); color: var(--watchdog-success-text); }
+.status-diff { border-color: var(--watchdog-danger-border); background: var(--watchdog-danger-bg); color: var(--watchdog-danger-text); }
+.status-warning { border-color: var(--watchdog-warning-border); background: var(--watchdog-warning-bg); color: var(--watchdog-warning-text); }
+.empty-cell { padding: 26px !important; text-align: center; color: var(--watchdog-text-muted); }
+@media (max-width: 800px) { body { padding: 12px; } .page-header { display: block; } .back-link { display: inline-block; margin-bottom: 12px; } .upload-grid, .summary-grid { grid-template-columns: 1fr; } .result-toolbar { display: block; } .filter-row { margin-top: 12px; } }

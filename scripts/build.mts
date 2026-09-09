@@ -58,6 +58,7 @@ const pageEntries = [
   { source: "src/tool/app/pdf-tool/main.ts", output: "tool/app/pdf-tool/app", page: "tool/app/pdf-tool/index.html" },
   { source: "src/tool/app/personnel-structure-stats/main.ts", output: "tool/app/personnel-structure-stats/app", page: "tool/app/personnel-structure-stats/index.html" },
   { source: "src/tool/app/qualification-roster-compare/main.ts", output: "tool/app/qualification-roster-compare/app", page: "tool/app/qualification-roster-compare/index.html" },
+  { source: "src/tool/app/language-validity-compare/main.ts", output: "tool/app/language-validity-compare/app", page: "tool/app/language-validity-compare/index.html" },
   { source: "src/tool/app/proof-king/main.ts", output: "tool/app/proof-king/app", page: "tool/app/proof-king/index.html" },
   { source: "src/tool/app/seasonal-learning/main.ts", output: "tool/app/seasonal-learning/app", page: "tool/app/seasonal-learning/index.html" },
   { source: "src/tool/app/session-bill-check/main.ts", output: "tool/app/session-bill-check/app", page: "tool/app/session-bill-check/index.html" },
