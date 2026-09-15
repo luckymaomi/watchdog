@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实力周报</title>
+    <script src="../../../theme.js"></script>
+    <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../theme.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="app-header">
+        <a class="back-link" href="../../index.html">← 返回工具箱</a>
+        <div class="header-copy">
+            <h1>实力周报</h1>
+            <p>多份飞行实力表 · 当前结构 · 带队资格 · 跨期变化</p>
+        </div>
+        <span class="header-spacer" aria-hidden="true"></span>
+    </header>
+
+    <section class="panel upload-panel" aria-labelledby="uploadHeading">
+        <div class="section-head">
+            <div>
+                <h2 id="uploadHeading">导入实力表</h2>
+                <p>可一次选择或持续拖入多份 Excel。列表顺序就是趋势图顺序，最后一份作为当前快照。</p>
+            </div>
+            <div class="file-toolbar">
+                <span id="fileCount" class="file-count">尚未导入</span>
+                <button id="clearButton" class="btn btn-outline-secondary btn-sm" type="button" disabled>清空全部</button>
+            </div>
+        </div>
+
+        <div id="dropZone" class="drop-zone">
+            <input id="fileInput" class="visually-hidden" type="file" accept=".xlsx,.xls" multiple>
+            <div class="drop-icon" aria-hidden="true">⇩</div>
+            <div>
+                <strong>把实力表拖到这里</strong>
+                <p>应用不限制文件数量；每份文件会独立统计，不会修改原文件。</p>
+            </div>
+            <label class="btn btn-primary btn-sm" for="fileInput">选择实力表</label>
+        </div>
+
+        <div id="statusLine" class="status-line status-muted" role="status">等待导入实力表。</div>
+        <div id="importErrors" class="import-errors" hidden></div>
+        <div id="fileList" class="file-list" aria-live="polite">
+            <div class="file-list-empty">文件会按这里的顺序进入趋势图；排序最后一份作为当前快照。</div>
+        </div>
+    </section>
+
+    <section id="reportSection" class="report-section" hidden aria-labelledby="reportTitle">
+        <div class="export-toolbar" data-html2canvas-ignore="true">
+            <span>图表右上角也可单独保存图片</span>
+            <button id="exportImageButton" class="btn btn-outline-secondary btn-sm" type="button">导出周报 PNG</button>
+            <button id="exportExcelButton" class="btn btn-primary btn-sm" type="button">导出统计 Excel</button>
+        </div>
+
+        <div id="reportCapture" class="report-capture">
+            <header class="panel report-heading">
+                <div>
+                    <h2 id="reportTitle">飞行实力周报</h2>
+                    <p id="reportMeta"></p>
+                </div>
+                <span class="scope-badge">仅统计 是否运行=是</span>
+            </header>
+
+            <div id="summaryGrid" class="summary-grid" aria-label="当前快照摘要"></div>
+            <div id="reportWarning" class="report-warning" hidden></div>
+
+            <div class="current-chart-grid">
+                <article class="panel chart-panel">
+                    <div class="chart-heading">
+                        <h3>技术信息</h3>
+                        <p>教员、机长、副驾驶合并为一个饼图</p>
+                    </div>
+                    <div id="technicalChart" class="chart-box" role="img" aria-label="技术信息饼图"></div>
+                </article>
+                <article class="panel chart-panel">
+                    <div class="chart-heading">
+                        <h3>带队资格</h3>
+                        <p>北美带队看 RAMA，欧洲带队看 REUO</p>
+                    </div>
+                    <div id="leadershipChart" class="chart-box" role="img" aria-label="带队资格柱状图"></div>
+                </article>
+            </div>
+
+            <article class="panel comparison-panel">
+                <div class="section-head comparison-head">
+                    <div>
+                        <h3>多期变化</h3>
+                        <p id="comparisonMeta"></p>
+                    </div>
+                    <div class="chart-type-toggle" data-html2canvas-ignore="true" aria-label="趋势图类型">
+                        <input id="chartTypeBar" class="btn-check" type="radio" name="chartType" value="bar" checked>
+                        <label class="btn btn-outline-secondary btn-sm" for="chartTypeBar">柱状图</label>
+                        <input id="chartTypeLine" class="btn-check" type="radio" name="chartType" value="line">
+                        <label class="btn btn-outline-secondary btn-sm" for="chartTypeLine">折线图</label>
+                    </div>
+                </div>
+                <div class="metric-toolbar" data-html2canvas-ignore="true">
+                    <div class="metric-actions">
+                        <strong>对比指标</strong>
+                        <button id="selectChangedButton" class="btn btn-outline-secondary btn-sm" type="button">只选有变化</button>
+                        <button id="selectAllButton" class="btn btn-outline-secondary btn-sm" type="button">全选</button>
+                    </div>
+                    <div id="metricControls" class="metric-controls"></div>
+                </div>
+                <div id="comparisonChart" class="comparison-chart" role="img" aria-label="多期实力变化图"></div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<script src="../../../libs/xlsx-js-style.min.js"></script>
+<script src="../../../libs/echarts.min.js"></script>
+<script src="../../../libs/html2canvas.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

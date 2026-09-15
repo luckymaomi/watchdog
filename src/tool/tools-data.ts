@@ -10,6 +10,7 @@ export const tools: ToolItem[] = [
     { name: "酒店皇帝", desc: "对比酒店账单与入住登记表", entry: "hotel-bill-check", status: "done", category: "light" },
     { name: "重点人员标注", desc: "在审班表中标注重点人员", entry: "focus-crew", status: "done", category: "light" },
     { name: "航线班次统计", desc: "按排班表统计每人各航线班次", entry: "crew-flight-stats", status: "done", category: "light", homepageVisibility: "hidden" },
+    { name: "实力周报", desc: "用多份飞行实力表生成当前结构与跨期变化图", entry: "crew-strength-report", status: "done", category: "light" },
     { name: "Word 模板填充器", desc: "按配置生成表单并批量填充 Word 模板", entry: "word-template-filler", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "PDF 工具", desc: "提取、合并、转图片和图片转 PDF", entry: "pdf-tool", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "PDF 加水印", desc: "在 PDF 每页统一位置添加图片水印", entry: "pdf-stamp", status: "done", category: "light" },
