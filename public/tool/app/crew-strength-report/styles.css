@@ -5,6 +5,16 @@
     --strength-first-officer-chart: #d2bead;
     --strength-north-america-chart: #a7c3d7;
     --strength-europe-chart: #bbb4d1;
+    --strength-snapshot-1: #9db7cb;
+    --strength-snapshot-2: #a8c6bb;
+    --strength-snapshot-3: #ccb7a6;
+    --strength-snapshot-4: #b6aecb;
+    --strength-snapshot-5: #c4c29f;
+    --strength-snapshot-6: #a9c5ca;
+    --strength-snapshot-7: #c9aeb7;
+    --strength-snapshot-8: #adb9a4;
+    --strength-snapshot-9: #b5b9c7;
+    --strength-snapshot-10: #c5b49e;
 }
 
 :root[data-theme="dark"] {
@@ -14,6 +24,16 @@
     --strength-first-officer-chart: #a38f7e;
     --strength-north-america-chart: #7f9fb0;
     --strength-europe-chart: #918aa8;
+    --strength-snapshot-1: #7894a7;
+    --strength-snapshot-2: #7f9e94;
+    --strength-snapshot-3: #9d8978;
+    --strength-snapshot-4: #8e86a2;
+    --strength-snapshot-5: #98966f;
+    --strength-snapshot-6: #7d9da1;
+    --strength-snapshot-7: #9f818b;
+    --strength-snapshot-8: #84917c;
+    --strength-snapshot-9: #878d9b;
+    --strength-snapshot-10: #9b876f;
 }
 
 body {
@@ -261,6 +281,52 @@ body {
 .chart-panel,
 .comparison-panel { padding: 14px; }
 .chart-box { width: 100%; height: 340px; margin-top: 4px; }
+#technicalChart,
+#leadershipChart { height: 430px; }
+.technical-detail-list {
+    display: grid;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 9px;
+    border: 1px solid var(--watchdog-border);
+    background: var(--watchdog-surface-soft);
+}
+
+.technical-detail-group {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+}
+
+.technical-detail-group > strong {
+    padding-top: 3px;
+    color: var(--watchdog-text);
+    font-size: 12px;
+}
+
+.technical-detail-group > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.technical-detail-group span {
+    padding: 3px 6px;
+    border: 1px solid var(--watchdog-border);
+    background: var(--watchdog-surface);
+    color: var(--watchdog-text-muted);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.technical-detail-group span b {
+    margin-left: 2px;
+    color: var(--watchdog-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.technical-detail-group .technical-detail-empty { color: var(--watchdog-text-quiet); }
 .comparison-panel { margin-top: 10px; }
 .comparison-head { align-items: flex-start; }
 .chart-type-toggle { display: flex; flex-shrink: 0; }
@@ -292,6 +358,71 @@ body {
 .metric-option small { color: var(--watchdog-text-muted); font-size: 10px; }
 .metric-option .form-check-input { margin: 0; accent-color: var(--watchdog-info-border); }
 .comparison-chart { width: 100%; height: 430px; margin-top: 8px; }
+.comparison-caption {
+    margin: 2px 0 8px;
+    color: var(--watchdog-text-muted);
+    font-size: 11px;
+    text-align: center;
+}
+
+.comparison-table-shell {
+    max-height: 300px;
+    overflow: auto;
+    border: 1px solid var(--watchdog-border);
+    background: var(--watchdog-surface);
+}
+
+.comparison-table {
+    min-width: 760px;
+    margin: 0;
+    color: var(--watchdog-text);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.comparison-table > thead > tr > th {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background: var(--watchdog-surface-muted);
+    color: var(--watchdog-text);
+    white-space: nowrap;
+}
+
+.comparison-table > tbody > tr > th {
+    min-width: 130px;
+    background: var(--watchdog-surface-soft);
+    color: var(--watchdog-text);
+    white-space: nowrap;
+}
+
+.comparison-table > :not(caption) > * > * {
+    padding: 8px 10px;
+    border-color: var(--watchdog-border);
+}
+
+.comparison-table td {
+    min-width: 110px;
+    color: var(--watchdog-text);
+    text-align: right;
+}
+
+.comparison-table td small { margin-left: 3px; color: var(--watchdog-text-muted); }
+.table-current-badge {
+    margin-left: 6px;
+    padding: 1px 4px;
+    border: 1px solid var(--watchdog-info-border);
+    background: var(--watchdog-info-bg);
+    color: var(--watchdog-info-text);
+    font-size: 9px;
+}
+
+.comparison-table-empty {
+    padding: 18px;
+    color: var(--watchdog-text-muted);
+    font-size: 12px;
+    text-align: center;
+}
 .chart-empty { display: grid; height: 100%; place-items: center; color: var(--watchdog-text-muted); font-size: 13px; }
 
 @media (max-width: 900px) {

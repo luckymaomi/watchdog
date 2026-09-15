@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
     METRIC_DEFINITIONS,
     analyzeStrengthRows,
+    buildComparisonMatrix,
     buildSnapshotLabel,
     getChangedMetricKeys,
     getDefaultSelectedMetricKeys,
@@ -19,6 +20,7 @@ function snapshot(overrides: Partial<StrengthSnapshot> = {}): StrengthSnapshot {
         totalDataRows: 10,
         excludedRows: 0,
         unclassifiedOperationalRows: 0,
+        technicalDetails: [],
         metrics: {
             operationalTotal: 10,
             instructor: 3,
@@ -42,7 +44,8 @@ describe("crew strength report logic", () => {
             ["丁", 1, "否", "777:C类机长", 1],
             ["戊", "", "", "777:飞行教员C", 1],
             ["己", 0, " 是 ", "777:B类副驾驶", 0],
-            ["庚", "", "是", "待定", ""]
+            ["庚", "", "是", "待定", ""],
+            ["辛", "", "是", "777：飞行教员B", ""]
         ], {
             id: "sample",
             fileName: "实力表20260904.xlsx",
@@ -50,17 +53,23 @@ describe("crew strength report logic", () => {
         });
 
         expect(result.label).toBe("2026-09-04");
-        expect(result.totalDataRows).toBe(7);
+        expect(result.totalDataRows).toBe(8);
         expect(result.excludedRows).toBe(2);
         expect(result.unclassifiedOperationalRows).toBe(1);
         expect(result.metrics).toEqual({
-            operationalTotal: 5,
-            instructor: 1,
+            operationalTotal: 6,
+            instructor: 2,
             captain: 1,
             firstOfficer: 2,
             northAmericaLeader: 1,
             europeLeader: 1
         });
+        expect(result.technicalDetails).toEqual([
+            { category: "instructor", label: "飞行教员B", count: 2 },
+            { category: "captain", label: "C类机长", count: 1 },
+            { category: "firstOfficer", label: "A2类副驾驶", count: 1 },
+            { category: "firstOfficer", label: "B类副驾驶", count: 1 }
+        ]);
     });
 
     it("rejects a worksheet that does not contain all required headers", () => {
@@ -115,5 +124,36 @@ describe("crew strength report logic", () => {
         expect(moveSnapshotByIndex(items, 0, 2).map((item) => item.id)).toEqual(["b", "c", "a"]);
         expect(items.map((item) => item.id)).toEqual(["a", "b", "c"]);
         expect(moveSnapshotByIndex(items, 2, 0).map((item) => item.id)).toEqual(["c", "a", "b"]);
+    });
+
+    it("builds category columns with one series per strength snapshot", () => {
+        const first = snapshot();
+        const second = snapshot({
+            id: "snapshot-2",
+            label: "2026-09-12",
+            metrics: {
+                operationalTotal: 11,
+                instructor: 3,
+                captain: 4,
+                firstOfficer: 3,
+                northAmericaLeader: 2,
+                europeLeader: 2
+            }
+        });
+
+        expect(buildComparisonMatrix(
+            [first, second],
+            new Set(["europeLeader", "captain", "firstOfficer"])
+        )).toEqual({
+            categories: [
+                { key: "captain", label: "机长" },
+                { key: "firstOfficer", label: "副驾驶" },
+                { key: "europeLeader", label: "欧洲带队（REUO）" }
+            ],
+            series: [
+                { snapshotId: "snapshot-1", label: "2026-09-04", values: [3, 4, 1] },
+                { snapshotId: "snapshot-2", label: "2026-09-12", values: [4, 3, 2] }
+            ]
+        });
     });
 });

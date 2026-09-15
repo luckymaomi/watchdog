@@ -18,8 +18,30 @@ export interface StrengthMetrics {
 export interface StrengthMetricDefinition {
     key: StrengthMetricKey;
     label: string;
-    shortLabel: string;
-    colorVariable: string;
+}
+
+export type StrengthTechnicalCategory = "instructor" | "captain" | "firstOfficer";
+
+export interface StrengthTechnicalDetail {
+    category: StrengthTechnicalCategory;
+    label: string;
+    count: number;
+}
+
+export interface StrengthComparisonCategory {
+    key: StrengthMetricKey;
+    label: string;
+}
+
+export interface StrengthComparisonSeries {
+    snapshotId: string;
+    label: string;
+    values: number[];
+}
+
+export interface StrengthComparisonMatrix {
+    categories: StrengthComparisonCategory[];
+    series: StrengthComparisonSeries[];
 }
 
 export interface StrengthSnapshotMeta {
@@ -33,6 +55,7 @@ export interface StrengthSnapshot extends StrengthSnapshotMeta {
     totalDataRows: number;
     excludedRows: number;
     unclassifiedOperationalRows: number;
+    technicalDetails: StrengthTechnicalDetail[];
     metrics: StrengthMetrics;
 }
 

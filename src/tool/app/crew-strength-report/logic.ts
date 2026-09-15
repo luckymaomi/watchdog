@@ -1,19 +1,22 @@
 import type {
+    StrengthComparisonMatrix,
     StrengthMetricDefinition,
     StrengthMetricKey,
     StrengthSnapshot,
-    StrengthSnapshotMeta
+    StrengthSnapshotMeta,
+    StrengthTechnicalCategory,
+    StrengthTechnicalDetail
 } from "./models";
 
 export const REQUIRED_HEADERS = ["技术信息", "是否运行", "RAMA", "REUO"] as const;
 
 export const METRIC_DEFINITIONS: readonly StrengthMetricDefinition[] = [
-    { key: "operationalTotal", label: "运行人员", shortLabel: "运行人员", colorVariable: "--strength-total-chart" },
-    { key: "instructor", label: "教员", shortLabel: "教员", colorVariable: "--strength-instructor-chart" },
-    { key: "captain", label: "机长", shortLabel: "机长", colorVariable: "--strength-captain-chart" },
-    { key: "firstOfficer", label: "副驾驶", shortLabel: "副驾驶", colorVariable: "--strength-first-officer-chart" },
-    { key: "northAmericaLeader", label: "北美带队（RAMA）", shortLabel: "北美带队", colorVariable: "--strength-north-america-chart" },
-    { key: "europeLeader", label: "欧洲带队（REUO）", shortLabel: "欧洲带队", colorVariable: "--strength-europe-chart" }
+    { key: "operationalTotal", label: "运行人员" },
+    { key: "instructor", label: "教员" },
+    { key: "captain", label: "机长" },
+    { key: "firstOfficer", label: "副驾驶" },
+    { key: "northAmericaLeader", label: "北美带队（RAMA）" },
+    { key: "europeLeader", label: "欧洲带队（REUO）" }
 ];
 
 interface HeaderMatch {
@@ -50,12 +53,27 @@ export function findStrengthHeader(rows: unknown[][]): HeaderMatch | null {
     return null;
 }
 
-function classifyTechnicalInformation(value: unknown): "instructor" | "captain" | "firstOfficer" | null {
+const TECHNICAL_CATEGORY_ORDER: readonly StrengthTechnicalCategory[] = ["instructor", "captain", "firstOfficer"];
+
+function classifyTechnicalInformation(value: unknown): StrengthTechnicalCategory | null {
     const text = normalizeCell(value);
     if (text.includes("飞行教员") || text.includes("教员")) return "instructor";
     if (text.includes("副驾驶")) return "firstOfficer";
     if (text.includes("机长")) return "captain";
     return null;
+}
+
+function technicalDetailLabel(value: unknown): string {
+    return normalizeCell(value).replace(/^.*?[:：]\s*/, "");
+}
+
+function sortTechnicalDetails(details: StrengthTechnicalDetail[]): StrengthTechnicalDetail[] {
+    return details.sort((left, right) => {
+        const categoryDifference = TECHNICAL_CATEGORY_ORDER.indexOf(left.category)
+            - TECHNICAL_CATEGORY_ORDER.indexOf(right.category);
+        if (categoryDifference) return categoryDifference;
+        return left.label.localeCompare(right.label, "zh-CN", { numeric: true, sensitivity: "base" });
+    });
 }
 
 function hasQualification(value: unknown): boolean {
@@ -95,14 +113,24 @@ export function analyzeStrengthRows(rows: unknown[][], meta: StrengthSnapshotMet
         europeLeader: 0
     };
     let unclassifiedOperationalRows = 0;
+    const technicalDetailCounts = new Map<string, StrengthTechnicalDetail>();
 
     dataRows.forEach((row) => {
         if (normalizeCell(row[header.indexes["是否运行"]]) !== "是") return;
         metrics.operationalTotal += 1;
 
-        const category = classifyTechnicalInformation(row[header.indexes["技术信息"]]);
-        if (category) metrics[category] += 1;
-        else unclassifiedOperationalRows += 1;
+        const technicalInformation = row[header.indexes["技术信息"]];
+        const category = classifyTechnicalInformation(technicalInformation);
+        if (category) {
+            metrics[category] += 1;
+            const label = technicalDetailLabel(technicalInformation);
+            const key = `${category}\u0000${label}`;
+            const detail = technicalDetailCounts.get(key);
+            if (detail) detail.count += 1;
+            else technicalDetailCounts.set(key, { category, label, count: 1 });
+        } else {
+            unclassifiedOperationalRows += 1;
+        }
 
         if (hasQualification(row[header.indexes.RAMA])) metrics.northAmericaLeader += 1;
         if (hasQualification(row[header.indexes.REUO])) metrics.europeLeader += 1;
@@ -114,7 +142,25 @@ export function analyzeStrengthRows(rows: unknown[][], meta: StrengthSnapshotMet
         totalDataRows: dataRows.length,
         excludedRows: dataRows.length - metrics.operationalTotal,
         unclassifiedOperationalRows,
+        technicalDetails: sortTechnicalDetails([...technicalDetailCounts.values()]),
         metrics
+    };
+}
+
+export function buildComparisonMatrix(
+    snapshots: readonly StrengthSnapshot[],
+    selectedMetricKeys: ReadonlySet<StrengthMetricKey>
+): StrengthComparisonMatrix {
+    const categories = METRIC_DEFINITIONS
+        .filter(({ key }) => selectedMetricKeys.has(key))
+        .map(({ key, label }) => ({ key, label }));
+    return {
+        categories,
+        series: snapshots.map((snapshot) => ({
+            snapshotId: snapshot.id,
+            label: snapshot.label,
+            values: categories.map(({ key }) => snapshot.metrics[key])
+        }))
     };
 }
 

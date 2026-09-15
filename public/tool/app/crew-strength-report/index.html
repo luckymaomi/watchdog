@@ -15,7 +15,7 @@
         <a class="back-link" href="../../index.html">← 返回工具箱</a>
         <div class="header-copy">
             <h1>实力周报</h1>
-            <p>多份飞行实力表 · 当前结构 · 带队资格 · 跨期变化</p>
+            <p>多份飞行实力表 · 技术细分 · 带队资格 · 分类横向对比</p>
         </div>
         <span class="header-spacer" aria-hidden="true"></span>
     </header>
@@ -24,7 +24,7 @@
         <div class="section-head">
             <div>
                 <h2 id="uploadHeading">导入实力表</h2>
-                <p>可一次选择或持续拖入多份 Excel。列表顺序就是趋势图顺序，最后一份作为当前快照。</p>
+                <p>可一次选择或持续拖入多份 Excel。列表顺序就是分类对比顺序，最后一份作为当前快照。</p>
             </div>
             <div class="file-toolbar">
                 <span id="fileCount" class="file-count">尚未导入</span>
@@ -45,7 +45,7 @@
         <div id="statusLine" class="status-line status-muted" role="status">等待导入实力表。</div>
         <div id="importErrors" class="import-errors" hidden></div>
         <div id="fileList" class="file-list" aria-live="polite">
-            <div class="file-list-empty">文件会按这里的顺序进入趋势图；排序最后一份作为当前快照。</div>
+            <div class="file-list-empty">文件会按这里的顺序进入分类对比；排序最后一份作为当前快照。</div>
         </div>
     </section>
 
@@ -72,14 +72,13 @@
                 <article class="panel chart-panel">
                     <div class="chart-heading">
                         <h3>技术信息</h3>
-                        <p>教员、机长、副驾驶合并为一个饼图</p>
                     </div>
                     <div id="technicalChart" class="chart-box" role="img" aria-label="技术信息饼图"></div>
+                    <div id="technicalDetails" class="technical-detail-list" aria-label="技术信息细分类人数"></div>
                 </article>
                 <article class="panel chart-panel">
                     <div class="chart-heading">
                         <h3>带队资格</h3>
-                        <p>北美带队看 RAMA，欧洲带队看 REUO</p>
                     </div>
                     <div id="leadershipChart" class="chart-box" role="img" aria-label="带队资格柱状图"></div>
                 </article>
@@ -88,10 +87,10 @@
             <article class="panel comparison-panel">
                 <div class="section-head comparison-head">
                     <div>
-                        <h3>多期变化</h3>
+                        <h3>分类横向对比</h3>
                         <p id="comparisonMeta"></p>
                     </div>
-                    <div class="chart-type-toggle" data-html2canvas-ignore="true" aria-label="趋势图类型">
+                    <div class="chart-type-toggle" data-html2canvas-ignore="true" aria-label="对比图类型">
                         <input id="chartTypeBar" class="btn-check" type="radio" name="chartType" value="bar" checked>
                         <label class="btn btn-outline-secondary btn-sm" for="chartTypeBar">柱状图</label>
                         <input id="chartTypeLine" class="btn-check" type="radio" name="chartType" value="line">
@@ -106,7 +105,9 @@
                     </div>
                     <div id="metricControls" class="metric-controls"></div>
                 </div>
-                <div id="comparisonChart" class="comparison-chart" role="img" aria-label="多期实力变化图"></div>
+                <div id="comparisonChart" class="comparison-chart" role="img" aria-label="实力分类横向对比图"></div>
+                <p class="comparison-caption">横轴按人员类别排列；颜色对应各份实力表，图中和下表数字单位均为人。</p>
+                <div id="comparisonTable" class="comparison-table-shell table-responsive" aria-label="分类横向对比数值"></div>
             </article>
         </div>
     </section>

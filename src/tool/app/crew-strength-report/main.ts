@@ -71,11 +71,13 @@ function pageElements(): StrengthPageElements {
         summaryGrid: requiredElement("summaryGrid"),
         metricControls: requiredElement("metricControls"),
         comparisonMeta: requiredElement("comparisonMeta"),
+        comparisonTable: requiredElement("comparisonTable"),
         selectChangedButton: requiredElement<HTMLButtonElement>("selectChangedButton"),
         selectAllButton: requiredElement<HTMLButtonElement>("selectAllButton"),
         exportImageButton: requiredElement<HTMLButtonElement>("exportImageButton"),
         exportExcelButton: requiredElement<HTMLButtonElement>("exportExcelButton"),
         technicalChart: requiredElement("technicalChart"),
+        technicalDetails: requiredElement("technicalDetails"),
         leadershipChart: requiredElement("leadershipChart"),
         comparisonChart: requiredElement("comparisonChart")
     };

@@ -1,4 +1,4 @@
-import { METRIC_DEFINITIONS, getChangedMetricKeys } from "./logic";
+import { METRIC_DEFINITIONS, buildComparisonMatrix, getChangedMetricKeys } from "./logic";
 import type {
     StrengthComparisonChartType,
     StrengthImportError,
@@ -22,11 +22,13 @@ export interface StrengthPageElements {
     summaryGrid: HTMLElement;
     metricControls: HTMLElement;
     comparisonMeta: HTMLElement;
+    comparisonTable: HTMLElement;
     selectChangedButton: HTMLButtonElement;
     selectAllButton: HTMLButtonElement;
     exportImageButton: HTMLButtonElement;
     exportExcelButton: HTMLButtonElement;
     technicalChart: HTMLElement;
+    technicalDetails: HTMLElement;
     leadershipChart: HTMLElement;
     comparisonChart: HTMLElement;
 }
@@ -52,7 +54,7 @@ function renderFileList(elements: StrengthPageElements, state: StrengthViewState
     elements.fileCount.textContent = state.snapshots.length ? `${state.snapshots.length} 份快照` : "尚未导入";
     elements.clearButton.disabled = state.importing || state.snapshots.length === 0;
     if (!state.snapshots.length) {
-        elements.fileList.innerHTML = '<div class="file-list-empty">文件会按这里的顺序进入趋势图；排序最后一份作为当前快照。</div>';
+        elements.fileList.innerHTML = '<div class="file-list-empty">文件会按这里的顺序进入分类对比；排序最后一份作为当前快照。</div>';
         return;
     }
 
@@ -111,6 +113,27 @@ function renderSummary(elements: StrengthPageElements, snapshot: StrengthSnapsho
         : "";
 }
 
+function renderTechnicalDetails(elements: StrengthPageElements, snapshot: StrengthSnapshot): void {
+    const groups = [
+        { category: "instructor", label: "教员" },
+        { category: "captain", label: "机长" },
+        { category: "firstOfficer", label: "副驾驶" }
+    ] as const;
+    elements.technicalDetails.innerHTML = groups.map((group) => {
+        const details = snapshot.technicalDetails.filter((detail) => detail.category === group.category);
+        return `
+            <section class="technical-detail-group technical-detail-${escapeHtml(group.category)}">
+                <strong>${escapeHtml(group.label)}</strong>
+                <div>
+                    ${details.length
+                        ? details.map((detail) => `<span>${escapeHtml(detail.label)} <b>${detail.count}</b></span>`).join("")
+                        : '<span class="technical-detail-empty">无可识别细分类</span>'}
+                </div>
+            </section>
+        `;
+    }).join("");
+}
+
 function renderMetricControls(elements: StrengthPageElements, state: StrengthViewState): void {
     const changedKeys = new Set(getChangedMetricKeys(state.snapshots));
     elements.metricControls.innerHTML = METRIC_DEFINITIONS.map(({ key, label }) => `
@@ -124,10 +147,39 @@ function renderMetricControls(elements: StrengthPageElements, state: StrengthVie
     elements.selectAllButton.disabled = state.importing || state.snapshots.length === 0;
 
     if (state.snapshots.length < 2) {
-        elements.comparisonMeta.textContent = "当前只有一份快照；继续追加文件后即可比较变化。";
+        elements.comparisonMeta.textContent = "当前只有一份实力表；横轴按已勾选类别排列。";
     } else {
-        elements.comparisonMeta.textContent = `${state.snapshots.length} 份快照中有 ${changedKeys.size} 项指标发生变化，默认仅展示这些指标。`;
+        elements.comparisonMeta.textContent = `${state.snapshots.length} 份实力表并列展示，当前有 ${changedKeys.size} 项指标发生变化。`;
     }
+}
+
+function renderComparisonTable(elements: StrengthPageElements, state: StrengthViewState): void {
+    const matrix = buildComparisonMatrix(state.snapshots, state.selectedMetricKeys);
+    if (!matrix.categories.length) {
+        elements.comparisonTable.innerHTML = '<div class="comparison-table-empty">请选择至少一个对比指标。</div>';
+        return;
+    }
+    elements.comparisonTable.innerHTML = `
+        <table class="table table-sm align-middle comparison-table">
+            <thead>
+                <tr>
+                    <th scope="col">实力表</th>
+                    ${matrix.categories.map(({ label }) => `<th scope="col">${escapeHtml(label)}</th>`).join("")}
+                </tr>
+            </thead>
+            <tbody>
+                ${matrix.series.map((series, index) => `
+                    <tr>
+                        <th scope="row">
+                            ${escapeHtml(series.label)}
+                            ${index === matrix.series.length - 1 ? '<span class="table-current-badge">当前</span>' : ""}
+                        </th>
+                        ${series.values.map((value) => `<td>${value}<small>人</small></td>`).join("")}
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+    `;
 }
 
 export function renderStrengthView(elements: StrengthPageElements, state: StrengthViewState): void {
@@ -141,5 +193,7 @@ export function renderStrengthView(elements: StrengthPageElements, state: Streng
     elements.exportExcelButton.disabled = state.importing || !current;
     if (!current) return;
     renderSummary(elements, current);
+    renderTechnicalDetails(elements, current);
     renderMetricControls(elements, state);
+    renderComparisonTable(elements, state);
 }
