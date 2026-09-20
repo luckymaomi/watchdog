@@ -11,16 +11,16 @@ function makeDate(year: number, month: number, day: number) {
 function buildWorkbook() {
   const workbook = XLSX.utils.book_new();
   const peopleSheet = XLSX.utils.aoa_to_sheet([
-    ["员工号", "姓名", "分部", "技术信息", "是否运行", "备注"],
-    ["1001", "张三", "一分部", "机长", "是", ""],
-    ["1002", "李四", "二分部", "副驾驶", "是", ""],
-    ["1003", "王五", "三分部", "机长", "是", ""],
-    ["1004", "张雨", "教员组", "教员", "是", "CRM教员"],
-    ["1006", "王军锋", "教员组", "教员", "是", "CRM教员"],
-    ["1005", "赵六", "三分部", "副驾驶", "否", "不运行"],
-    ["1007", "钱七", "一分部", "777:飞行教员A", "是", ""],
-    ["1008", "孙八", "二分部", "777:A2类副驾驶", "是", ""],
-    ["1009", "周九", "三分部", "转入待定", "是", ""]
+    ["员工号", "姓名", "分部", "技术信息", "是否运行", "备注", "RAMA", "REUO", "RWAS", "RSEA"],
+    ["1001", "张三", "一分部", "机长", "是", "", 1, "", "", ""],
+    ["1002", "李四", "二分部", "副驾驶", "是", "", "", "", "", ""],
+    ["1003", "王五", "三分部", "机长", "是", "", "", "", "", ""],
+    ["1004", "张雨", "教员组", "教员", "是", "CRM教员", "", "", "", ""],
+    ["1006", "王军锋", "教员组", "教员", "是", "CRM教员", "", "", "", ""],
+    ["1005", "赵六", "三分部", "副驾驶", "否", "不运行", "", "", "", ""],
+    ["1007", "钱七", "一分部", "777:飞行教员A", "是", "", "", 1, "", ""],
+    ["1008", "孙八", "二分部", "777:A2类副驾驶", "是", "", "", "", "", ""],
+    ["1009", "周九", "三分部", "转入待定", "是", "", "", "", "", ""]
   ], { cellDates: true });
   const oldCrmSheet = XLSX.utils.aoa_to_sheet([
     ["员工号", "姓名", "培训开始日期", "培训结束日期", "培训信息是否录入", "教员", "备注"],
@@ -85,10 +85,8 @@ describe("crm annual check", () => {
     expect(result.monthlyRows[11]).toEqual({ label: "12月", count: 0, kind: "attended" });
     expect(result.monthlyRows[12]).toEqual({ label: "未参加", count: 4, kind: "missing" });
     expect(result.roleRows).toEqual([
-      { role: "教员", required: 2, attended: 1, missing: 1, attendedRate: 0.5 },
-      { role: "机长", required: 2, attended: 1, missing: 1, attendedRate: 0.5 },
-      { role: "副驾驶", required: 3, attended: 1, missing: 2, attendedRate: 1 / 3 },
-      { role: "未识别", required: 1, attended: 1, missing: 0, attendedRate: 1 }
+      { role: "带队机长", required: 2, attended: 2, missing: 0, attendedRate: 1 },
+      { role: "非带队机长", required: 6, attended: 2, missing: 4, attendedRate: 1 / 3 }
     ]);
   });
 });

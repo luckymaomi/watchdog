@@ -94,7 +94,7 @@ const Config = TrainingToolConfig;
       }
     });
 
-    ["分部", "技术信息", "是否运行", "备注"].forEach((header) => {
+    ["分部", "技术信息", "是否运行", "备注", "RAMA", "REUO", "RWAS", "RSEA"].forEach((header) => {
       if (!hasHeader(peopleInfo, header)) {
         addItem(result, "warning", "人员信息表", `缺少建议表头“${header}”。`, "相关展示或 CRM 分类可能不完整。");
       }
@@ -315,7 +315,6 @@ const Config = TrainingToolConfig;
     });
 
     const crmResult = CrmAnnual.buildAnnualCheck(workbook, analysis, scanner, year);
-    const unrecognized = (crmResult.roleRows || []).find((row) => row.role === "未识别");
     addItem(
       result,
       "info",
@@ -323,9 +322,6 @@ const Config = TrainingToolConfig;
       `${year} 年 CRM 核对可生成。`,
       `应参加 ${crmResult.stats.required} 人，已参加 ${crmResult.stats.attended} 人，未参加 ${crmResult.stats.missing} 人。`
     );
-    if (unrecognized && unrecognized.required) {
-      addItem(result, "warning", "CRM", `有 ${unrecognized.required} 名 CRM 应参加人员技术等级未识别。`);
-    }
     if (crmResult.duplicateRows && crmResult.duplicateRows.length) {
       addItem(
         result,

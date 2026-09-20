@@ -13,7 +13,8 @@ const Utils = TrainingToolUtils;
   const CrmInstructors = TrainingToolCrmInstructors;
 
   const CRM_SHEET_NAME = "CRM";
-  const ROLE_ORDER = ["教员", "机长", "副驾驶", "未识别"];
+  const LEADER_QUALIFICATION_CODES = ["RAMA", "REUO", "RWAS", "RSEA"] as const;
+  const ROLE_ORDER = ["带队机长", "非带队机长"];
 
   export interface CrmPersonBasics {
     employeeId: string;
@@ -22,6 +23,7 @@ const Utils = TrainingToolUtils;
     techInfo: string;
     operation: string;
     remark: string;
+    isLineLeader: boolean;
   }
 
   export interface CrmRecord {
@@ -83,22 +85,24 @@ const Utils = TrainingToolUtils;
   }
 
   function getPersonBasics(row: TrainingToolSheetRow, peopleInfo: TrainingToolSheetInfo): CrmPersonBasics {
+    const isLineLeader = LEADER_QUALIFICATION_CODES.some((code) => {
+      const value = Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, code)).toLowerCase();
+      return value !== ""
+        && !["0", "否", "无", "不适用", "false", "no"].includes(value);
+    });
     return {
       employeeId: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "员工号")),
       name: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "姓名")),
       department: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "分部")),
       techInfo: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "技术信息")),
       operation: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "是否运行")),
-      remark: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "备注"))
+      remark: Utils.normalizeText(Utils.getValueByHeader(row, peopleInfo, "备注")),
+      isLineLeader
     };
   }
 
-  function classifyRole(techInfo: unknown): string {
-    const text = Utils.normalizeText(techInfo);
-    if (text.includes("飞行教员") || text.includes("教员")) return "教员";
-    if (text.includes("机长")) return "机长";
-    if (text.includes("副驾驶")) return "副驾驶";
-    return "未识别";
+  function classifyRole(person: Pick<CrmPersonBasics, "isLineLeader">): string {
+    return person.isLineLeader ? "带队机长" : "非带队机长";
   }
 
   function buildInstructorSet(): Set<string> {
@@ -260,8 +264,8 @@ const Utils = TrainingToolUtils;
     }]));
 
     requiredPeople.forEach((person) => {
-      const role = classifyRole(person.techInfo);
-      const item = roleMap.get(role) || roleMap.get("未识别");
+      const role = classifyRole(person);
+      const item = roleMap.get(role);
       if (!item) return;
       const keys = collectPersonKeys(person);
       item.required += 1;
