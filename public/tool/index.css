@@ -73,6 +73,44 @@ button {
     background: #050b08;
 }
 
+body.habitats-feed-mode .habitats-background.is-interactive,
+body.habitats-feed-mode .habitats-background.is-interactive .habitats-background-frame {
+    pointer-events: auto;
+    z-index: 1;
+}
+
+.habitats-feed-toggle-home {
+    display: inline-flex;
+}
+
+.habitats-feed-toggle.is-active {
+    color: var(--soft-ink);
+    background: color-mix(in srgb, var(--soft-sky) 28%, var(--soft-surface));
+}
+
+.habitats-feed-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.habitats-feed-toggle.is-feed-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 30;
+    width: 40px;
+    height: 40px;
+    opacity: 0.48;
+    background: color-mix(in srgb, var(--soft-surface) 72%, transparent);
+    box-shadow: var(--hard-shadow-small);
+    pointer-events: auto;
+}
+
+.habitats-feed-toggle.is-feed-floating:hover,
+.habitats-feed-toggle.is-feed-floating:focus-visible {
+    opacity: 0.92;
+}
+
 .command-bar {
     position: sticky;
     top: 16px;
@@ -577,16 +615,6 @@ button {
 .cooling-unlock input::selection {
     background: transparent;
     color: transparent;
-}
-
-.habitats-toggle.is-active {
-    color: var(--soft-ink);
-    background: color-mix(in srgb, var(--soft-sky) 28%, var(--soft-surface));
-}
-
-.habitats-toggle svg {
-    width: 18px;
-    height: 18px;
 }
 
 @media (max-width: 1180px) {

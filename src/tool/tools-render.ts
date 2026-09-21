@@ -1,5 +1,5 @@
 import { coolingGateLogic, type CoolingClickState } from "./cooling-gate-logic";
-import { bindHabitatsBackground } from "./habitats-background";
+import { bindHabitatsFeedMode } from "./habitats-background";
 import type { ToolCategory, ToolHomepageState, ToolItem } from "./models";
 import { tools } from "./tools-data";
 
@@ -27,7 +27,9 @@ const coolingUnlockInput = document.getElementById("coolingUnlockInput");
 const coolingUnlockStatus = document.getElementById("coolingUnlockStatus");
 const habitatsBackground = document.getElementById("habitatsBackground");
 const habitatsBackgroundFrame = document.getElementById("habitatsBackgroundFrame");
-const habitatsBackgroundToggle = document.getElementById("habitatsBackgroundToggle");
+const habitatsFeedToggle = document.getElementById("habitatsFeedToggle");
+const habitatsFeedToggleHome = document.getElementById("habitatsFeedToggleHome");
+const pageShell = document.querySelector(".page-shell");
 type HomepageCategory = ToolCategory | "all";
 let coolingToolsUnlocked = false;
 let coolingKeyAccepted = false;
@@ -45,7 +47,7 @@ let activeCategory: HomepageCategory = isHomepageCategory(configuredDefaultCateg
     : "all";
 
 bindHomeThemeToggle();
-bindHabitatsBackgroundToggle();
+bindHabitatsFeedToggle();
 
 if (
     searchInput instanceof HTMLInputElement
@@ -82,19 +84,25 @@ function bindHomeThemeToggle(): void {
     syncToggle();
 }
 
-function bindHabitatsBackgroundToggle(): void {
+function bindHabitatsFeedToggle(): void {
     if (
-        !(habitatsBackground instanceof HTMLElement)
+        !(document.body instanceof HTMLElement)
+        || !(pageShell instanceof HTMLElement)
+        || !(habitatsBackground instanceof HTMLElement)
         || !(habitatsBackgroundFrame instanceof HTMLIFrameElement)
-        || !(habitatsBackgroundToggle instanceof HTMLButtonElement)
+        || !(habitatsFeedToggle instanceof HTMLButtonElement)
+        || !(habitatsFeedToggleHome instanceof HTMLElement)
     ) {
         return;
     }
 
-    bindHabitatsBackground({
+    bindHabitatsFeedMode({
+        root: document.body,
+        pageShell,
         layer: habitatsBackground,
         frame: habitatsBackgroundFrame,
-        toggle: habitatsBackgroundToggle
+        toggle: habitatsFeedToggle,
+        toggleHome: habitatsFeedToggleHome
     });
 }
 

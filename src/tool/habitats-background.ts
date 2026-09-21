@@ -1,95 +1,81 @@
-export const HABITATS_BACKGROUND_STORAGE_KEY = "watchdog.toolIndex.habitatsBackground";
 export const HABITATS_BACKGROUND_SRC = "./habitats/index.html";
+export const HABITATS_FEED_MODE_CLASS = "habitats-feed-mode";
 
-export type HabitatsBackgroundStorage = {
-    getItem(key: string): string | null;
-    setItem(key: string, value: string): void;
-};
-
-export function readHabitatsBackgroundEnabled(
-    storage: HabitatsBackgroundStorage | null | undefined = globalThis.localStorage
-): boolean {
-    if (!storage) return true;
-    try {
-        const raw = storage.getItem(HABITATS_BACKGROUND_STORAGE_KEY);
-        if (raw === null) return true;
-        return raw === "1" || raw === "true";
-    } catch {
-        return true;
-    }
+export function habitatsFeedToggleLabel(feeding: boolean): string {
+    return feeding ? "停止喂鱼" : "喂鱼";
 }
 
-export function writeHabitatsBackgroundEnabled(
-    enabled: boolean,
-    storage: HabitatsBackgroundStorage | null | undefined = globalThis.localStorage
-): void {
-    if (!storage) return;
-    try {
-        storage.setItem(HABITATS_BACKGROUND_STORAGE_KEY, enabled ? "1" : "0");
-    } catch {
-        // Ignore quota / private-mode write failures; UI still works for this session.
-    }
-}
-
-export function habitatsBackgroundToggleLabel(enabled: boolean): string {
-    return enabled ? "关闭水族箱背景" : "开启水族箱背景";
-}
-
-export type HabitatsBackgroundElements = {
+export type HabitatsFeedModeElements = {
+    root: HTMLElement;
+    pageShell: HTMLElement;
     layer: HTMLElement;
     frame: HTMLIFrameElement;
     toggle: HTMLButtonElement;
+    toggleHome: HTMLElement;
 };
 
-export function applyHabitatsBackgroundState(
-    elements: HabitatsBackgroundElements,
-    enabled: boolean
-): void {
-    const { layer, frame, toggle } = elements;
-    layer.hidden = !enabled;
-    layer.setAttribute("aria-hidden", String(!enabled));
-
-    if (enabled) {
-        if (!frame.getAttribute("src")) {
-            frame.setAttribute("src", HABITATS_BACKGROUND_SRC);
-        }
-    } else {
-        frame.removeAttribute("src");
+export function ensureHabitatsBackgroundLoaded(frame: HTMLIFrameElement): void {
+    if (!frame.getAttribute("src")) {
+        frame.setAttribute("src", HABITATS_BACKGROUND_SRC);
     }
-
-    const label = habitatsBackgroundToggleLabel(enabled);
-    toggle.setAttribute("aria-label", label);
-    toggle.setAttribute("title", label);
-    toggle.setAttribute("aria-pressed", String(enabled));
-    toggle.classList.toggle("is-active", enabled);
 }
 
-export function bindHabitatsBackground(
-    elements: HabitatsBackgroundElements,
-    storage: HabitatsBackgroundStorage | null | undefined = globalThis.localStorage
-): { getEnabled: () => boolean; setEnabled: (enabled: boolean) => void } {
-    let enabled = readHabitatsBackgroundEnabled(storage);
-    applyHabitatsBackgroundState(elements, enabled);
+export function applyHabitatsFeedMode(
+    elements: HabitatsFeedModeElements,
+    feeding: boolean
+): void {
+    const { root, pageShell, layer, frame, toggle, toggleHome } = elements;
+
+    ensureHabitatsBackgroundLoaded(frame);
+    layer.hidden = false;
+    layer.setAttribute("aria-hidden", "false");
+    root.classList.toggle(HABITATS_FEED_MODE_CLASS, feeding);
+    pageShell.hidden = feeding;
+    pageShell.setAttribute("aria-hidden", String(feeding));
+    layer.classList.toggle("is-interactive", feeding);
+
+    if (feeding) {
+        if (toggle.parentElement !== root) {
+            root.appendChild(toggle);
+        }
+        toggle.classList.add("is-feed-floating");
+    } else {
+        toggle.classList.remove("is-feed-floating");
+        if (toggle.parentElement !== toggleHome) {
+            toggleHome.appendChild(toggle);
+        }
+    }
+
+    const label = habitatsFeedToggleLabel(feeding);
+    toggle.setAttribute("aria-label", label);
+    toggle.setAttribute("title", label);
+    toggle.setAttribute("aria-pressed", String(feeding));
+    toggle.classList.toggle("is-active", feeding);
+}
+
+export function bindHabitatsFeedMode(
+    elements: HabitatsFeedModeElements
+): { getFeeding: () => boolean; setFeeding: (feeding: boolean) => void } {
+    let feeding = false;
+    applyHabitatsFeedMode(elements, feeding);
 
     elements.frame.addEventListener("error", () => {
-        if (!enabled) return;
-        enabled = false;
-        writeHabitatsBackgroundEnabled(false, storage);
-        applyHabitatsBackgroundState(elements, false);
+        if (feeding) {
+            feeding = false;
+            applyHabitatsFeedMode(elements, false);
+        }
     });
 
     elements.toggle.addEventListener("click", () => {
-        enabled = !enabled;
-        writeHabitatsBackgroundEnabled(enabled, storage);
-        applyHabitatsBackgroundState(elements, enabled);
+        feeding = !feeding;
+        applyHabitatsFeedMode(elements, feeding);
     });
 
     return {
-        getEnabled: () => enabled,
-        setEnabled: (next: boolean) => {
-            enabled = next;
-            writeHabitatsBackgroundEnabled(enabled, storage);
-            applyHabitatsBackgroundState(elements, enabled);
+        getFeeding: () => feeding,
+        setFeeding: (next: boolean) => {
+            feeding = next;
+            applyHabitatsFeedMode(elements, feeding);
         }
     };
 }
