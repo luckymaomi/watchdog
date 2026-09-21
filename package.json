@@ -13,6 +13,7 @@
     "test:watch": "tsx scripts/build.mts && vitest",
     "test:smoke": "tsx scripts/build.mts && vitest run tests/smoke",
     "test:tool": "tsx scripts/build.mts && vitest run tests/tool",
+    "test:habitats": "node public/tool/habitats/tests/fish-behavior.mjs && node public/tool/habitats/tests/render-policy.mjs && node public/tool/habitats/tests/plant-budget.mjs",
     "verify:deterministic": "tsx scripts/verify-deterministic-build.mts",
     "verify": "npm run check:readme && npm run typecheck && npm test && npm run verify:deterministic"
   },

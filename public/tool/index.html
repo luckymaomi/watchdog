@@ -9,6 +9,21 @@
     <link rel="stylesheet" href="./index.css">
 </head>
 <body>
+    <div
+        id="habitatsBackground"
+        class="habitats-background"
+        aria-hidden="false"
+    >
+        <iframe
+            id="habitatsBackgroundFrame"
+            class="habitats-background-frame"
+            title="水族箱动态背景"
+            loading="lazy"
+            tabindex="-1"
+            aria-hidden="true"
+        ></iframe>
+    </div>
+
     <div class="page-shell">
         <header class="command-bar">
             <a class="brand-lockup" href="./index.html" aria-label="乡里人首页">
@@ -32,6 +47,21 @@
                     <span id="coolingUnlockStatus" class="visually-hidden" aria-live="polite"></span>
                 </div>
                 <a class="header-link" href="../memo/index.html" target="_blank" rel="noopener noreferrer" title="备忘录">备忘录</a>
+                <button
+                    class="icon-button habitats-toggle is-active"
+                    id="habitatsBackgroundToggle"
+                    type="button"
+                    aria-label="关闭水族箱背景"
+                    aria-pressed="true"
+                    title="关闭水族箱背景"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 14c2.5-1.5 5.5-1.5 8 0s5.5 1.5 8 0"></path>
+                        <path d="M4 18c2.5-1.5 5.5-1.5 8 0s5.5 1.5 8 0"></path>
+                        <path d="M7 10.5c.8-1.6 2.2-2.5 3.8-2.5 1.2 0 2 .5 2.7 1.3"></path>
+                        <circle cx="16.2" cy="8.2" r="1.1"></circle>
+                    </svg>
+                </button>
                 <button class="icon-button" id="homeThemeToggle" type="button" aria-label="切换到暗夜模式" aria-pressed="false" title="切换到暗夜模式">
                     <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="4"></circle>

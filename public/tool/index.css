@@ -4,13 +4,13 @@
 
 html {
     min-width: 320px;
-    background: var(--soft-bg);
+    background: transparent;
 }
 
 body {
     min-height: 100vh;
     margin: 0;
-    background: var(--soft-bg);
+    background: transparent;
     color: var(--soft-ink);
     font-family: Aptos, "Microsoft YaHei UI", "Segoe UI", sans-serif;
     font-size: 16px;
@@ -45,9 +45,32 @@ button {
 }
 
 .page-shell {
+    position: relative;
+    z-index: 1;
     width: min(1500px, 100%);
     margin: 0 auto;
     padding: 24px 24px 56px;
+}
+
+.habitats-background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.habitats-background[hidden] {
+    display: none !important;
+}
+
+.habitats-background-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none;
+    background: #050b08;
 }
 
 .command-bar {
@@ -61,7 +84,7 @@ button {
     gap: 24px;
     padding: 13px 16px 13px 18px;
     border: 2px solid var(--soft-border);
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 88%, transparent);
     box-shadow: var(--hard-shadow-medium);
 }
 
@@ -101,7 +124,7 @@ button {
     align-items: center;
     justify-content: center;
     border: 2px solid var(--soft-border);
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 88%, transparent);
     box-shadow: var(--hard-shadow-small);
     color: var(--soft-muted);
     text-decoration: none;
@@ -192,7 +215,7 @@ button {
     padding: 0 56px 0 18px;
     border: 2px solid var(--soft-border);
     outline: 0;
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 90%, transparent);
     box-shadow: var(--hard-shadow-medium);
     color: var(--soft-ink);
     font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
@@ -206,7 +229,7 @@ button {
 }
 
 .search-field input:focus {
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 94%, transparent);
     box-shadow: var(--hard-shadow-focus);
     outline: 2px solid var(--soft-focus);
     outline-offset: 2px;
@@ -238,7 +261,7 @@ button {
     height: var(--home-control-height);
     padding: 0 13px;
     border: 2px solid var(--soft-border);
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 90%, transparent);
     box-shadow: var(--hard-shadow-small);
     color: var(--soft-muted);
     font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
@@ -262,14 +285,14 @@ button {
 }
 
 .category-button:hover {
-    background: var(--soft-surface-muted);
+    background: color-mix(in srgb, var(--soft-surface-muted) 92%, transparent);
     box-shadow: none;
     color: var(--soft-ink);
     transform: translate(2px, 2px);
 }
 
 .category-button.active {
-    background: var(--category-accent, var(--soft-sky));
+    background: color-mix(in srgb, var(--category-accent, var(--soft-sky)) 88%, transparent);
     box-shadow: var(--hard-shadow-small);
     color: var(--soft-on-pastel);
 }
@@ -331,7 +354,11 @@ button {
     padding: 18px;
     padding-bottom: 56px;
     border: 2px solid var(--soft-border);
-    background: color-mix(in srgb, var(--card-accent) 9%, var(--soft-surface));
+    background: color-mix(
+        in srgb,
+        var(--card-accent) 9%,
+        color-mix(in srgb, var(--soft-surface) 92%, transparent)
+    );
     color: var(--soft-ink);
     text-decoration: none;
     transition: box-shadow 160ms ease-out, transform 160ms ease-out, background 160ms ease-out, color 160ms ease-out;
@@ -376,7 +403,11 @@ button {
 }
 
 .is-enabled .tool-card-surface:hover {
-    background: color-mix(in srgb, var(--card-accent) 32%, var(--soft-surface));
+    background: color-mix(
+        in srgb,
+        var(--card-accent) 32%,
+        color-mix(in srgb, var(--soft-surface) 94%, transparent)
+    );
     box-shadow: none;
     transform: translate(2px, 2px);
 }
@@ -433,7 +464,7 @@ button {
 
 .is-cooling .tool-card-surface,
 .is-cooling .tool-card-surface:hover {
-    background: var(--soft-surface-muted);
+    background: color-mix(in srgb, var(--soft-surface-muted) 92%, transparent);
 }
 
 .is-cooling .tool-card-surface:hover .tool-card-title {
@@ -494,7 +525,7 @@ button {
 .empty-state {
     padding: 46px 24px;
     border: 2px solid var(--soft-border);
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 92%, transparent);
     box-shadow: var(--hard-shadow-medium);
     color: var(--soft-muted);
     font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
@@ -533,7 +564,7 @@ button {
     padding: 0;
     border: 2px solid var(--soft-border);
     outline: 0;
-    background: var(--soft-surface);
+    background: color-mix(in srgb, var(--soft-surface) 88%, transparent);
     box-shadow: none;
     color: transparent;
     -webkit-text-fill-color: transparent;
@@ -546,6 +577,16 @@ button {
 .cooling-unlock input::selection {
     background: transparent;
     color: transparent;
+}
+
+.habitats-toggle.is-active {
+    color: var(--soft-ink);
+    background: color-mix(in srgb, var(--soft-sky) 28%, var(--soft-surface));
+}
+
+.habitats-toggle svg {
+    width: 18px;
+    height: 18px;
 }
 
 @media (max-width: 1180px) {

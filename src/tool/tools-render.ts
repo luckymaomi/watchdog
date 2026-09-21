@@ -1,4 +1,5 @@
 import { coolingGateLogic, type CoolingClickState } from "./cooling-gate-logic";
+import { bindHabitatsBackground } from "./habitats-background";
 import type { ToolCategory, ToolHomepageState, ToolItem } from "./models";
 import { tools } from "./tools-data";
 
@@ -24,6 +25,9 @@ const csn2apiLink = document.getElementById("csn2apiLink");
 const coolingUnlockArea = document.getElementById("coolingUnlockArea");
 const coolingUnlockInput = document.getElementById("coolingUnlockInput");
 const coolingUnlockStatus = document.getElementById("coolingUnlockStatus");
+const habitatsBackground = document.getElementById("habitatsBackground");
+const habitatsBackgroundFrame = document.getElementById("habitatsBackgroundFrame");
+const habitatsBackgroundToggle = document.getElementById("habitatsBackgroundToggle");
 type HomepageCategory = ToolCategory | "all";
 let coolingToolsUnlocked = false;
 let coolingKeyAccepted = false;
@@ -41,6 +45,7 @@ let activeCategory: HomepageCategory = isHomepageCategory(configuredDefaultCateg
     : "all";
 
 bindHomeThemeToggle();
+bindHabitatsBackgroundToggle();
 
 if (
     searchInput instanceof HTMLInputElement
@@ -75,6 +80,22 @@ function bindHomeThemeToggle(): void {
     });
     window.addEventListener("watchdog:themechange", syncToggle);
     syncToggle();
+}
+
+function bindHabitatsBackgroundToggle(): void {
+    if (
+        !(habitatsBackground instanceof HTMLElement)
+        || !(habitatsBackgroundFrame instanceof HTMLIFrameElement)
+        || !(habitatsBackgroundToggle instanceof HTMLButtonElement)
+    ) {
+        return;
+    }
+
+    bindHabitatsBackground({
+        layer: habitatsBackground,
+        frame: habitatsBackgroundFrame,
+        toggle: habitatsBackgroundToggle
+    });
 }
 
 function renderToolList(rows: ToolItem[]): void {
