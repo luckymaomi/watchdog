@@ -9,7 +9,7 @@ import {
   STANDARD_LENGTH,
 } from "./fish-anatomy.js";
 
-export const COUNT = 24;
+export const COUNT = 36;
 // The whole water column the fish may use. The floor is the sand, tracked separately.
 export const BOUNDS = {
   minX: -8.3,
