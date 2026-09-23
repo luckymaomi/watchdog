@@ -67,7 +67,6 @@ export function applyHabitatsBackgroundState(
     toggle.setAttribute("title", label);
     toggle.setAttribute("aria-pressed", String(enabled));
     toggle.classList.toggle("is-active", enabled);
-    toggle.classList.remove("is-feed-floating");
 }
 
 export function bindHabitatsBackground(
