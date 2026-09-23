@@ -12,7 +12,8 @@
     <div
         id="habitatsBackground"
         class="habitats-background"
-        aria-hidden="false"
+        hidden
+        aria-hidden="true"
     >
         <iframe
             id="habitatsBackgroundFrame"
@@ -47,23 +48,21 @@
                     <span id="coolingUnlockStatus" class="visually-hidden" aria-live="polite"></span>
                 </div>
                 <a class="header-link" href="../memo/index.html" target="_blank" rel="noopener noreferrer" title="备忘录">备忘录</a>
-                <span id="habitatsFeedToggleHome" class="habitats-feed-toggle-home">
-                    <button
-                        class="icon-button habitats-feed-toggle"
-                        id="habitatsFeedToggle"
-                        type="button"
-                        aria-label="喂鱼"
-                        aria-pressed="false"
-                        title="喂鱼"
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M4 14c2.5-1.5 5.5-1.5 8 0s5.5 1.5 8 0"></path>
-                            <path d="M4 18c2.5-1.5 5.5-1.5 8 0s5.5 1.5 8 0"></path>
-                            <path d="M7 10.5c.8-1.6 2.2-2.5 3.8-2.5 1.2 0 2 .5 2.7 1.3"></path>
-                            <circle cx="16.2" cy="8.2" r="1.1"></circle>
-                        </svg>
-                    </button>
-                </span>
+                <button
+                    class="icon-button habitats-toggle"
+                    id="habitatsBackgroundToggle"
+                    type="button"
+                    aria-label="开启水族箱"
+                    aria-pressed="false"
+                    title="开启水族箱"
+                >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 14c2.5-1.5 5.5-1.5 8 0s5.5 1.5 8 0"></path>
+                        <path d="M4 18c2.5-1.5 5.5-1.5 8 0s5.5 1.5 8 0"></path>
+                        <path d="M7 10.5c.8-1.6 2.2-2.5 3.8-2.5 1.2 0 2 .5 2.7 1.3"></path>
+                        <circle cx="16.2" cy="8.2" r="1.1"></circle>
+                    </svg>
+                </button>
                 <button class="icon-button" id="homeThemeToggle" type="button" aria-label="切换到暗夜模式" aria-pressed="false" title="切换到暗夜模式">
                     <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="4"></circle>

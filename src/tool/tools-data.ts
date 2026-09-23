@@ -6,7 +6,7 @@ export const tools: ToolItem[] = [
     { name: "换季学习", desc: "换季学习负载均衡", entry: "seasonal-learning", status: "done", category: "heavy", homepageVisibility: "hidden" },
     { name: "审计之王", desc: "从检查项检索手册证据，整理审计依据和 PDF 页面", entry: "audit-king", status: "done", category: "heavy", homepageVisibility: "hidden" },
     { name: "校对之王", desc: "比对同一本手册新旧版，增删改情况。", entry: "proof-king", status: "done", category: "heavy", homepageState: "beta" },
-    { name: "姓名匹配员工号", desc: "识别姓名并匹配员工号", entry: "crew-match-name-id", status: "done", category: "light", homepageVisibility: "hidden" },
+    { name: "姓名匹配员工号", desc: "识别姓名并匹配员工号", entry: "crew-match-name-id", status: "done", category: "light" },
     { name: "酒店皇帝", desc: "对比酒店账单与入住登记表", entry: "hotel-bill-check", status: "done", category: "light" },
     { name: "重点人员标注", desc: "在审班表中标注重点人员", entry: "focus-crew", status: "done", category: "light" },
     { name: "航线班次统计", desc: "按排班表统计每人各航线班次", entry: "crew-flight-stats", status: "done", category: "light", homepageVisibility: "hidden" },
