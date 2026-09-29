@@ -12,6 +12,7 @@ const result = calculate([record("飞行教员B"), record("E类机长"), record(
 const escape = (value: string): string => value.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const cell = (value: string, merge = ""): string => `<w:tc><w:tcPr>${merge}</w:tcPr><w:p><w:r><w:t>${escape(value)}</w:t></w:r></w:p></w:tc>`;
 const row = (...values: string[]): string => `<w:tr>${values.map(v => cell(v)).join("")}</w:tr>`;
+const mergedLabelRow = (label: string): string => `<w:tr>${cell(label, '<w:gridSpan w:val="2"/>')}${["", "", "/", "5%"].map(v => cell(v)).join("")}</w:tr>`;
 const para = (value: string): string => `<w:p><w:r><w:t>${escape(value)}</w:t></w:r></w:p>`;
 const table = (labels: string[], grouped = false): string => {
   const header = grouped ? ["", "", "8月", "9月", "本月变化", "本月占比"] : ["", "8月", "9月", "本月变化", "本月占比"];
@@ -32,7 +33,7 @@ async function fixture(): Promise<Uint8Array> {
     table(["D类副驾驶", "C类副驾驶", "B类副驾驶", "A类副驾驶", "在训副驾驶"]),
     table(result.sections[5].items.map(i => i.label)),
     table(["本地居住", "异地居住", "本地居住", "异地居住"], true),
-    table(["777", "737", "320", "909", ...result.sections[7].items.slice(4).map(i => i.label)], true),
+    table(["777", "737", "320", "909", ...result.sections[7].items.slice(4).filter(i => i.label !== "飞行/总队 919").map(i => i.label)], true),
     table(["其他部门"])
   ];
   const titles = result.sections.map(s => s.title);
@@ -92,6 +93,21 @@ describe("personnel structure Word template filling", () => {
     expect(xml).not.toContain("<w:t xml:space=\"preserve\">其他</w:t>");
     expect(xml).toContain("<w:t xml:space=\"preserve\">1</w:t>");
     expect(output.filledRows).toBeGreaterThan(50);
+  });
+
+  it("adds origin categories when the last template row merges the first two columns", async () => {
+    const source = await fixture();
+    const zip = await JSZip.loadAsync(source);
+    const xml = await zip.file("word/document.xml")!.async("string");
+    zip.file("word/document.xml", xml.replace(row("机长（2）", "上海", "", "", "/", "5%"), mergedLabelRow("上海")));
+    const originResult = calculate([record("B类机长", "总队919"), record("B类机长", "顺丰航空")]);
+    const output = await fillPersonnelDocx(await zip.generateAsync({ type: "uint8array" }), originResult, 9);
+    const outputXml = await (await JSZip.loadAsync(output.bytes)).file("word/document.xml")!.async("string");
+    expect(output.warnings).toContain("空勤人员原单位情况：模板补充分类行 飞行/总队 919。");
+    expect(output.warnings).toContain("空勤人员原单位情况：模板补充分类行 其他。");
+    expect(outputXml).toContain("<w:t xml:space=\"preserve\">飞行总队</w:t>");
+    expect(outputXml).toContain("<w:t xml:space=\"preserve\">919</w:t>");
+    expect(outputXml).toContain("<w:t xml:space=\"preserve\">其他</w:t>");
   });
 
 });

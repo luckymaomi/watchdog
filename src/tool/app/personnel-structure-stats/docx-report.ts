@@ -85,6 +85,7 @@ function labelFor(row: WordRow, index: number): string {
         const group = normalizedWordText(row.cells[0]);
         return `${group.includes("副驾驶") ? "副驾驶" : group.includes("机长") ? "机长" : ""}${label}`;
     }
+    if (index === 7 && normalizedWordText(row.cells[0]).includes("飞行总队")) return `飞行/总队${label}`;
     return ALIASES[label] || label;
 }
 
@@ -96,7 +97,8 @@ function groupFor(label: string, index: number, result: PersonnelStructureResult
         return `机长（${result.captainOrAboveCount - teachers}）`;
     }
     if (index === 6) return label.startsWith("机长") ? `机长（${result.captainOrAboveCount}）` : `副驾驶（${result.firstOfficerCount}）`;
-    return index === 7 ? label : "";
+    if (index === 7) return label.startsWith("飞行/总队 ") ? "飞行总队" : label;
+    return "";
 }
 
 function prepareRows(table: WordElement, section: PersonnelStatSection, index: number, result: PersonnelStructureResult, warnings: string[]): void {
@@ -111,7 +113,9 @@ function prepareRows(table: WordElement, section: PersonnelStatSection, index: n
     const existing = new Set(wordRows(table).slice(1).map(row => labelFor(row, index)));
     for (const item of section.items) {
         if (existing.has(normalize(item.label)) || (item.count === 0 && !["E类机长", "F类机长"].includes(item.label))) continue;
-        const label = index === 6 ? item.label.replace(/^(机长|副驾驶)/, "") : item.label;
+        const label = index === 6
+            ? item.label.replace(/^(机长|副驾驶)/, "")
+            : index === 7 ? item.label.replace(/^飞行\/总队\s*/, "") : item.label;
         appendWordRow(table, labelColumn(index), label, groupFor(item.label, index, result));
         existing.add(normalize(item.label));
         warnings.push(`${section.title}：模板补充分类行 ${item.label}。`);

@@ -34,6 +34,7 @@ const ORIGIN_LABELS = [
     "飞行/总队 737",
     "飞行/总队 320",
     "飞行/总队 909",
+    "飞行/总队 919",
     "湖南",
     "湖北",
     "新疆",
@@ -450,6 +451,7 @@ function mapOrigin(origin: string): string {
     if (normalized === "总队737") return "飞行/总队 737";
     if (normalized === "总队320") return "飞行/总队 320";
     if (normalized === "总队909") return "飞行/总队 909";
+    if (normalized === "总队919") return "飞行/总队 919";
     if (normalized === "湖南分公司") return "湖南";
     if (normalized === "湖北分公司") return "湖北";
     if (normalized === "新疆分公司" || normalized === "新疆分公司（借）") return "新疆";
@@ -460,7 +462,7 @@ function mapOrigin(origin: string): string {
     if (normalized === "珠海分公司") return "珠海";
     if (normalized === "广西分公司") return "广西";
     if (normalized === "海南分公司") return "海南";
-    if (normalized === "上海分公司（借）") return "上海";
+    if (normalized === "上海分公司" || normalized === "上海分公司（借）") return "上海";
     return normalized || "未识别";
 }
 
@@ -572,7 +574,7 @@ export function calculate(records: PersonnelRecord[]): PersonnelStructureResult 
         "空勤人员原单位情况",
         `${structureCrewCount}人`,
         balancePercentages([
-            ...ORIGIN_LABELS.map((label) => makeItem(label, originCounts.get(label) || 0, structureCrewCount, "按原单位映射汇总；总队777与777返聘合并到飞行/总队777。")),
+            ...ORIGIN_LABELS.map((label) => makeItem(label, originCounts.get(label) || 0, structureCrewCount, "按原单位映射汇总；总队777与777返聘合并到飞行/总队777，总队919归入飞行/总队919。")),
             ...(otherOriginCount ? [makeItem("其他", otherOriginCount, structureCrewCount, otherOriginRule)] : [])
         ], structureCrewCount),
         structureCrewCount

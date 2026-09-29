@@ -102,9 +102,12 @@ export function wordRows(table: WordElement): WordRow[] {
 
 export function appendWordRow(table: WordElement, labelColumn: number, label: string, group: string): WordRow {
     const rows = wordRows(table);
-    const last = rows[rows.length - 1];
     if (rows.length < 2) throw new Error("Word 表格没有可复制的数据行。");
-    const element = last.element.cloneNode(true) as WordElement;
+    const template = [...rows.slice(1)].reverse().find(row =>
+        row.cells[labelColumn] && (labelColumn === 0 || row.cells[0] !== row.cells[labelColumn])
+    );
+    if (!template) throw new Error("Word 表格没有分类列未合并的数据行，无法补充分类行。");
+    const element = template.element.cloneNode(true) as WordElement;
     for (const cell of wordChildren(element, "tc")) {
         const props = wordChildren(cell, "tcPr")[0];
         if (props) for (const merge of wordChildren(props, "vMerge")) props.removeChild(merge);
@@ -112,9 +115,7 @@ export function appendWordRow(table: WordElement, labelColumn: number, label: st
     }
     table.appendChild(element);
     const added = wordRows(table).at(-1)!;
-    if (!added.cells[labelColumn] || (labelColumn > 0 && added.cells[0] === added.cells[labelColumn])) {
-        throw new Error("Word 表格分类列合并，无法补充分类行。");
-    }
+    if (!added.cells[labelColumn] || (labelColumn > 0 && added.cells[0] === added.cells[labelColumn])) throw new Error("Word 表格分类列合并，无法补充分类行。");
     if (labelColumn > 0) setWordText(added.cells[0], group);
     setWordText(added.cells[labelColumn], label);
     return added;
