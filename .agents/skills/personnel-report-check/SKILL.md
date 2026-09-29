@@ -1,6 +1,6 @@
 ---
 name: personnel-report-check
-description: 核对人员结构统计和人员结构 Word 报告填充结果时使用。适用于人员信息 Excel、人员结构报告 docx、app.py 写回结果、统计口径闭合、资质代码映射和报告数据一致性核对。
+description: 核对人员结构统计和浏览器生成的人员结构 Word 报告时使用。适用于人员信息 Excel、报告 docx、统计口径闭合、资质代码映射和报告数据一致性核对。
 ---
 
 # Personnel Report Check
@@ -12,7 +12,7 @@ description: 核对人员结构统计和人员结构 Word 报告填充结果时�
 - `.agents/skills/watchdog-dev/SKILL.md`
 - `.agents/skills/docx-report/SKILL.md`
 - `spec/dev/personnel-structure-stats/spec.md`
-- `src/tool/app/personnel-structure-stats/app.py`
+- `src/tool/app/personnel-structure-stats/docx-report.ts`
 - `src/tool/app/personnel-structure-stats/logic.ts`
 
 ## 核对原则
@@ -36,7 +36,7 @@ description: 核对人员结构统计和人员结构 Word 报告填充结果时�
 
 - Excel 是否识别到人员信息表头，而不是误读第一个说明 sheet。
 - docx 是否至少有 9 张飞行部统计表。
-- 脚本是否生成新文件，而不是覆盖原 docx。
+- 浏览器是否下载新文件，而不是覆盖原 docx。
 - 目标月份列、`本月变化` 列、`本月占比` 列是否先清空再写入。
 - 表内目标月份人数是否和计算结果一致。
 - `本月变化` 是否按当前月减上月生成。
@@ -45,9 +45,9 @@ description: 核对人员结构统计和人员结构 Word 报告填充结果时�
 
 ## 推荐验证方式
 
-1. 运行脚本生成新 docx。
+1. 使用浏览器输入 Excel 与模板，下载新 docx。
 2. 用 `python-docx` 读取新 docx。
-3. 用脚本同一套计算函数读取 Excel 得到期望结果。
+3. 用浏览器统计逻辑读取 Excel 得到期望结果。
 4. 按段落索引和表格索引逐项比较：
    - 表 1 到表 9：目标月份列和占比列
 5. 如果比对失败，先判断是业务口径问题、模板结构变化问题，还是写入定位问题。
@@ -55,11 +55,11 @@ description: 核对人员结构统计和人员结构 Word 报告填充结果时�
 ## 变更要求
 
 - 资质代码映射、统计口径、表格写入范围发生变化时，先更新 `spec/dev/personnel-structure-stats/spec.md`。
-- 修改脚本后，补或更新 `tests/tool/personnel-structure-stats/docx-app.test.ts`。
+- 修改浏览器填报逻辑后，补或更新 `tests/tool/personnel-structure-stats/docx-report.test.ts`。
 - 改动后至少运行：
 
 ```powershell
-npx.cmd vitest run tests/tool/personnel-structure-stats/docx-app.test.ts tests/tool/personnel-structure-stats/logic.test.ts
+npx.cmd vitest run tests/tool/personnel-structure-stats/docx-report.test.ts tests/tool/personnel-structure-stats/logic.test.ts
 npm.cmd run build
 npm.cmd run typecheck
 npm.cmd test

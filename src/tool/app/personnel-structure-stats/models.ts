@@ -51,6 +51,10 @@ export type PersonnelStructureElements = {
     sheetSelect: HTMLSelectElement;
     analyzeBtn: HTMLButtonElement;
     exportBtn: HTMLButtonElement;
+    docxInput: HTMLInputElement;
+    docxStatus: HTMLElement;
+    monthSelect: HTMLSelectElement;
+    exportDocxBtn: HTMLButtonElement;
     fileStatus: HTMLElement;
     summary: HTMLElement;
     resultSection: HTMLElement;

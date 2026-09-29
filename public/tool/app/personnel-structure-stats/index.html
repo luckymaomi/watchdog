@@ -115,7 +115,7 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title border-bottom pb-2 mb-3">上传人员信息表</h5>
+            <h5 class="card-title border-bottom pb-2 mb-3">上传文件</h5>
             <div class="row g-3 align-items-end">
                 <div class="col-md-6">
                     <label class="form-label">Excel 文件</label>
@@ -126,10 +126,17 @@
                     <label class="form-label">工作表</label>
                     <select class="form-select" id="sheetSelect" disabled></select>
                 </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button id="analyzeBtn" class="btn btn-outline-secondary w-50" type="button" disabled>开始统计</button>
-                    <button id="exportBtn" class="btn btn-outline-secondary w-50" type="button" disabled>导出 Excel</button>
+                <div class="col-md-3">
+                    <label class="form-label" for="docxInput">Word 报告模板</label>
+                    <input type="file" class="form-control" id="docxInput" accept=".docx">
+                    <div id="docxStatus" class="status status-hint">尚未选择 Word 模板。</div>
                 </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-end gap-2 mt-3">
+                <div><label class="form-label" for="monthSelect">写入月份</label><select class="form-select" id="monthSelect" disabled></select></div>
+                <button id="analyzeBtn" class="btn btn-outline-secondary" type="button" disabled>开始统计</button>
+                <button id="exportBtn" class="btn btn-outline-secondary" type="button" disabled>导出 Excel</button>
+                <button id="exportDocxBtn" class="btn btn-primary" type="button" disabled>导出填充 Word</button>
             </div>
         </div>
     </div>

@@ -2,11 +2,13 @@
 
 ## 产品定位
 
-`personnel-structure-stats` 是纯浏览器工具：读取人员信息 Excel、展示八张结构统计表，支持逐表复制及导出 Excel。不读取或生成 Word，不依赖 Python；统计不绑定文件名、工作表名或固定列号。
+`personnel-structure-stats` 是纯浏览器工具：读取人员信息 Excel 和现有人员结构报告 DOCX 模板，展示八张结构统计表，支持逐表复制，并分别导出统计 Excel 与填充后的 DOCX。不依赖本地 Python；统计不绑定文件名、工作表名或固定列号。
 
 ## 输入契约
 
 浏览器支持 `.xlsx`、`.xls` 并由用户选择工作表。必需表头为 `姓名`、`技术信息`、`RAMA`、`REUO`、`RWAS`、`EAMA`、`EEUO`、`EWAS`、`原单位`、`检查员资格`；`员工号`、`RSEA`、`ESEA`、`RANC`、`RORD`、`RJFK`、`RLAX`、`RNLU` 可选。缺少必需表头时停止统计。`是否运行`和`行政职务`均不读取、不筛选，也不影响任何统计结果。
+
+Word 输入为现有人员结构报告 `.docx`。至少有 9 张飞行部表；第 2 至第 9 张依次对应页面八张统计表，并在对应表前具有相同标题。每张表需有月份、`本月变化` 和 `本月占比` 列；不接受写入单元格与其他月份、数据行或写入列合并的模板。页面列出八张表共有的月份；第一张人员分类表恰有一个整列空月份时自动选中，否则由用户选择。
 
 资格代码含义：`RAMA/REUO/RWAS/RSEA` 为北美、欧洲、西亚、东南亚单飞资格；`EAMA/EEUO/EWAS/ESEA` 为对应报务资格；`RANC/RORD/RJFK/RLAX/RNLU` 为特殊或关注机场。当前报告分类只直接使用美、欧、西亚三类组合。
 
@@ -43,10 +45,13 @@
 
 Excel 固定包含 `统计结果`、`闭环核对`、`规则说明`、`未识别数据` 四个 sheet。统计结果包含分组、构成项、其中项与分组小计；人数列为数值。输出只反映当前上传快照，不含月份列，也不计算本月变化。
 
+DOCX 按用户选择的月份，把八张飞行部统计表的本月人数、本月变化、本月占比写入原模板，更新对应标题母数及等级和居住分组小计；E/F 类机长沿用等级分类，模板中如有 A 类教员行则移除。上月存在数值时变化为本月减上月；上月空白或没有上一月列时变化写 `/`，空白历史数据不会作为零。若统计中存在模板没有的非零分类，新增行并提示；E/F 类机长行即使为零也会补全。模板未识别分类的本月列留空并提示。仅改 `word/document.xml` 中的目标表及标题，其他 DOCX 归档项、既有历史列、飞行管理表、空地总人数、人员引进和后续其他部门保持原模板内容；导出生成新文件，不覆盖模板。该范围之外的数据需要人工核对。
+
 ## 代码与验证
 
 - 页面：`public/tool/app/personnel-structure-stats/index.html`
 - 浏览器规则：`src/tool/app/personnel-structure-stats/logic.ts`
 - 页面接线：`src/tool/app/personnel-structure-stats/main.ts`
 - 展示/导出模型：`src/tool/app/personnel-structure-stats/report.ts`
-- 测试：`tests/tool/personnel-structure-stats/logic.test.ts`、`report.test.ts`
+- Word XML 与填报：`src/tool/app/personnel-structure-stats/docx-xml.ts`、`docx-report.ts`
+- 测试：`tests/tool/personnel-structure-stats/logic.test.ts`、`report.test.ts`、`docx-report.test.ts`

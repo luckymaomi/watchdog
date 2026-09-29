@@ -16,7 +16,7 @@ export const tools: ToolItem[] = [
     { name: "PDF 加水印", desc: "在 PDF 每页统一位置添加图片水印", entry: "pdf-stamp", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "图片工具", desc: "转换、压缩、裁剪、缩放和 Base64 互转", entry: "image-tool", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "文本拼接助手", desc: "清除换行与常见分隔符，按指定字符重新拼接", entry: "text-joiner", status: "done", category: "light", homepageVisibility: "hidden" },
-    { name: "人员结构统计", desc: "查看、复制并导出人员结构统计", entry: "personnel-structure-stats", status: "done", category: "light", homepageVisibility: "hidden" },
+    { name: "人员结构统计", desc: "查看、复制并导出人员结构 Excel 与填充后的 Word", entry: "personnel-structure-stats", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "运行资质比对", desc: "按员工号核对人员信息与飞行门户运行资质名册", entry: "qualification-roster-compare", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "英语汉语有效期比对", desc: "按姓名核对人员信息与局方执照备注中的英语、汉语有效期", entry: "language-validity-compare", status: "done", category: "light", homepageVisibility: "hidden" },
     { name: "国际航班资质反推", desc: "按地区机场和反推日期查找近期国际航班并导出", entry: "international-flight-reverse", status: "done", category: "light", homepageVisibility: "hidden" },

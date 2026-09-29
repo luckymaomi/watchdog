@@ -1,5 +1,6 @@
 import type * as XlsxRuntime from "xlsx-js-style";
 
+import { fillPersonnelDocx, inspectPersonnelDocx } from "./docx-report";
 import { calculate, parseRows } from "./logic";
 import { buildReportTable, buildReportText, buildWorkbook } from "./report";
 import type {
@@ -14,12 +15,19 @@ const XLSX = window.XLSX as unknown as typeof XlsxRuntime;
 let workbook: PersonnelWorkbook | null = null;
 let sourceFileName = "人员结构统计";
 let currentResult: PersonnelStructureResult | null = null;
+let docxTemplate: Uint8Array | null = null;
+let docxFileName = "人员结构报告";
+let docxWarnings: string[] = [];
 
 const elements: PersonnelStructureElements = {
     fileInput: requireElement("fileInput", HTMLInputElement),
     sheetSelect: requireElement("sheetSelect", HTMLSelectElement),
     analyzeBtn: requireElement("analyzeBtn", HTMLButtonElement),
     exportBtn: requireElement("exportBtn", HTMLButtonElement),
+    docxInput: requireElement("docxInput", HTMLInputElement),
+    docxStatus: requireElement("docxStatus", HTMLElement),
+    monthSelect: requireElement("monthSelect", HTMLSelectElement),
+    exportDocxBtn: requireElement("exportDocxBtn", HTMLButtonElement),
     fileStatus: requireElement("fileStatus", HTMLElement),
     summary: requireElement("summary", HTMLElement),
     resultSection: requireElement("resultSection", HTMLElement),
@@ -50,7 +58,11 @@ function showStatus(message: string, type: "success" | "error" | "hint" | "loadi
 }
 
 function stripExtension(fileName: string): string {
-    return fileName.replace(/\.(xlsx|xls)$/i, "");
+    return fileName.replace(/\.(xlsx|xls|docx)$/i, "");
+}
+
+function updateDocxExport(): void {
+    elements.exportDocxBtn.disabled = !currentResult || !docxTemplate || !elements.monthSelect.value;
 }
 
 function timestamp(): string {
@@ -86,17 +98,21 @@ async function handleFileChange(event: Event): Promise<void> {
         workbook = XLSX.read(data, { type: "array", cellDates: true });
         sourceFileName = stripExtension(file.name);
         currentResult = null;
+        docxWarnings = [];
         renderSheetOptions(workbook.SheetNames);
         elements.analyzeBtn.disabled = false;
         elements.exportBtn.disabled = true;
+        updateDocxExport();
         elements.resultSection.style.display = "none";
         elements.warningSection.style.display = "none";
         showStatus(`已加载：${file.name}（${workbook.SheetNames.length} 个工作表）`, "success");
     } catch (error) {
         workbook = null;
         currentResult = null;
+        docxWarnings = [];
         elements.analyzeBtn.disabled = true;
         elements.exportBtn.disabled = true;
+        updateDocxExport();
         elements.resultSection.style.display = "none";
         elements.warningSection.style.display = "none";
         showStatus(`文件解析失败：${error instanceof Error ? error.message : String(error)}`, "error");
@@ -109,12 +125,15 @@ function handleAnalyze(): void {
         const records = parseRows(rows);
         const result = calculate(records);
         currentResult = result;
+        docxWarnings = [];
         renderResult(result);
         elements.exportBtn.disabled = false;
+        updateDocxExport();
         showStatus(`统计完成：${result.structureCrewCount} 人，8 张表全部闭环`, "success");
     } catch (error) {
         currentResult = null;
         elements.exportBtn.disabled = true;
+        updateDocxExport();
         elements.resultSection.style.display = "none";
         elements.warningSection.style.display = "none";
         showStatus(`统计失败：${error instanceof Error ? error.message : String(error)}`, "error");
@@ -175,10 +194,16 @@ function renderResult(result: PersonnelStructureResult): void {
         </div>
     `).join("");
 
+    renderWarnings(result);
+    elements.resultSection.style.display = "block";
+}
+
+function renderWarnings(result: PersonnelStructureResult): void {
     const warnings = [
         ...result.warnings,
         ...result.unrecognized.techInfo.map((item) => `未识别技术信息：${item}`),
-        ...result.unrecognized.origin.map((item) => `未映射原单位：${item}`)
+        ...result.unrecognized.origin.map((item) => `未映射原单位：${item}`),
+        ...docxWarnings
     ];
 
     if (warnings.length) {
@@ -189,7 +214,6 @@ function renderResult(result: PersonnelStructureResult): void {
         elements.warningList.innerHTML = "";
     }
 
-    elements.resultSection.style.display = "block";
 }
 
 function handleExport(): void {
@@ -214,9 +238,76 @@ async function handleCopyTable(event: MouseEvent): Promise<void> {
 
 function handleSheetChange(): void {
     currentResult = null;
+    docxWarnings = [];
     elements.exportBtn.disabled = true;
+    updateDocxExport();
     elements.resultSection.style.display = "none";
     elements.warningSection.style.display = "none";
+}
+
+async function handleDocxChange(): Promise<void> {
+    const file = elements.docxInput.files?.[0];
+    docxTemplate = null;
+    docxWarnings = [];
+    if (currentResult) renderWarnings(currentResult);
+    elements.monthSelect.replaceChildren();
+    elements.monthSelect.disabled = true;
+    updateDocxExport();
+    if (!file) {
+        elements.docxStatus.textContent = "尚未选择 Word 模板。";
+        return;
+    }
+    elements.docxStatus.textContent = "正在检查 Word 模板...";
+    try {
+        if (!/\.docx$/i.test(file.name)) throw new Error("请选择 .docx 格式的 Word 模板。");
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const info = await inspectPersonnelDocx(bytes);
+        for (const month of info.months) {
+            const option = document.createElement("option");
+            option.value = String(month);
+            option.textContent = `${month}月`;
+            elements.monthSelect.appendChild(option);
+        }
+        elements.monthSelect.value = info.suggestedMonth ? String(info.suggestedMonth) : "";
+        if (!info.suggestedMonth) {
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "请选择月份";
+            elements.monthSelect.prepend(placeholder);
+            elements.monthSelect.value = "";
+        }
+        elements.monthSelect.disabled = false;
+        docxTemplate = bytes;
+        docxFileName = stripExtension(file.name);
+        elements.docxStatus.textContent = `已加载：${file.name}${info.suggestedMonth ? `；写入 ${info.suggestedMonth}月` : "；请选择写入月份"}`;
+        updateDocxExport();
+    } catch (error) {
+        elements.docxStatus.textContent = `Word 模板无法使用：${error instanceof Error ? error.message : String(error)}`;
+    }
+}
+
+async function handleDocxExport(): Promise<void> {
+    if (!docxTemplate || !currentResult || !elements.monthSelect.value) return;
+    elements.exportDocxBtn.disabled = true;
+    try {
+        const output = await fillPersonnelDocx(docxTemplate, currentResult, Number(elements.monthSelect.value));
+        const blob = new Blob([new Uint8Array(output.bytes)], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `${docxFileName}_已填充_${output.month}月_${timestamp()}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showStatus(`Word 已填充 ${output.filledRows} 行。请核对未自动更新的飞行管理人数及其他部门数据。`, "success");
+        docxWarnings = output.warnings.filter(item => !currentResult!.warnings.includes(item));
+        renderWarnings(currentResult);
+    } catch (error) {
+        showStatus(`Word 导出失败：${error instanceof Error ? error.message : String(error)}`, "error");
+    } finally {
+        updateDocxExport();
+    }
 }
 
 elements.fileInput.addEventListener("change", handleFileChange);
@@ -224,3 +315,6 @@ elements.analyzeBtn.addEventListener("click", handleAnalyze);
 elements.exportBtn.addEventListener("click", handleExport);
 elements.sheetSelect.addEventListener("change", handleSheetChange);
 elements.resultTables.addEventListener("click", handleCopyTable);
+elements.docxInput.addEventListener("change", handleDocxChange);
+elements.monthSelect.addEventListener("change", updateDocxExport);
+elements.exportDocxBtn.addEventListener("click", handleDocxExport);
