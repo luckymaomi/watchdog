@@ -11,7 +11,7 @@ describe("personnel structure stats", () => {
   function buildRows(): unknown[][] {
     return [
       ["姓名", "员工号", "技术信息", "原单位", "检查员资格", "RAMA", "REUO", "RWAS", "EAMA", "EEUO", "EWAS", "是否运行"],
-      ["教员甲", "100001", "777:飞行教员A", "总队777", "公司检查员", 1, 1, 1, 1, 1, 1, "否"],
+      ["教员甲", "100001", "777:飞行教员B", "总队777", "公司检查员", 1, 1, 1, 1, 1, 1, "否"],
       ["机长乙", "100002", "777:B类机长", "777返聘", "", "", "", "", 1, "", 1, "是"],
       ["机长丙", "100003", "777:Z类机长", "河南分公司", "", "", "", "", "", "", "", "是"],
       ["转机丁", "100004", "划转机长", "湖北分公司", "", "", "", "", "", "", "", "否"],
@@ -65,7 +65,7 @@ describe("personnel structure stats", () => {
     expect(records[0]).toMatchObject({
       employeeId: "100001",
       name: "教员甲",
-      techInfo: "777:飞行教员A",
+      techInfo: "777:飞行教员B",
       origin: "总队777"
     });
     expect(records[0].qualifications.RAMA).toBe(true);
@@ -138,5 +138,52 @@ describe("personnel structure stats", () => {
       : row.map((value, column) => column === row.length - 1 ? (value === "是" ? "否" : "是") : value));
 
     expect(logic.calculate(logic.parseRows(toggledRows))).toEqual(logic.calculate(logic.parseRows(rows)));
+  });
+
+  it("classifies E/F captains by level and routes without losing people or qualifications", () => {
+    const rows = buildRows();
+    rows.push(
+      ["E甲", "200001", "777:E类机长", "总队777", "", "", "", "", 1, "", "", "是"],
+      ["F乙", "200002", "777:F类机长", "河南分公司", "", "", "", "", "", 1, "", "是"],
+      ["E丙", "200003", "777:E类机长", "总队777", "", 1, "", "", 1, "", "", "是"],
+      ["F丁", "200004", "777:F类机长", "河南分公司", "", "", 1, 1, "", 1, "", "是"]
+    );
+    const result = logic.calculate(logic.parseRows(rows));
+    expect(countOf(result, "教员、机长、副驾驶占比", "教员")).toBe(1);
+    expect(countOf(result, "教员、机长、副驾驶占比", "机长")).toBe(8);
+    expect(countOf(result, "机长含以上各级别占比", "E类机长")).toBe(2);
+    expect(countOf(result, "机长含以上各级别占比", "F类机长")).toBe(2);
+    expect(section(result, "机长含以上各级别占比").items.map(item => item.label)).toEqual([
+      "检查员", "C类教员", "B类教员", "F类机长", "E类机长", "D类机长", "C类机长", "B类机长", "Z类机长", "转机型机长"
+    ]);
+    expect(countOf(result, "机长航线资格占比", "航线机长")).toBe(3);
+    expect(countOf(result, "机长航线资格占比", "仅北美带队")).toBe(1);
+    expect(countOf(result, "机长航线资格占比", "欧+西亚")).toBe(1);
+    expect(countOf(result, "机长航线资格占比", "其他")).toBe(1);
+    expect(section(result, "机长航线资格占比").closure.denominator).toBe(8);
+    expect(countOf(result, "机长报务占比", "单美洲报务")).toBe(2);
+    expect(countOf(result, "机长报务占比", "单欧洲报务")).toBe(2);
+    result.sections.forEach(value => {
+      expect(value.closure.closed).toBe(true);
+      if (value.title !== "人员居住情况") expect(categoryPercentTotal(value)).toBe(100);
+    });
+  });
+
+  it("keeps the crew base, communication, residence and origin unchanged when teachers become E/F captains", () => {
+    const rows = buildRows();
+    rows.push([...rows[1]].map((value, i) => i === 1 ? "100009" : value));
+    const before = logic.calculate(logic.parseRows(rows));
+    const converted = rows.map((row, i) => i === 1 || i === rows.length - 1
+      ? row.map((value, column) => column === 2 ? (i === 1 ? "777:E类机长" : "777:F类机长") : value)
+      : row);
+    const after = logic.calculate(logic.parseRows(converted));
+    expect(after.structureCrewCount).toBe(before.structureCrewCount);
+    expect(after.captainOrAboveCount).toBe(before.captainOrAboveCount);
+    expect(after.firstOfficerCount).toBe(before.firstOfficerCount);
+    expect(countOf(after, "教员、机长、副驾驶占比", "教员")).toBe(0);
+    expect(countOf(after, "教员、机长、副驾驶占比", "机长")).toBe(countOf(before, "教员、机长、副驾驶占比", "机长") + 2);
+    for (const title of ["机长航线资格占比", "机长报务占比", "副驾驶级别占比", "副驾驶报务占比", "人员居住情况", "空勤人员原单位情况"]) {
+      expect(section(after, title)).toEqual(section(before, title));
+    }
   });
 });

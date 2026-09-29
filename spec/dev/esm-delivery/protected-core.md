@@ -16,7 +16,7 @@
 | 姓名匹配员工号 | 文本姓名识别、员工号映射、未匹配/多匹配、编辑状态、Excel 与图片导出 | `tests/tool/crew-match-name-id/logic.test.ts` |
 | 文本拼接助手 | 分隔符识别、空项处理、顺序与输出拼接 | `tests/tool/text-joiner/logic.test.ts` |
 | 珠海皇帝 | 场次/账单表头读取、姓名规范化、人次统计、状态与图表输入 | `tests/tool/session-bill-check/logic.test.ts` |
-| 人员结构统计 | 人员表识别、资质/年龄/性别/原单位等统计闭合、前 9 张 Word 表写回 | `tests/tool/personnel-structure-stats/` 2 个测试文件 |
+| 人员结构统计 | 人员表识别、等级/资质/原单位等统计闭合、前端表格复制与 Excel 导出 | `tests/tool/personnel-structure-stats/` 2 个测试文件 |
 | 图片工具 | 文件类型、Blob URL 生命周期、转换、压缩、裁剪、缩放和 Base64 输入输出 | `tests/tool/image-tool/shared.test.ts` |
 | PDF 工具 | PDF 拆分、合并、转图片、图片转 PDF 的页序、尺寸和文件输出 | 第三方适配器启动测试 |
 | PDF 加水印 | 页尺寸与水印位置换算、规则校验、页面渲染和导出 PDF | `tests/tool/pdf-stamp/logic.test.ts` |

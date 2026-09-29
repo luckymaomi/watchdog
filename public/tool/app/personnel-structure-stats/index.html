@@ -61,7 +61,7 @@
             font-weight: 700;
             line-height: 1;
         }
-        .result-table { width: 100%; table-layout: fixed; font-size: 13px; margin-bottom: 0; }
+        .result-table { width: 100%; min-width: 780px; table-layout: fixed; font-size: 13px; margin-bottom: 0; }
         .result-table th {
             background: var(--watchdog-surface-soft);
             border-bottom: 1px solid var(--watchdog-border);
@@ -76,22 +76,17 @@
             padding: 9px 10px;
             vertical-align: top;
         }
-        .result-table th:nth-child(1),
-        .result-table td:nth-child(1) { width: 26%; }
-        .result-table th:nth-child(2),
-        .result-table td:nth-child(2) { width: 12%; }
-        .result-table th:nth-child(3),
-        .result-table td:nth-child(3) { width: 12%; }
-        .result-table th:nth-child(4),
-        .result-table td:nth-child(4) { width: 50%; }
-        .result-table th:nth-child(2),
-        .result-table th:nth-child(3),
-        .result-table td:nth-child(2),
-        .result-table td:nth-child(3) { text-align: right; white-space: nowrap; }
-        .result-table td:nth-child(2) { font-weight: 600; }
-        .result-table td:nth-child(4) { color: var(--watchdog-text-muted); }
-        .result-table .subset-row td { background: var(--watchdog-surface-soft); }
-        .result-table .subset-row td:first-child { font-weight: 600; }
+        .result-table th:nth-child(1), .result-table td:nth-child(1) { width: 16%; }
+        .result-table th:nth-child(2), .result-table td:nth-child(2) { width: 18%; }
+        .result-table th:nth-child(3), .result-table td:nth-child(3) { width: 10%; }
+        .result-table th:nth-child(4), .result-table td:nth-child(4) { width: 10%; }
+        .result-table th:nth-child(5), .result-table td:nth-child(5) { width: 46%; }
+        .result-table th:nth-child(3), .result-table th:nth-child(4),
+        .result-table td:nth-child(3), .result-table td:nth-child(4) { text-align: right; white-space: nowrap; }
+        .result-table td:nth-child(3) { font-weight: 600; }
+        .result-table td:nth-child(5) { color: var(--watchdog-text-muted); }
+        .result-table .subset-row td, .result-table .subtotal-row td { background: var(--watchdog-surface-soft); }
+        .result-table .subtotal-row td { font-weight: 700; }
         .result-table-shell { margin-top: 0; overflow-x: auto; }
         .result-table-shell .table > :not(caption) > * > * { background-color: transparent; }
         .result-table-shell .table thead th { background-color: var(--watchdog-surface-soft); }
@@ -133,21 +128,7 @@
                 </div>
                 <div class="col-md-3 d-flex gap-2">
                     <button id="analyzeBtn" class="btn btn-outline-secondary w-50" type="button" disabled>开始统计</button>
-                    <button id="exportBtn" class="btn btn-outline-secondary w-50" type="button" disabled>导出Excel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title border-bottom pb-2 mb-3">Word 报告填充脚本</h5>
-            <div class="row g-3 align-items-center">
-                <div class="col-md-8 text-muted small">
-                    下载脚本后运行，图形界面选择人员信息 Excel 原表和人员结构报告 docx，生成已填好的新 Word 文件。
-                </div>
-                <div class="col-md-4 text-md-end">
-                    <a href="app.py" download class="btn btn-outline-secondary">下载 app.py</a>
+                    <button id="exportBtn" class="btn btn-outline-secondary w-50" type="button" disabled>导出 Excel</button>
                 </div>
             </div>
         </div>

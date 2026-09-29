@@ -186,7 +186,9 @@ function isLineCaptain(record: PersonnelRecord): boolean {
     const isCaptainLevelForLine = label.includes("飞行教员")
         || label.includes("A类机长")
         || label.includes("B类机长")
-        || label.includes("C类机长");
+        || label.includes("C类机长")
+        || label === "E类机长"
+        || label === "F类机长";
     return isCaptainLevelForLine
         && !label.includes("Z类机长")
         && !hasQualification(record, "RAMA")
@@ -348,7 +350,7 @@ function buildCaptainRouteItems(records: PersonnelRecord[], denominator: number)
 
     return balancePercentages([
         ...comboItems,
-        makeItem("航线机长", count(records, isLineCaptain), denominator, "B类及以上、无RAMA/REUO/RWAS单飞资格、且不是Z类机长。"),
+        makeItem("航线机长", count(records, isLineCaptain), denominator, "飞行教员、F/E/C/B/A类机长，无RAMA/REUO/RWAS单飞资格，且不是Z类机长。"),
         makeItem("左座带飞", count(records, (record) => techLabel(record) === "Z类机长"), denominator, "Z类机长。"),
         makeItem(
             "其他",
@@ -374,9 +376,14 @@ function buildCaptainLevelItems(records: PersonnelRecord[], denominator: number)
                 rule: "技术信息为飞行教员B。"
             },
             {
-                label: "A类教员",
-                predicate: (record) => techLabel(record) === "飞行教员A",
-                rule: "技术信息为飞行教员A。"
+                label: "F类机长",
+                predicate: (record) => techLabel(record) === "F类机长",
+                rule: "技术信息为F类机长。"
+            },
+            {
+                label: "E类机长",
+                predicate: (record) => techLabel(record) === "E类机长",
+                rule: "技术信息为E类机长。"
             },
             {
                 label: "D类机长",

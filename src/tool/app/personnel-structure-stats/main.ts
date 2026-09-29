@@ -1,6 +1,7 @@
 import type * as XlsxRuntime from "xlsx-js-style";
 
-import { calculate, parseRows, REQUIRED_HEADERS } from "./logic";
+import { calculate, parseRows } from "./logic";
+import { buildReportTable, buildReportText, buildWorkbook } from "./report";
 import type {
     PersonnelStructureElements,
     PersonnelStructureResult,
@@ -93,8 +94,11 @@ async function handleFileChange(event: Event): Promise<void> {
         showStatus(`已加载：${file.name}（${workbook.SheetNames.length} 个工作表）`, "success");
     } catch (error) {
         workbook = null;
+        currentResult = null;
         elements.analyzeBtn.disabled = true;
         elements.exportBtn.disabled = true;
+        elements.resultSection.style.display = "none";
+        elements.warningSection.style.display = "none";
         showStatus(`文件解析失败：${error instanceof Error ? error.message : String(error)}`, "error");
     }
 }
@@ -112,6 +116,7 @@ function handleAnalyze(): void {
         currentResult = null;
         elements.exportBtn.disabled = true;
         elements.resultSection.style.display = "none";
+        elements.warningSection.style.display = "none";
         showStatus(`统计失败：${error instanceof Error ? error.message : String(error)}`, "error");
     }
 }
@@ -132,7 +137,7 @@ function renderResult(result: PersonnelStructureResult): void {
         </div>
     `;
 
-    elements.resultTables.innerHTML = result.sections.map((section) => `
+    elements.resultTables.innerHTML = result.sections.map((section, index) => `
         <div class="card mb-4">
             <div class="card-body">
                 <div class="result-card-head">
@@ -143,12 +148,14 @@ function renderResult(result: PersonnelStructureResult): void {
                         <strong class="closure-state ${section.closure.closed ? "is-closed" : "is-open"}">
                             ${section.closure.closed ? "已闭环" : "待核对"}
                         </strong>
+                        <button type="button" class="btn btn-outline-secondary btn-sm copy-table" data-section="${index}" title="复制此表统计结果" aria-label="复制${escapeHtml(section.title)}">复制表格</button>
                     </div>
                 </div>
                 <div class="table-responsive result-table-shell">
                     <table class="table table-hover align-middle result-table mb-0">
                         <thead>
                             <tr>
+                                <th>分组</th>
                                 <th>项目</th>
                                 <th>人数</th>
                                 <th>占比</th>
@@ -156,12 +163,9 @@ function renderResult(result: PersonnelStructureResult): void {
                             </tr>
                         </thead>
                         <tbody>
-                            ${section.items.map((item) => `
-                                <tr class="${item.isSubset ? "subset-row" : ""}">
-                                    <td>${item.isSubset ? "其中：" : ""}${escapeHtml(item.label)}</td>
-                                    <td>${item.count}</td>
-                                    <td>${escapeHtml(item.percent)}</td>
-                                    <td>${escapeHtml(item.rule)}</td>
+                            ${buildReportTable(section).rows.map((row) => `
+                                <tr class="${row.isSubtotal ? "subtotal-row" : row.relation === "其中项" ? "subset-row" : ""}">
+                                    ${row.values.map(value => `<td>${escapeHtml(value)}</td>`).join("")}
                                 </tr>
                             `).join("")}
                         </tbody>
@@ -188,89 +192,35 @@ function renderResult(result: PersonnelStructureResult): void {
     elements.resultSection.style.display = "block";
 }
 
-function buildResultRows(result: PersonnelStructureResult): unknown[][] {
-    const rows: unknown[][] = [["表格", "项目", "统计关系", "人数", "母数", "占比", "口径"]];
-    result.sections.forEach((section) => {
-        section.items.forEach((item) => {
-            rows.push([
-                section.title,
-                item.label,
-                item.isSubset ? "其中项" : "构成项",
-                item.count,
-                item.denominator,
-                item.percent,
-                item.rule
-            ]);
-        });
-    });
-    return rows;
-}
-
-function buildClosureRows(result: PersonnelStructureResult): unknown[][] {
-    return [
-        ["表格", "构成合计", "闭环母数", "状态"],
-        ...result.sections.map((section) => [
-            section.title,
-            section.closure.total,
-            section.closure.denominator,
-            section.closure.closed ? "已闭环" : "待核对"
-        ])
-    ];
-}
-
-function buildRuleRows(result: PersonnelStructureResult): unknown[][] {
-    return [
-        ["规则", "说明"],
-        ["输入", "上传任意 xlsx/xls，按表头识别字段，不绑定文件名、sheet 名或列位置。"],
-        ["必要表头", REQUIRED_HEADERS.join("、")],
-        ["结构统计人员", "教员、普通机长、转机型机长、普通副驾驶、转机型副驾驶。"],
-        ["转机型机长", "技术信息为划转机长；航线资格和报务不包含转机型。"],
-        ["转机型副驾驶", "技术信息为划转副驾驶；级别包含转机型，报务不包含转机型。"],
-        ["检查员", "其中项，不参加机长技术等级构成求和。"],
-        ["闭环", "每张表的构成项人数合计等于闭环母数；其中项不重复计入。"],
-        ["单飞资格", "RAMA/REUO/RWAS 分别代表北美、欧洲、西亚单飞资格。"],
-        ["报务资格", "EAMA/EEUO/EWAS 分别代表北美、欧洲、西亚英语通信资格。"],
-        ["航线机长", "B类及以上、没有 RAMA/REUO/RWAS 单飞资格、且不是 Z类机长。"],
-        ["左座带飞", "Z类机长。"],
-        ["本地居住", "原单位以总队开头，或原单位为 777返聘。"],
-        ["导出时间", new Date().toLocaleString("zh-CN")],
-        ["结构统计人员", result.structureCrewCount],
-        ["机长含以上", result.captainOrAboveCount],
-        ["副驾驶", result.firstOfficerCount]
-    ];
-}
-
-function buildUnrecognizedRows(result: PersonnelStructureResult): unknown[][] {
-    const rows: unknown[][] = [["类型", "内容"]];
-    result.unrecognized.techInfo.forEach((item) => rows.push(["未识别技术信息", item]));
-    result.unrecognized.origin.forEach((item) => rows.push(["未映射原单位", item]));
-    if (rows.length === 1) rows.push(["无", ""]);
-    return rows;
-}
-
-function applySheetWidth(sheet: PersonnelWorksheet, widths: number[]): void {
-    sheet["!cols"] = widths.map((wch) => ({ wch }));
-}
-
 function handleExport(): void {
     if (!currentResult) return;
+    XLSX.writeFile(buildWorkbook(XLSX, currentResult), `${sourceFileName}_人员结构统计_${timestamp()}.xlsx`);
+}
 
-    const output = XLSX.utils.book_new();
-    const resultSheet = XLSX.utils.aoa_to_sheet(buildResultRows(currentResult));
-    const closureSheet = XLSX.utils.aoa_to_sheet(buildClosureRows(currentResult));
-    const ruleSheet = XLSX.utils.aoa_to_sheet(buildRuleRows(currentResult));
-    const unrecognizedSheet = XLSX.utils.aoa_to_sheet(buildUnrecognizedRows(currentResult));
-    applySheetWidth(resultSheet, [24, 18, 12, 10, 10, 10, 58]);
-    applySheetWidth(closureSheet, [28, 12, 12, 12]);
-    applySheetWidth(ruleSheet, [20, 80]);
-    applySheetWidth(unrecognizedSheet, [22, 42]);
-    XLSX.utils.book_append_sheet(output, resultSheet, "统计结果");
-    XLSX.utils.book_append_sheet(output, closureSheet, "闭环核对");
-    XLSX.utils.book_append_sheet(output, ruleSheet, "规则说明");
-    XLSX.utils.book_append_sheet(output, unrecognizedSheet, "未识别数据");
-    XLSX.writeFile(output, `${sourceFileName}_人员结构统计_${timestamp()}.xlsx`);
+async function handleCopyTable(event: MouseEvent): Promise<void> {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button.copy-table");
+    if (!button || !currentResult) return;
+    const section = currentResult.sections[Number(button.dataset.section)];
+    if (!section) return;
+    try {
+        await navigator.clipboard.writeText(buildReportText(section));
+        const previous = button.textContent;
+        button.textContent = "已复制";
+        window.setTimeout(() => { button.textContent = previous; }, 1600);
+    } catch {
+        showStatus("复制失败，请使用导出 Excel 获取统计结果。", "error");
+    }
+}
+
+function handleSheetChange(): void {
+    currentResult = null;
+    elements.exportBtn.disabled = true;
+    elements.resultSection.style.display = "none";
+    elements.warningSection.style.display = "none";
 }
 
 elements.fileInput.addEventListener("change", handleFileChange);
 elements.analyzeBtn.addEventListener("click", handleAnalyze);
 elements.exportBtn.addEventListener("click", handleExport);
+elements.sheetSelect.addEventListener("change", handleSheetChange);
+elements.resultTables.addEventListener("click", handleCopyTable);
