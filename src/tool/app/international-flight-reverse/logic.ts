@@ -22,8 +22,7 @@ export function normalizeAnalysisOptions(input: Partial<AnalysisOptions> = {}): 
     matchDeparture: input.matchDeparture ?? DEFAULT_ANALYSIS_OPTIONS.matchDeparture,
     matchArrival: input.matchArrival ?? DEFAULT_ANALYSIS_OPTIONS.matchArrival,
     validityYears: clampInteger(input.validityYears ?? DEFAULT_ANALYSIS_OPTIONS.validityYears, 1, 10),
-    overlapMonths: clampInteger(input.overlapMonths ?? DEFAULT_ANALYSIS_OPTIONS.overlapMonths, 0, 12),
-    monthEndDay: clampInteger(input.monthEndDay ?? DEFAULT_ANALYSIS_OPTIONS.monthEndDay, 0, 31)
+    overlapMonths: clampInteger(input.overlapMonths ?? DEFAULT_ANALYSIS_OPTIONS.overlapMonths, 0, 12)
   };
 }
 
@@ -84,8 +83,7 @@ export function calculateSuggestedExpiry(latestDate: string, options: AnalysisOp
   const targetYear = parsed.year + Math.floor(targetMonthIndex / 12);
   const targetMonth = ((targetMonthIndex % 12) + 12) % 12 + 1;
   const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
-  const targetDay = options.monthEndDay === 0 ? daysInMonth : Math.min(options.monthEndDay, daysInMonth);
-  return formatDate(targetYear, targetMonth, targetDay);
+  return formatDate(targetYear, targetMonth, daysInMonth);
 }
 
 function matchingAirports(flight: FlightRecord, codes: Set<string>, options: AnalysisOptions): string[] {

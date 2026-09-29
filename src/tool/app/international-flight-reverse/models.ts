@@ -70,7 +70,6 @@ export interface AnalysisOptions {
   matchArrival: boolean;
   validityYears: number;
   overlapMonths: number;
-  monthEndDay: number;
 }
 
 export interface RecentFlight {
@@ -134,6 +133,5 @@ export const DEFAULT_ANALYSIS_OPTIONS: AnalysisOptions = {
   matchDeparture: true,
   matchArrival: true,
   validityYears: 1,
-  overlapMonths: 1,
-  monthEndDay: 30
+  overlapMonths: 1
 };

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { analyzeInternationalFlights, calculateSuggestedExpiry, parseAirportConfigText } from "../../../src/tool/app/international-flight-reverse/logic";
 import type { EmployeeTask, FlightRecord } from "../../../src/tool/app/international-flight-reverse/models";
+import { DEFAULT_ANALYSIS_OPTIONS } from "../../../src/tool/app/international-flight-reverse/models";
 
 const task: EmployeeTask = { employeeId: "000001", name: "张三", qualification: "北美区域英语通信资格", region: "北美", reverseDate: "2026-09-30", sourceSheet: "临期资质表", sourceRow: 2 };
 const flight = (date: string, flightNumber: string, departure: string, arrival: string, sourceRow: number, stage = "起飞"): FlightRecord => ({ employeeId: "000001", name: "张三", date, flightNumber, departure, arrival, stage, sourceSheet: "航班明细", sourceRow });
@@ -22,7 +23,7 @@ describe("international flight reverse logic", () => {
       ["2026-08-20", "100", "PVG", "LAX"],
       ["2026-07-01", "99", "PVG", "JFK"]
     ]);
-    expect(result.tasks[0].suggestedExpiryDate).toBe("2027-07-30");
+    expect(result.tasks[0].suggestedExpiryDate).toBe("2027-07-31");
   });
 
   it("honors cutoff, direction and configurable recent count", () => {
@@ -51,8 +52,19 @@ describe("international flight reverse logic", () => {
     expect(result.tasks[0].status).toBe("已找到");
   });
 
-  it("supports natural month end and short months", () => {
-    expect(calculateSuggestedExpiry("2026-03-10", { recentLimit: 3, matchDeparture: true, matchArrival: true, validityYears: 1, overlapMonths: 1, monthEndDay: 0 })).toBe("2027-02-28");
-    expect(calculateSuggestedExpiry("2026-06-06", { recentLimit: 3, matchDeparture: true, matchArrival: true, validityYears: 1, overlapMonths: 1, monthEndDay: 30 })).toBe("2027-05-30");
+  it.each([
+    ["2026-11-06", "2027-10-31"],
+    ["2026-10-06", "2027-09-30"],
+    ["2026-03-10", "2027-02-28"],
+    ["2027-03-31", "2028-02-29"],
+    ["2026-01-01", "2026-12-31"],
+    ["2026-01-31", "2026-12-31"]
+  ])("uses the previous month's natural end after one year: %s", (latestDate, expected) => {
+    expect(calculateSuggestedExpiry(latestDate, DEFAULT_ANALYSIS_OPTIONS)).toBe(expected);
+  });
+
+  it("uses natural month end with configurable years and overlap months", () => {
+    expect(calculateSuggestedExpiry("2026-10-06", { ...DEFAULT_ANALYSIS_OPTIONS, overlapMonths: 0 })).toBe("2027-10-31");
+    expect(calculateSuggestedExpiry("2026-03-06", { ...DEFAULT_ANALYSIS_OPTIONS, validityYears: 2, overlapMonths: 2 })).toBe("2028-01-31");
   });
 });

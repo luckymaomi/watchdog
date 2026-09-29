@@ -91,7 +91,7 @@ export function buildInternationalFlightExportWorkbook(XLSXApi: WorkbookApi, res
     ["到达参与匹配", result.options.matchArrival ? "是" : "否"],
     ["资质年限（年）", result.options.validityYears],
     ["重叠月数", result.options.overlapMonths],
-    ["目标月末日（0=自然月末）", result.options.monthEndDay]
+    ["有效期截止日", "目标月自然月末"]
   ];
   const issueRows: Array<Array<string | number>> = [
     ["来源", "问题类型", "说明", "工作表", "行号", "员工号", "地区"],

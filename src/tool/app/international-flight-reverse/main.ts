@@ -29,8 +29,7 @@ function currentOptions(): AnalysisOptions {
     matchDeparture: element<HTMLInputElement>("matchDeparture").checked,
     matchArrival: element<HTMLInputElement>("matchArrival").checked,
     validityYears: Number(element<HTMLInputElement>("validityYears").value),
-    overlapMonths: Number(element<HTMLInputElement>("overlapMonths").value),
-    monthEndDay: Number(element<HTMLInputElement>("monthEndDay").value)
+    overlapMonths: Number(element<HTMLInputElement>("overlapMonths").value)
   });
 }
 
@@ -52,7 +51,6 @@ function init(): void {
   element<HTMLInputElement>("recentLimit").value = String(DEFAULT_ANALYSIS_OPTIONS.recentLimit);
   element<HTMLInputElement>("validityYears").value = String(DEFAULT_ANALYSIS_OPTIONS.validityYears);
   element<HTMLInputElement>("overlapMonths").value = String(DEFAULT_ANALYSIS_OPTIONS.overlapMonths);
-  element<HTMLInputElement>("monthEndDay").value = String(DEFAULT_ANALYSIS_OPTIONS.monthEndDay);
 
   const update = (): void => renderReverseView(state);
   const readFile = async (file: File): Promise<XLSX.WorkBook> => XLSXApi.read(await file.arrayBuffer(), { type: "array", cellDates: true });

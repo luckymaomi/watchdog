@@ -33,7 +33,7 @@
     .status-tag.status-success { border-color: var(--watchdog-success-border); background: var(--watchdog-success-bg); color: var(--watchdog-success-text); }
     .status-tag.status-warning { border-color: var(--watchdog-warning-border); background: var(--watchdog-warning-bg); color: var(--watchdog-warning-text); }
     .status-tag.status-danger { border-color: var(--watchdog-danger-border); background: var(--watchdog-danger-bg); color: var(--watchdog-danger-text); }
-    .parameter-grid { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 12px; }
+    .parameter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .check-row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
     .check-row label { display: inline-flex; align-items: center; gap: 6px; }
     textarea { min-height: 128px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
@@ -60,7 +60,6 @@
         <div><label class="form-label" for="recentLimit">近期航班数</label><input id="recentLimit" class="form-control" type="number" min="1" max="1000" step="1"></div>
         <div><label class="form-label" for="validityYears">资质年限</label><input id="validityYears" class="form-control" type="number" min="1" max="10" step="1"></div>
         <div><label class="form-label" for="overlapMonths">重叠月数</label><input id="overlapMonths" class="form-control" type="number" min="0" max="12" step="1"></div>
-        <div><label class="form-label" for="monthEndDay">目标月日期</label><input id="monthEndDay" class="form-control" type="number" min="0" max="31" step="1"><div class="form-text">0=自然月末</div></div>
       </div><div class="check-row"><label><input id="matchDeparture" type="checkbox" checked> 离场命中</label><label><input id="matchArrival" type="checkbox" checked> 到达命中</label></div></div>
     </div>
     <div id="statusLine" class="status-line status-info">请选择两份 Excel 文件。</div>
