@@ -95,7 +95,8 @@ describe("personnel structure stats", () => {
 
     expect(countOf(result, "机长含以上各级别占比", "转机型机长")).toBe(1);
     expect(itemOf(result, "机长含以上各级别占比", "检查员").isSubset).toBe(true);
-    expect(countOf(result, "机长航线资格占比", "其他")).toBe(1);
+    expect(section(result, "机长航线资格占比").items.some(item => item.label === "其他")).toBe(false);
+    expect(countOf(result, "机长航线资格占比", "航线机长")).toBe(2);
     expect(section(result, "机长航线资格占比").closure.denominator).toBe(4);
     expect(section(result, "机长报务占比").closure.denominator).toBe(4);
 
@@ -156,10 +157,10 @@ describe("personnel structure stats", () => {
     expect(section(result, "机长含以上各级别占比").items.map(item => item.label)).toEqual([
       "检查员", "C类教员", "B类教员", "F类机长", "E类机长", "D类机长", "C类机长", "B类机长", "Z类机长", "转机型机长"
     ]);
-    expect(countOf(result, "机长航线资格占比", "航线机长")).toBe(3);
+    expect(countOf(result, "机长航线资格占比", "航线机长")).toBe(4);
     expect(countOf(result, "机长航线资格占比", "仅北美带队")).toBe(1);
     expect(countOf(result, "机长航线资格占比", "欧+西亚")).toBe(1);
-    expect(countOf(result, "机长航线资格占比", "其他")).toBe(1);
+    expect(section(result, "机长航线资格占比").items.some(item => item.label === "其他")).toBe(false);
     expect(section(result, "机长航线资格占比").closure.denominator).toBe(8);
     expect(countOf(result, "机长报务占比", "单美洲报务")).toBe(2);
     expect(countOf(result, "机长报务占比", "单欧洲报务")).toBe(2);

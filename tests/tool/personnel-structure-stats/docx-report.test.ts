@@ -88,8 +88,9 @@ describe("personnel structure Word template filling", () => {
     const withOther = calculate([record("D类机长")]);
     const output = await fillPersonnelDocx(await fixture(), withOther, 9);
     const xml = await (await JSZip.loadAsync(output.bytes)).file("word/document.xml")!.async("string");
-    expect(output.warnings).toContain("机长航线资格占比：模板补充分类行 其他。");
-    expect(xml).toContain("<w:t xml:space=\"preserve\">其他</w:t>");
+    expect(output.warnings).not.toContain("机长航线资格占比：模板补充分类行 其他。");
+    expect(xml).not.toContain("<w:t xml:space=\"preserve\">其他</w:t>");
+    expect(xml).toContain("<w:t xml:space=\"preserve\">1</w:t>");
     expect(output.filledRows).toBeGreaterThan(50);
   });
 

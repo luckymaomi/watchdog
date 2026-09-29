@@ -347,17 +347,12 @@ function buildCaptainRouteItems(records: PersonnelRecord[], denominator: number)
     });
 
     const unmatched = records.filter((record) => !matched.has(record));
+    const routeCaptainCount = count(records, isLineCaptain) + unmatched.length;
 
     return balancePercentages([
         ...comboItems,
-        makeItem("航线机长", count(records, isLineCaptain), denominator, "飞行教员、F/E/C/B/A类机长，无RAMA/REUO/RWAS单飞资格，且不是Z类机长。"),
-        makeItem("左座带飞", count(records, (record) => techLabel(record) === "Z类机长"), denominator, "Z类机长。"),
-        makeItem(
-            "其他",
-            unmatched.length,
-            denominator,
-            unmatched.length ? `不属于上述航线资格分类，需人工核对：${formatPeople(unmatched)}。` : "上述航线资格分类已覆盖全部人员。"
-        )
+        makeItem("航线机长", routeCaptainCount, denominator, "无RAMA/REUO/RWAS单飞资格且不是Z类机长的人员，统一归入航线机长；包含原本无法归入其他航线资格分类的人员。"),
+        makeItem("左座带飞", count(records, (record) => techLabel(record) === "Z类机长"), denominator, "Z类机长。")
     ], denominator);
 }
 

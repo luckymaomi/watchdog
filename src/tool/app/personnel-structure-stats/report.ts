@@ -107,7 +107,7 @@ function buildRuleRows(result: PersonnelStructureResult): (string | number)[][] 
         ["闭环", "每张表的构成项人数合计等于闭环母数；其中项及分组小计不重复计入。"],
         ["单飞资格", "RAMA/REUO/RWAS 分别代表北美、欧洲、西亚单飞资格。"],
         ["报务资格", "EAMA/EEUO/EWAS 分别代表北美、欧洲、西亚英语通信资格。"],
-        ["航线机长", "飞行教员及 F/E/C/B/A 类机长，没有 RAMA/REUO/RWAS 单飞资格，且不是 Z 类机长。"],
+        ["航线机长", "无 RAMA/REUO/RWAS 单飞资格且不是 Z 类机长的人员统一归入航线机长，包含原本无法归入其他航线资格分类的人员。"],
         ["左座带飞", "Z类机长。"],
         ["本地居住", "原单位以总队开头，或原单位为 777返聘。"],
         ["导出时间", new Date().toLocaleString("zh-CN")],
