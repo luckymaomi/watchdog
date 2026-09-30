@@ -23,7 +23,7 @@ describe("international flight reverse logic", () => {
       ["2026-08-20", "100", "PVG", "LAX"],
       ["2026-07-01", "99", "PVG", "JFK"]
     ]);
-    expect(result.tasks[0].suggestedExpiryDate).toBe("2027-07-31");
+    expect(result.tasks[0].suggestedExpiryDate).toBe("2027-08-31");
   });
 
   it("honors cutoff, direction and configurable recent count", () => {
@@ -53,18 +53,18 @@ describe("international flight reverse logic", () => {
   });
 
   it.each([
-    ["2026-11-06", "2027-10-31"],
-    ["2026-10-06", "2027-09-30"],
-    ["2026-03-10", "2027-02-28"],
-    ["2027-03-31", "2028-02-29"],
-    ["2026-01-01", "2026-12-31"],
-    ["2026-01-31", "2026-12-31"]
-  ])("uses the previous month's natural end after one year: %s", (latestDate, expected) => {
+    ["2026-11-06", "2027-11-30"],
+    ["2026-10-06", "2027-10-31"],
+    ["2026-03-10", "2027-03-31"],
+    ["2027-03-31", "2028-03-31"],
+    ["2026-01-01", "2027-01-31"],
+    ["2026-01-31", "2027-01-31"]
+  ])("uses the anniversary month natural end after one year: %s", (latestDate, expected) => {
     expect(calculateSuggestedExpiry(latestDate, DEFAULT_ANALYSIS_OPTIONS)).toBe(expected);
   });
 
   it("uses natural month end with configurable years and overlap months", () => {
-    expect(calculateSuggestedExpiry("2026-10-06", { ...DEFAULT_ANALYSIS_OPTIONS, overlapMonths: 0 })).toBe("2027-10-31");
+    expect(calculateSuggestedExpiry("2026-10-06", { ...DEFAULT_ANALYSIS_OPTIONS, overlapMonths: 1 })).toBe("2027-09-30");
     expect(calculateSuggestedExpiry("2026-03-06", { ...DEFAULT_ANALYSIS_OPTIONS, validityYears: 2, overlapMonths: 2 })).toBe("2028-01-31");
   });
 });

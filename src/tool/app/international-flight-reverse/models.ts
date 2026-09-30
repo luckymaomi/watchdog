@@ -133,5 +133,5 @@ export const DEFAULT_ANALYSIS_OPTIONS: AnalysisOptions = {
   matchDeparture: true,
   matchArrival: true,
   validityYears: 1,
-  overlapMonths: 1
+  overlapMonths: 0
 };

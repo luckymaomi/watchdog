@@ -9,9 +9,9 @@ describe("international flight reverse export", () => {
   it("exports summary, detail, configuration and issues", () => {
     const result: AnalysisResult = {
       airportRegions: [{ region: "北美", codes: ["LAX"] }],
-      options: { recentLimit: 2, matchDeparture: true, matchArrival: true, validityYears: 1, overlapMonths: 1 },
+      options: { recentLimit: 2, matchDeparture: true, matchArrival: true, validityYears: 1, overlapMonths: 0 },
       issues: [],
-      tasks: [{ employeeId: "000001", name: "张三", qualification: "北美区域英语通信资格", region: "北美", reverseDate: "2026-09-30", status: "已找到", latestDate: "2026-08-01", suggestedExpiryDate: "2027-07-31", recentFlights: [{ rank: 1, date: "2026-08-01", flightNumber: "100", departure: "PVG", arrival: "LAX", matchedAirports: ["LAX"], stage: "起飞", sourceSheet: "航班", sourceRow: 2 }], airportRecentFlights: [{ airport: "LAX", flights: [{ rank: 1, date: "2026-08-01", flightNumber: "100", departure: "PVG", arrival: "LAX", matchedAirports: ["LAX"], stage: "起飞", sourceSheet: "航班", sourceRow: 2 }] }], message: "已找到最近航班：2026-08-01", sourceSheet: "员工", sourceRow: 2 }],
+      tasks: [{ employeeId: "000001", name: "张三", qualification: "北美区域英语通信资格", region: "北美", reverseDate: "2026-09-30", status: "已找到", latestDate: "2026-08-01", suggestedExpiryDate: "2027-08-31", recentFlights: [{ rank: 1, date: "2026-08-01", flightNumber: "100", departure: "PVG", arrival: "LAX", matchedAirports: ["LAX"], stage: "起飞", sourceSheet: "航班", sourceRow: 2 }], airportRecentFlights: [{ airport: "LAX", flights: [{ rank: 1, date: "2026-08-01", flightNumber: "100", departure: "PVG", arrival: "LAX", matchedAirports: ["LAX"], stage: "起飞", sourceSheet: "航班", sourceRow: 2 }] }], message: "已找到最近航班：2026-08-01", sourceSheet: "员工", sourceRow: 2 }],
       totals: { taskCount: 1, matchedTasks: 1, noMatchTasks: 0, issueCount: 0, recentFlightCount: 1 }
     };
     const workbook = buildInternationalFlightExportWorkbook(XLSX, result);
@@ -35,6 +35,6 @@ describe("international flight reverse export", () => {
       [{ region: "北美", codes: ["LAX"] }]
     );
     const workbook = buildInternationalFlightExportWorkbook(XLSX, result);
-    expect(workbook.Sheets["最近航班汇总"].H2.v).toBe("2027-10-31");
+    expect(workbook.Sheets["最近航班汇总"].H2.v).toBe("2027-11-30");
   });
 });
