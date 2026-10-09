@@ -45,7 +45,8 @@ const ORIGIN_LABELS = [
     "珠海",
     "广西",
     "海南",
-    "上海"
+    "上海",
+    "顺丰航空"
 ];
 
 function normalizeText(value: unknown): string {

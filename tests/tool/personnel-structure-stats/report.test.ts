@@ -41,4 +41,15 @@ describe("personnel structure browser report", () => {
     const empty = calculate([]);
     expect(buildReportTable(empty.sections[1]).rows.filter(row => row.isSubtotal).map(row => row.values.slice(2, 4))).toEqual([[0, "0%"], [0, "0%"]]);
   });
+
+  it("exports Shunfeng Aviation as a named origin with closed counts", () => {
+    const current = calculate([{ ...record("划转机长"), origin: "顺丰航空" }]);
+    const workbook = buildWorkbook(XLSX, current);
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets["统计结果"], { header: 1 });
+    const origins = rows.filter(r => r[0] === "空勤人员原单位情况");
+    expect(origins.find(r => r[2] === "顺丰航空")?.slice(2, 7)).toEqual(["顺丰航空", "构成项", 1, 1, "100%"]);
+    expect(origins.reduce((sum, r) => sum + Number(r[4]), 0)).toBe(1);
+    expect(origins.some(r => r[2] === "其他")).toBe(false);
+    expect(current.unrecognized.origin).toEqual([]);
+  });
 });

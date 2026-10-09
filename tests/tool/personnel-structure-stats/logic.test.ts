@@ -141,7 +141,7 @@ describe("personnel structure stats", () => {
     expect(logic.calculate(logic.parseRows(toggledRows))).toEqual(logic.calculate(logic.parseRows(rows)));
   });
 
-  it("maps Shanghai branch and unlisted fleet type while keeping Shunfeng Aviation as other", () => {
+  it("maps Shanghai, fleet 919 and Shunfeng Aviation into the report categories", () => {
     const rows = buildRows();
     rows.push(
       ["李东", "211430", "777:B类机长", "上海分公司", "", "", "", "", "", "", "", "是"],
@@ -153,12 +153,13 @@ describe("personnel structure stats", () => {
 
     expect(countOf(result, "空勤人员原单位情况", "上海")).toBe(2);
     expect(countOf(result, "空勤人员原单位情况", "飞行/总队 919")).toBe(1);
-    expect(countOf(result, "空勤人员原单位情况", "其他")).toBe(2);
+    expect(countOf(result, "空勤人员原单位情况", "顺丰航空")).toBe(1);
+    expect(countOf(result, "空勤人员原单位情况", "其他")).toBe(1);
     expect(origins.closure.total).toBe(result.structureCrewCount);
     expect(origins.closure.closed).toBe(true);
-    expect(result.unrecognized.origin).toContain("顺丰航空");
+    expect(result.unrecognized.origin).not.toContain("顺丰航空");
     expect(result.unrecognized.origin).not.toContain("总队919");
-    expect(origins.items.find(item => item.label === "其他")?.rule).toContain("顺丰航空");
+    expect(origins.items.find(item => item.label === "其他")?.rule).toContain("火星分公司");
   });
 
   it("classifies E/F captains by level and routes without losing people or qualifications", () => {

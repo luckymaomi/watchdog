@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { calculate } from "../../../src/tool/app/personnel-structure-stats/logic";
 import type { PersonnelRecord } from "../../../src/tool/app/personnel-structure-stats/models";
 import { fillPersonnelDocx, inspectPersonnelDocx } from "../../../src/tool/app/personnel-structure-stats/docx-report";
+import { parseWordXml, wordChildren, wordRows, normalizedWordText } from "../../../src/tool/app/personnel-structure-stats/docx-xml";
 
 const wordNs = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const record = (techInfo: string, origin = "总队777"): PersonnelRecord => ({
@@ -33,7 +34,7 @@ async function fixture(): Promise<Uint8Array> {
     table(["D类副驾驶", "C类副驾驶", "B类副驾驶", "A类副驾驶", "在训副驾驶"]),
     table(result.sections[5].items.map(i => i.label)),
     table(["本地居住", "异地居住", "本地居住", "异地居住"], true),
-    table(["777", "737", "320", "909", ...result.sections[7].items.slice(4).filter(i => i.label !== "飞行/总队 919").map(i => i.label)], true),
+    table(["777", "737", "320", "909", ...result.sections[7].items.slice(4).filter(i => !["飞行/总队 919", "顺丰航空"].includes(i.label)).map(i => i.label)], true),
     table(["其他部门"])
   ];
   const titles = result.sections.map(s => s.title);
@@ -100,7 +101,7 @@ describe("personnel structure Word template filling", () => {
     const zip = await JSZip.loadAsync(source);
     const xml = await zip.file("word/document.xml")!.async("string");
     zip.file("word/document.xml", xml.replace(row("机长（2）", "上海", "", "", "/", "5%"), mergedLabelRow("上海")));
-    const originResult = calculate([record("B类机长", "总队919"), record("B类机长", "顺丰航空")]);
+    const originResult = calculate([record("B类机长", "总队919"), record("B类机长", "未映射单位")]);
     const output = await fillPersonnelDocx(await zip.generateAsync({ type: "uint8array" }), originResult, 9);
     const outputXml = await (await JSZip.loadAsync(output.bytes)).file("word/document.xml")!.async("string");
     expect(output.warnings).toContain("空勤人员原单位情况：模板补充分类行 飞行/总队 919。");
@@ -108,6 +109,28 @@ describe("personnel structure Word template filling", () => {
     expect(outputXml).toContain("<w:t xml:space=\"preserve\">飞行总队</w:t>");
     expect(outputXml).toContain("<w:t xml:space=\"preserve\">919</w:t>");
     expect(outputXml).toContain("<w:t xml:space=\"preserve\">其他</w:t>");
+  });
+
+  it("fills the new E first officer, 919 and Shunfeng rows without adding origin categories", async () => {
+    const zip = await JSZip.loadAsync(await fixture());
+    const originalXml = await zip.file("word/document.xml")!.async("string");
+    zip.file("word/document.xml", originalXml
+      .replace(table(["D类副驾驶", "C类副驾驶", "B类副驾驶", "A类副驾驶", "在训副驾驶"]), table(["D类副驾驶", "C类副驾驶", "B类副驾驶", "A类副驾驶", "转机型副驾驶", "E类副驾驶"]))
+      .replace(row("机长（2）", "上海", "", "", "/", "5%"), row("机长（2）", "上海", "", "", "/", "5%") + row("飞行总队", "919", "", "99", "/", "5%") + mergedLabelRow("顺丰航空")));
+    const current = calculate([record("E类副驾驶", "总队777"), record("划转机长", "总队919"), record("划转机长", "顺丰航空")]);
+    const output = await fillPersonnelDocx(await zip.generateAsync({ type: "uint8array" }), current, 9);
+    const document = parseWordXml(await (await JSZip.loadAsync(output.bytes)).file("word/document.xml")!.async("string"));
+    const tables = wordChildren(wordChildren(document.documentElement!, "body")[0], "tbl");
+    const firstOfficer = wordRows(tables[5]).find(r => normalizedWordText(r.cells[0]) === "E类副驾驶")!;
+    expect(firstOfficer.cells.slice(1).map(normalizedWordText)).toEqual(["0", "1", "新增1人", "100%"]);
+    const originRows = wordRows(tables[8]);
+    const fleet = originRows.find(r => normalizedWordText(r.cells[1]) === "919")!;
+    const shunfeng = originRows.find(r => normalizedWordText(r.cells[1]) === "顺丰航空")!;
+    expect(fleet.cells.slice(2).map(normalizedWordText)).toEqual(["", "1", "/", "33%"]);
+    expect(shunfeng.cells.slice(2).map(normalizedWordText)).toEqual(["", "1", "/", "33%"]);
+    expect(current.sections[7].closure).toEqual({ total: 3, denominator: 3, closed: true });
+    expect(current.unrecognized.origin).toEqual([]);
+    expect(output.warnings.some(w => w.startsWith("空勤人员原单位情况") && (w.includes("模板补充分类行") || w.includes("未识别模板分类")))).toBe(false);
   });
 
 });
