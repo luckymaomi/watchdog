@@ -13,8 +13,8 @@ describe("home cooling gate", () => {
     expect(coolingGateLogic.matches("")).toBe(false);
   });
 
-  it("assigns cooling and explicitly hidden tools to the hidden area", () => {
-    expect(coolingGateLogic.isHomepageToolHidden("cooling", undefined)).toBe(true);
+  it("only assigns explicitly hidden tools to the hidden area", () => {
+    expect(coolingGateLogic.isHomepageToolHidden("cooling", undefined)).toBe(false);
     expect(coolingGateLogic.isHomepageToolHidden("beta", "hidden")).toBe(true);
     expect(coolingGateLogic.isHomepageToolHidden("enabled", "hidden")).toBe(true);
     expect(coolingGateLogic.isHomepageToolHidden("enabled", undefined)).toBe(false);

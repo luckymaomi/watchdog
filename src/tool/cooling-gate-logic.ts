@@ -12,10 +12,10 @@ export function matchesCoolingAccessKey(input: string): boolean {
 }
 
 export function isHomepageToolHidden(
-    homepageState: string | undefined,
+    _homepageState: string | undefined,
     homepageVisibility: string | undefined
 ): boolean {
-    return homepageVisibility === "hidden" || homepageState === "cooling";
+    return homepageVisibility === "hidden";
 }
 
 export function registerCoolingClick(

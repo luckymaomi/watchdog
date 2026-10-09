@@ -237,7 +237,7 @@ function bindCoolingUnlock(): void {
         coolingUnlockInput.value = "";
         coolingUnlockInput.blur();
         if (csn2apiLink instanceof HTMLAnchorElement) csn2apiLink.hidden = false;
-        showCoolingUnlockStatus("已显示隐藏工具");
+        showCoolingUnlockStatus("已显示 csn2api");
         renderCategoryCounts();
         renderCurrentView();
     });
