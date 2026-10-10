@@ -8,6 +8,7 @@ import type {
     MedicalExamPerson,
     MedicalWorkbookImport,
     QuotaSlot,
+    QuotaMonth,
     RosterParseResult,
     SheetRows
 } from "./models";
@@ -41,17 +42,13 @@ function readWorkbook(data: ArrayBuffer | Uint8Array): XlsxRuntime.WorkBook {
     return XLSX.read(data, { type: "array", cellDates: true, cellStyles: true });
 }
 
-function monthsFromSlots(slots: QuotaSlot[]): string[] {
-    return [...new Set(slots.map((slot) => slot.date.slice(0, 7)))].sort();
+function monthsFromQuota(quotaMonths: QuotaMonth[]): string[] {
+    return quotaMonths.map((month) => month.key);
 }
 
 function inferMonth(candidateName: string, months: string[]): string {
-    const matched = candidateName.match(/(20\d{2})[.\-/年](\d{1,2})/);
-    if (!matched) return months[0] || "";
-    const current = new Date(Number(matched[1]), Number(matched[2]) - 1, 1, 12);
-    current.setMonth(current.getMonth() + 1);
-    const expected = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}`;
-    return months.includes(expected) ? expected : months[0] || "";
+    const expected = logic.candidateMonthKey(candidateName);
+    return months.includes(expected) ? expected : "";
 }
 
 function currentCandidate(): CandidateSheet | null {
@@ -59,7 +56,8 @@ function currentCandidate(): CandidateSheet | null {
 }
 
 function currentSlots(): QuotaSlot[] {
-    return imported?.slots.filter((slot) => slot.date.startsWith(selectedMonth)) || [];
+    if (!imported || !selectedMonth) return [];
+    return imported.slots.filter((slot) => slot.date.startsWith(selectedMonth));
 }
 
 function activeImport(slots: QuotaSlot[]): MedicalWorkbookImport | null {
@@ -104,11 +102,16 @@ function setupSelectors(): void {
     if (!imported) return;
     const candidateOptions = imported.candidateSheets.map((candidate, index) => ({ value: String(index), label: candidate.name }));
     view.populateSelect("candidateField", "candidateSelect", candidateOptions, String(candidateIndex));
-    const months = monthsFromSlots(imported.slots);
+    const months = monthsFromQuota(imported.quotaMonths);
     if (!selectedMonth || !months.includes(selectedMonth)) {
         selectedMonth = inferMonth(currentCandidate()?.name || "", months);
     }
-    view.populateSelect("monthField", "monthSelect", months.map((month) => ({ value: month, label: month })), selectedMonth);
+    const monthOptions = selectedMonth ? [selectedMonth] : [];
+    view.populateSelect("monthField", "monthSelect", monthOptions.map((month) => {
+        const metadata = imported?.quotaMonths.find((item) => item.key === month);
+        const sources = metadata?.sourceSheets.join("、") || "额度表";
+        return { value: month, label: `${month} · ${sources}` };
+    }), selectedMonth);
 }
 
 async function loadDefaultRoster(): Promise<void> {
@@ -206,7 +209,7 @@ function bindEvents(): void {
     });
     view.requireElement("candidateSelect", HTMLSelectElement).addEventListener("change", (event) => {
         candidateIndex = Number((event.currentTarget as HTMLSelectElement).value);
-        selectedMonth = inferMonth(currentCandidate()?.name || "", monthsFromSlots(imported?.slots || []));
+        selectedMonth = inferMonth(currentCandidate()?.name || "", monthsFromQuota(imported?.quotaMonths || []));
         setupSelectors();
         resetPeople();
     });

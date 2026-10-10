@@ -33,7 +33,6 @@ export interface CandidateHeaderIndexes {
     name: number;
     examDate: number;
     note: number;
-    adjustmentNotes?: number;
 }
 
 export interface MedicalExamPerson {
@@ -65,9 +64,17 @@ export interface QuotaSlot {
     sourceRow: number;
 }
 
+export interface QuotaMonth {
+    key: string;
+    sourceSheets: string[];
+    dateCount: number;
+    totalCapacity: number;
+}
+
 export interface MedicalWorkbookImport {
     candidateSheets: CandidateSheet[];
     slots: QuotaSlot[];
+    quotaMonths: QuotaMonth[];
     issues: HealthItem[];
 }
 

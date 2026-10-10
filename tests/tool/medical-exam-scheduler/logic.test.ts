@@ -17,7 +17,7 @@ const candidateRows = [
 ];
 
 const quotaRows = [
-  [new Date(2026, 10, 1), "2026/11额度", new Date(2026, 11, 1), "2026/12额度"],
+  ["2026年11月日期", "2026年11月额度", "2026年12月日期", "2026年12月额度"],
   [new Date(2026, 10, 2), 2, new Date(2026, 11, 2), 0],
   [new Date(2026, 10, 3), 2, new Date(2026, 11, 3), 0]
 ];
@@ -45,10 +45,17 @@ describe("medical exam scheduler logic", () => {
     expect(roster.headerRowIndex).toBe(0);
   });
 
-  it("parses candidate and quota sheets by headers and column pairs", () => {
+  it("binds a monthly candidate sheet to the same quota month", () => {
+    expect(logic.candidateMonthKey("2026.11")).toBe("2026-11");
+    expect(logic.candidateMonthKey("2026.10名单")).toBe("");
+  });
+
+  it("parses only annual quota sheets and monthly four-column candidate sheets", () => {
     const imported = logic.parseMedicalSheets([
-      { name: "2026月额度", rows: quotaRows },
-      { name: "2026.10", rows: candidateRows }
+      { name: "填写说明", rows: [["说明"], ["不参与解析"]] },
+      { name: "可用日期2026", rows: quotaRows },
+      { name: "2026.11", rows: candidateRows },
+      { name: "旧格式名单", rows: candidateRows }
     ]);
 
     expect(imported.candidateSheets).toHaveLength(1);
@@ -57,13 +64,17 @@ describe("medical exam scheduler logic", () => {
       ["2026-11-02", 2],
       ["2026-11-03", 2]
     ]);
+    expect(imported.quotaMonths.map((month) => [month.key, month.totalCapacity])).toEqual([
+      ["2026-11", 4],
+      ["2026-12", 0]
+    ]);
   });
 
   it("leaves north America leaders unassigned and allocates only other people", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
-      { name: "额度", rows: quotaRows },
-      { name: "名单", rows: candidateRows }
+      { name: "可用日期2026", rows: quotaRows },
+      { name: "2026.11", rows: candidateRows }
     ]);
     const people = logic.enrichPeople(imported.candidateSheets[0].people, roster.people);
     const result = logic.allocatePeople(people, imported.slots, () => 0.5);
@@ -80,9 +91,9 @@ describe("medical exam scheduler logic", () => {
   it("fills every unassigned non-leader in one action without changing existing dates", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
-      { name: "额度", rows: quotaRows },
+      { name: "可用日期2026", rows: quotaRows },
       {
-        name: "名单",
+        name: "2026.11",
         rows: [
           ["员工号", "姓名", "体检日", "备注"],
           [100001, "甲", "2026-11-03", ""],
@@ -114,9 +125,9 @@ describe("medical exam scheduler logic", () => {
   it("reports unmatched roster people and over-capacity dates in health checks", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
-      { name: "额度", rows: [[new Date(2026, 10, 1), "额度"], [new Date(2026, 10, 2), 1]] },
+      { name: "可用日期2026", rows: [["2026年11月日期", "2026年11月额度"], [new Date(2026, 10, 2), 1]] },
       {
-        name: "名单",
+        name: "2026.11",
         rows: [
           ["员工号", "姓名", "体检日", "备注"],
           [100001, "甲", "2026-11-02", ""],
@@ -134,8 +145,8 @@ describe("medical exam scheduler logic", () => {
   it("moves selected people without exceeding target capacity", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
-      { name: "额度", rows: quotaRows },
-      { name: "名单", rows: candidateRows }
+      { name: "可用日期2026", rows: quotaRows },
+      { name: "2026.11", rows: candidateRows }
     ]);
     const people = logic.allocatePeople(
       logic.enrichPeople(imported.candidateSheets[0].people, roster.people),
