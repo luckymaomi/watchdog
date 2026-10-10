@@ -3,7 +3,6 @@ import type { ToolItem } from "./models";
 export const tools: ToolItem[] = [
     { name: "菜鸟教程", desc: "哈哈。好活。置顶。", entry: "beginner-tutorial", status: "done", category: "light", homepageState: "beta" },
     { name: "培训皇帝", desc: "查个人资质、排培训、核对覆盖率、年度负载均衡、更新有效期", entry: "training-workbench", status: "done", category: "heavy" },
-    { name: "体检排班", desc: "非北美带队一键均衡分配，北美带队单独安排并预警", entry: "medical-exam-scheduler", status: "done", category: "heavy", homepageState: "beta" },
     { name: "换季学习", desc: "换季学习负载均衡", entry: "seasonal-learning", status: "done", category: "heavy" },
     { name: "审计之王", desc: "从检查项检索手册证据，整理审计依据和 PDF 页面", entry: "audit-king", status: "done", category: "heavy" },
     { name: "校对之王", desc: "比对同一本手册新旧版，增删改情况。", entry: "proof-king", status: "done", category: "heavy", homepageState: "beta" },
@@ -21,6 +20,7 @@ export const tools: ToolItem[] = [
     { name: "运行资质比对", desc: "按员工号核对人员信息与飞行门户运行资质名册", entry: "qualification-roster-compare", status: "done", category: "light" },
     { name: "英语汉语有效期比对", desc: "按姓名核对人员信息与局方执照备注中的英语、汉语有效期", entry: "language-validity-compare", status: "done", category: "light" },
     { name: "国际航班资质反推", desc: "按地区机场和反推日期查找近期国际航班并导出", entry: "international-flight-reverse", status: "done", category: "light" },
+    { name: "体检排班", desc: "非北美带队一键均衡分配，北美带队单独安排并预警", entry: "medical-exam-scheduler", status: "done", category: "heavy", homepageState: "beta" },
     { name: "锁班乞丐", desc: "乞丐版，用playwright自动化模拟锁班。", entry: "lock-entry-helper", status: "done", category: "automation", homepageState: "cooling" },
     { name: "飞行经历查询（乞丐版）", desc: "playwright批量查询飞行时间+起落数、飞行经历+起落数、左座经历+起落数或全部数据", entry: "flight-stats-helper", status: "done", category: "automation", homepageState: "cooling" },
     { name: "珠海皇帝", desc: "核对场次表与账单表姓名人次", entry: "session-bill-check", status: "done", category: "light", homepageState: "cooling" },
