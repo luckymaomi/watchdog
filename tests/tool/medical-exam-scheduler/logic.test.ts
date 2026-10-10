@@ -122,6 +122,28 @@ describe("medical exam scheduler logic", () => {
     expect(logic.getWarning("", "", base).level).toBe("unassigned");
   });
 
+  it("builds a copyable summary for unassigned leaders and remaining quota", () => {
+    const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
+    const imported = logic.parseMedicalSheets([
+      { name: "可用日期2026", rows: quotaRows },
+      { name: "2026.11", rows: candidateRows }
+    ]);
+    const people = logic.enrichPeople(imported.candidateSheets[0].people, roster.people);
+    people.find((person) => person.employeeId === "100002")!.examDate = "2026-11-02";
+
+    expect(logic.buildLeaderCopyText(people, imported.slots)).toBe(
+      "北美带队未安排人员：甲（100001）未安排、丙（100003）未安排。当前有空余的体检日：2026年11月2日剩余1个名额、2026年11月3日剩余2个名额。"
+    );
+    expect(logic.buildLeaderCopyText(people, imported.slots.map((slot) => ({ ...slot, capacity: 0 })))).toBe(
+      "北美带队未安排人员：甲（100001）未安排、丙（100003）未安排。当前没有剩余额度的体检日。"
+    );
+
+    const fullPeople = people.map((person) => ({ ...person }));
+    fullPeople.find((person) => person.employeeId === "100001")!.examDate = "2026-11-02";
+    fullPeople.find((person) => person.employeeId === "100003")!.examDate = "2026-11-03";
+    expect(logic.buildLeaderCopyText(fullPeople, imported.slots)).toBe("北美带队均已安排体检。");
+  });
+
   it("reports unmatched roster people and over-capacity dates in health checks", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([

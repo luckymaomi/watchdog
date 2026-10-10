@@ -261,6 +261,14 @@ body {
     font-size: 12px;
 }
 
+.leader-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 .allocation-head {
     align-items: center;
 }
@@ -386,6 +394,7 @@ body {
     .section-head,
     .action-row,
     .allocation-head { align-items: stretch; flex-direction: column; }
+    .leader-actions { justify-content: flex-start; }
     .move-controls { justify-content: flex-start; }
 }
 

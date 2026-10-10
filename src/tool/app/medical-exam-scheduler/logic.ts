@@ -111,6 +111,28 @@ function getWarning(examDate: string, availableDate: string, today = new Date())
     return { level: "none", daysUntilAvailableDate, label: "未安排" };
 }
 
+function displayDate(dateKey: string): string {
+    const matched = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!matched) return dateKey;
+    return `${Number(matched[1])}年${Number(matched[2])}月${Number(matched[3])}日`;
+}
+
+function buildLeaderCopyText(people: MedicalExamPerson[], slots: QuotaSlot[]): string {
+    const pendingLeaders = people.filter((person) => person.isNorthAmericaLeader && !person.examDate);
+    if (!pendingLeaders.length) return "北美带队均已安排体检。";
+    const peopleText = pendingLeaders
+        .map((person) => `${person.name || "未填写姓名"}（${person.employeeId}）未安排`)
+        .join("、");
+    const availableText = buildLoads(people, slots)
+        .filter((load) => load.remaining > 0)
+        .map((load) => `${displayDate(load.date)}剩余${load.remaining}个名额`)
+        .join("、");
+    const datesText = availableText
+        ? `当前有空余的体检日：${availableText}。`
+        : "当前没有剩余额度的体检日。";
+    return `北美带队未安排人员：${peopleText}。${datesText}`;
+}
+
 function healthItem(id: string, severity: HealthItem["severity"], title: string, message: string): HealthItem {
     return { id, severity, title, message };
 }
@@ -196,6 +218,7 @@ export const MedicalExamLogic = {
     buildLoads,
     allocatePeople,
     getWarning,
+    buildLeaderCopyText,
     buildHealthReport,
     movePeople,
     unassignPeople

@@ -104,6 +104,7 @@ function renderLeaders(people: MedicalExamPerson[], slots: QuotaSlot[], selected
             || left.person.sourceRow - right.person.sourceRow);
     const pendingCount = leaders.filter(({ person }) => !person.examDate).length;
     requireElement("leaderSummary", HTMLElement).textContent = `共 ${leaders.length} 人 · 未安排 ${pendingCount} 人`;
+    requireElement("copyLeaderButton", HTMLButtonElement).disabled = pendingCount === 0;
     requireElement("leaderTableBody", HTMLTableSectionElement).innerHTML = leaders.length
         ? leaders.map(({ person, warning }) => `
             <tr>
