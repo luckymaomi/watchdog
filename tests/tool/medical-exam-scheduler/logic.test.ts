@@ -82,9 +82,9 @@ describe("medical exam scheduler logic", () => {
     const leaders = result.people.filter((person) => person.isNorthAmericaLeader);
     expect(leaders.every((person) => !person.examDate)).toBe(true);
     expect(result.people.find((person) => person.employeeId === "100002")?.examDate).toBe("2026-11-02");
-    expect(result.dailyLoads.map((load) => [load.date, load.assigned, load.remaining])).toEqual([
-      ["2026-11-02", 1, 1],
-      ["2026-11-03", 0, 2]
+    expect(result.dailyLoads.map((load) => [load.date, load.assigned, load.remaining, load.protectedRemaining])).toEqual([
+      ["2026-11-02", 1, 1, 0],
+      ["2026-11-03", 0, 2, 0]
     ]);
   });
 
@@ -122,26 +122,28 @@ describe("medical exam scheduler logic", () => {
     expect(logic.getWarning("", "", base).level).toBe("unassigned");
   });
 
-  it("builds a copyable summary for unassigned leaders and remaining quota", () => {
+  it("builds a copyable summary for every leader and remaining quota", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
       { name: "可用日期2026", rows: quotaRows },
       { name: "2026.11", rows: candidateRows }
     ]);
     const people = logic.enrichPeople(imported.candidateSheets[0].people, roster.people);
+    people.find((person) => person.employeeId === "100001")!.examDate = "2026-11-02";
     people.find((person) => person.employeeId === "100002")!.examDate = "2026-11-02";
 
     expect(logic.buildLeaderCopyText(people, imported.slots)).toBe(
-      "北美带队未安排人员：甲（100001）未安排、丙（100003）未安排。当前有空余的体检日：2026年11月2日剩余1个名额、2026年11月3日剩余2个名额。"
+      "北美带队安排情况：甲（100001）已安排2026年11月2日、丙（100003）未安排。当前有空余的体检日：2026年11月3日剩余2个名额。"
     );
     expect(logic.buildLeaderCopyText(people, imported.slots.map((slot) => ({ ...slot, capacity: 0 })))).toBe(
-      "北美带队未安排人员：甲（100001）未安排、丙（100003）未安排。当前没有剩余额度的体检日。"
+      "北美带队安排情况：甲（100001）已安排2026年11月2日、丙（100003）未安排。当前没有剩余额度的体检日。"
     );
 
     const fullPeople = people.map((person) => ({ ...person }));
-    fullPeople.find((person) => person.employeeId === "100001")!.examDate = "2026-11-02";
     fullPeople.find((person) => person.employeeId === "100003")!.examDate = "2026-11-03";
-    expect(logic.buildLeaderCopyText(fullPeople, imported.slots)).toBe("北美带队均已安排体检。");
+    expect(logic.buildLeaderCopyText(fullPeople, imported.slots)).toBe(
+      "北美带队安排情况：甲（100001）已安排2026年11月2日、丙（100003）已安排2026年11月3日。当前有空余的体检日：2026年11月3日剩余1个名额。"
+    );
   });
 
   it("reports unmatched roster people and over-capacity dates in health checks", () => {
@@ -162,6 +164,7 @@ describe("medical exam scheduler logic", () => {
 
     expect(health.some((item) => item.severity === "warning" && item.message.includes("999999"))).toBe(true);
     expect(health.some((item) => item.severity === "error" && item.message.includes("超过额度"))).toBe(true);
+    expect(health.some((item) => item.severity === "info" && item.message.includes("每日 2 个名额"))).toBe(true);
   });
 
   it("moves selected people without exceeding target capacity", () => {

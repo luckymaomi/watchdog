@@ -198,13 +198,13 @@ function exportCurrent(): void {
     view.setStatus("medicalStatus", "已导出体检预排工作簿。", "success");
 }
 
-async function copyPendingLeaders(): Promise<void> {
+async function copyLeaderAssignments(): Promise<void> {
     const button = view.requireElement("copyLeaderButton", HTMLButtonElement);
     try {
         await navigator.clipboard.writeText(logic.buildLeaderCopyText(people, currentSlots()));
         button.textContent = "已复制";
         window.setTimeout(() => {
-            button.textContent = "复制未安排信息";
+            button.textContent = "复制带队安排信息";
         }, 1500);
     } catch (error) {
         view.setStatus("medicalStatus", `复制失败：${error instanceof Error ? error.message : String(error)}`, "danger");
@@ -237,7 +237,7 @@ function bindEvents(): void {
         selectedEmployeeIds.clear();
         renderCurrent();
     });
-    view.requireElement("copyLeaderButton", HTMLButtonElement).addEventListener("click", () => void copyPendingLeaders());
+    view.requireElement("copyLeaderButton", HTMLButtonElement).addEventListener("click", () => void copyLeaderAssignments());
     view.requireElement("exportButton", HTMLButtonElement).addEventListener("click", exportCurrent);
     document.addEventListener("change", (event) => {
         const checkbox = (event.target as Element | null)?.closest<HTMLInputElement>(".person-select");

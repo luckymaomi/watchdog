@@ -12,6 +12,8 @@ import type {
 } from "./models";
 import { MedicalExamWorkbook as workbook } from "./workbook";
 
+const DAILY_RESERVED_CAPACITY = 2;
+
 function clonePerson(person: MedicalExamPerson): MedicalExamPerson {
     return { ...person, adjustmentNotes: [...person.adjustmentNotes] };
 }
@@ -41,7 +43,7 @@ function buildLoads(people: MedicalExamPerson[], slots: QuotaSlot[]): DailyLoad[
             ...slot,
             assigned,
             remaining: slot.capacity - assigned,
-            protectedRemaining: Math.max(slot.capacity - 1 - assigned, 0)
+            protectedRemaining: Math.max(slot.capacity - DAILY_RESERVED_CAPACITY - assigned, 0)
         };
     });
 }
@@ -82,7 +84,7 @@ function allocatePeople(people: MedicalExamPerson[], slots: QuotaSlot[], random:
         return pending;
     };
 
-    const afterProtected = assignQueue(queue, 1);
+    const afterProtected = assignQueue(queue, DAILY_RESERVED_CAPACITY);
     const afterFull = assignQueue(afterProtected, 0);
     const pendingEmployeeIds = afterFull.map((person) => person.employeeId);
     return { people: next, dailyLoads: buildLoads(next, slots), pendingEmployeeIds };
@@ -118,10 +120,13 @@ function displayDate(dateKey: string): string {
 }
 
 function buildLeaderCopyText(people: MedicalExamPerson[], slots: QuotaSlot[]): string {
-    const pendingLeaders = people.filter((person) => person.isNorthAmericaLeader && !person.examDate);
-    if (!pendingLeaders.length) return "北美带队均已安排体检。";
-    const peopleText = pendingLeaders
-        .map((person) => `${person.name || "未填写姓名"}（${person.employeeId}）未安排`)
+    const leaders = people.filter((person) => person.isNorthAmericaLeader);
+    if (!leaders.length) return "当前名单没有北美带队。";
+    const peopleText = leaders
+        .map((person) => {
+            const status = person.examDate ? `已安排${displayDate(person.examDate)}` : "未安排";
+            return `${person.name || "未填写姓名"}（${person.employeeId}）${status}`;
+        })
         .join("、");
     const availableText = buildLoads(people, slots)
         .filter((load) => load.remaining > 0)
@@ -130,7 +135,7 @@ function buildLeaderCopyText(people: MedicalExamPerson[], slots: QuotaSlot[]): s
     const datesText = availableText
         ? `当前有空余的体检日：${availableText}。`
         : "当前没有剩余额度的体检日。";
-    return `北美带队未安排人员：${peopleText}。${datesText}`;
+    return `北美带队安排情况：${peopleText}。${datesText}`;
 }
 
 function healthItem(id: string, severity: HealthItem["severity"], title: string, message: string): HealthItem {
@@ -169,11 +174,11 @@ function buildHealthReport(
     if (people.length > totalCapacity) {
         items.push(healthItem("insufficient-capacity", "warning", "总额度不足", `待排 ${people.length} 人，当前月份总额度 ${totalCapacity} 人，将有 ${people.length - totalCapacity} 人无法预排。`));
     }
-    const protectedCapacity = imported.slots.reduce((sum, slot) => sum + Math.max(slot.capacity - 1, 0), 0);
+    const protectedCapacity = imported.slots.reduce((sum, slot) => sum + Math.max(slot.capacity - DAILY_RESERVED_CAPACITY, 0), 0);
     items.push(
         healthItem("roster-summary", "info", "花名册识别", `已从 ${roster.sheetName} 识别 ${roster.people.length} 人，其中 RAMA=1 共 ${roster.people.filter((person) => person.isNorthAmericaLeader).length} 人。`),
         healthItem("candidate-summary", "info", "待排名单", `${candidate.name} 共 ${people.length} 人，其中北美带队 ${people.filter((person) => person.isNorthAmericaLeader).length} 人。`),
-        healthItem("quota-summary", "info", "体检额度", `识别 ${imported.slots.length} 个可用体检日，总额度 ${totalCapacity} 人；第一轮保留每日 1 个名额后可排 ${protectedCapacity} 人。`)
+        healthItem("quota-summary", "info", "体检额度", `识别 ${imported.slots.length} 个可用体检日，总额度 ${totalCapacity} 人；第一轮保留每日 ${DAILY_RESERVED_CAPACITY} 个名额后可排 ${protectedCapacity} 人。`)
     );
     return items;
 }
