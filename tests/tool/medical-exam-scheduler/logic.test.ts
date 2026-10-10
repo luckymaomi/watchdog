@@ -75,6 +75,28 @@ describe("medical exam scheduler logic", () => {
     ]);
   });
 
+  it("fills every unassigned person in one action without changing existing dates", () => {
+    const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
+    const imported = logic.parseMedicalSheets([
+      { name: "额度", rows: quotaRows },
+      {
+        name: "名单",
+        rows: [
+          ["员工号", "姓名", "体检日", "备注"],
+          [100001, "甲", "2026-11-03", ""],
+          [100002, "乙", "", ""],
+          [100003, "丙", "", ""]
+        ]
+      }
+    ]);
+    const people = logic.enrichPeople(imported.candidateSheets[0].people, roster.people);
+    const result = logic.allocatePeople(people, imported.slots, () => 0.5);
+
+    expect(result.people.find((person) => person.employeeId === "100001")?.examDate).toBe("2026-11-03");
+    expect(result.people.every((person) => Boolean(person.examDate))).toBe(true);
+    expect(result.pendingEmployeeIds).toEqual([]);
+  });
+
   it("classifies 30, 15 and 10 day warnings from the planned exam date", () => {
     const base = new Date(2026, 9, 1, 12);
 

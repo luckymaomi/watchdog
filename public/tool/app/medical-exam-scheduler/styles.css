@@ -73,8 +73,33 @@ body {
 
 .control-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
     gap: 12px;
+}
+
+.advanced-options {
+    margin-top: 10px;
+    color: var(--watchdog-text-muted);
+    font-size: 12px;
+}
+
+.advanced-options summary {
+    width: fit-content;
+    cursor: pointer;
+}
+
+.advanced-content {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid var(--watchdog-border);
+    background: var(--watchdog-surface-soft);
+}
+
+.advanced-content .field-group {
+    width: min(420px, 100%);
 }
 
 .field-group {
@@ -369,6 +394,7 @@ body {
     .app-header { padding-top: 38px; }
     .back-link { top: 12px; }
     .control-grid { grid-template-columns: 1fr; }
+    .advanced-content { align-items: stretch; flex-direction: column; }
     .day-grid { grid-template-columns: 1fr; }
     .move-controls .form-select { width: 100%; }
 }

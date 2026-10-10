@@ -22,19 +22,14 @@
     <section class="panel control-panel" aria-labelledby="importHeading">
         <div class="section-head">
             <div>
-                <h2 id="importHeading">导入数据</h2>
+                <h2 id="importHeading">导入体检工作簿</h2>
                 <p id="rosterStatus" class="status-line">正在加载默认机组花名册…</p>
             </div>
-            <a href="../../../template/机组花名册.xlsx" download>下载花名册模板</a>
         </div>
         <div class="control-grid">
             <label class="field-group">
                 <span>体检工作簿</span>
                 <input id="medicalFile" class="form-control form-control-sm" type="file" accept=".xlsx,.xls">
-            </label>
-            <label class="field-group">
-                <span>替换机组花名册</span>
-                <input id="rosterFile" class="form-control form-control-sm" type="file" accept=".xlsx,.xls">
             </label>
             <label id="candidateField" class="field-group" hidden>
                 <span>待排名单</span>
@@ -45,11 +40,21 @@
                 <select id="monthSelect" class="form-select form-select-sm"></select>
             </label>
         </div>
+        <details class="advanced-options">
+            <summary>高级选项</summary>
+            <div class="advanced-content">
+                <label class="field-group">
+                    <span>替换默认机组花名册</span>
+                    <input id="rosterFile" class="form-control form-control-sm" type="file" accept=".xlsx,.xls">
+                </label>
+                <a href="../../../template/机组花名册.xlsx" download>下载花名册模板</a>
+            </div>
+        </details>
         <div class="action-row">
             <span id="medicalStatus" class="status-line">等待导入体检工作簿。</span>
             <div>
-                <button id="allocateButton" class="btn btn-outline-secondary btn-sm" type="button" disabled>生成预排</button>
-                <button id="exportButton" class="btn btn-primary btn-sm" type="button" disabled>导出 Excel</button>
+                <button id="allocateButton" class="btn btn-primary btn-sm" type="button" disabled>一键分配全部未排人员</button>
+                <button id="exportButton" class="btn btn-outline-secondary btn-sm" type="button" disabled>导出 Excel</button>
             </div>
         </div>
     </section>

@@ -85,8 +85,11 @@ function renderCurrent(): void {
     const valid = !hasErrors(health);
     const pendingCount = people.filter((person) => !person.examDate).length;
     view.requireElement("allocateButton", HTMLButtonElement).disabled = !valid || pendingCount === 0;
-    view.requireElement("allocateButton", HTMLButtonElement).textContent = pendingCount === people.length ? "生成预排" : "补充分配";
-    view.requireElement("exportButton", HTMLButtonElement).disabled = !valid || !sourceWorkbook;
+    view.requireElement("allocateButton", HTMLButtonElement).textContent = pendingCount === 0
+        ? "全部人员已分配"
+        : "一键分配全部未排人员";
+    const hasAssignments = people.some((person) => Boolean(person.examDate));
+    view.requireElement("exportButton", HTMLButtonElement).disabled = !valid || !sourceWorkbook || !hasAssignments;
 }
 
 function resetPeople(): void {
@@ -158,8 +161,8 @@ function allocate(): void {
     renderCurrent();
     const pending = result.pendingEmployeeIds.length;
     view.setStatus("medicalStatus", pending
-        ? `预排完成，仍有 ${pending} 人因额度不足未分配。`
-        : "预排完成：北美带队已优先安排，其余人员已按额度均衡分配。", pending ? "warning" : "success");
+        ? `一键分配完成，仍有 ${pending} 人因额度不足未分配。`
+        : "一键分配完成：全部未排人员均已安排。", pending ? "warning" : "success");
 }
 
 function moveSelected(): void {
