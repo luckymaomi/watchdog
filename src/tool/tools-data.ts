@@ -20,7 +20,7 @@ export const tools: ToolItem[] = [
     { name: "运行资质比对", desc: "按员工号核对人员信息与飞行门户运行资质名册", entry: "qualification-roster-compare", status: "done", category: "light" },
     { name: "英语汉语有效期比对", desc: "按姓名核对人员信息与局方执照备注中的英语、汉语有效期", entry: "language-validity-compare", status: "done", category: "light" },
     { name: "国际航班资质反推", desc: "按地区机场和反推日期查找近期国际航班并导出", entry: "international-flight-reverse", status: "done", category: "light" },
-    { name: "体检排班", desc: "非北美带队一键均衡分配，北美带队单独安排并预警", entry: "medical-exam-scheduler", status: "done", category: "heavy", homepageState: "beta" },
+    { name: "体检排班", desc: "非北美带队一键均衡分配，北美带队单独安排并预警", entry: "medical-exam-scheduler", status: "done", category: "light", homepageState: "beta" },
     { name: "锁班乞丐", desc: "乞丐版，用playwright自动化模拟锁班。", entry: "lock-entry-helper", status: "done", category: "automation", homepageState: "cooling" },
     { name: "飞行经历查询（乞丐版）", desc: "playwright批量查询飞行时间+起落数、飞行经历+起落数、左座经历+起落数或全部数据", entry: "flight-stats-helper", status: "done", category: "automation", homepageState: "cooling" },
     { name: "珠海皇帝", desc: "核对场次表与账单表姓名人次", entry: "session-bill-check", status: "done", category: "light", homepageState: "cooling" },
