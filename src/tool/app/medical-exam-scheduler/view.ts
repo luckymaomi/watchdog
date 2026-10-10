@@ -76,25 +76,34 @@ function personChoice(person: MedicalExamPerson, selected: ReadonlySet<string>):
 }
 
 const warningOrder: Record<WarningLevel, number> = {
-    pastExam: 0,
-    overdueLock: 1,
-    urgent10: 2,
-    warning15: 3,
-    notice30: 4,
-    unassigned: 5,
-    none: 6,
-    locked: 7
+    overdue: 0,
+    urgent10: 1,
+    warning15: 2,
+    notice30: 3,
+    unassigned: 4,
+    none: 5,
+    scheduled: 6
 };
 
-function renderLeaders(people: MedicalExamPerson[], selected: ReadonlySet<string>, today: Date): void {
+function localDateKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function renderLeaders(people: MedicalExamPerson[], slots: QuotaSlot[], selected: ReadonlySet<string>, today: Date): void {
+    const todayKey = localDateKey(today);
+    const nextAvailableDate = logic.buildLoads(people, slots)
+        .find((load) => load.remaining > 0 && load.date >= todayKey)?.date || "";
     const leaders = people
         .filter((person) => person.isNorthAmericaLeader)
-        .map((person) => ({ person, warning: logic.getWarning(person.examDate, person.locked, today) }))
+        .map((person) => ({ person, warning: logic.getWarning(person.examDate, nextAvailableDate, today) }))
         .sort((left, right) => warningOrder[left.warning.level] - warningOrder[right.warning.level]
             || left.person.examDate.localeCompare(right.person.examDate)
             || left.person.sourceRow - right.person.sourceRow);
-    const warningCount = leaders.filter(({ warning }) => !["none", "locked"].includes(warning.level)).length;
-    requireElement("leaderSummary", HTMLElement).textContent = `共 ${leaders.length} 人 · 未锁班预警 ${warningCount} 人`;
+    const pendingCount = leaders.filter(({ person }) => !person.examDate).length;
+    requireElement("leaderSummary", HTMLElement).textContent = `共 ${leaders.length} 人 · 未安排 ${pendingCount} 人`;
     requireElement("leaderTableBody", HTMLTableSectionElement).innerHTML = leaders.length
         ? leaders.map(({ person, warning }) => `
             <tr>
@@ -103,12 +112,11 @@ function renderLeaders(people: MedicalExamPerson[], selected: ReadonlySet<string
                 <td>${escapeHtml(person.employeeId)}</td>
                 <td>${escapeHtml(person.technicalInfo || "未匹配")}</td>
                 <td>${escapeHtml(person.examDate || "待分配")}</td>
-                <td>${warning.daysUntilExam === null ? "—" : `${warning.daysUntilExam} 天`}</td>
+                <td>${warning.daysUntilAvailableDate === null ? "—" : `${warning.daysUntilAvailableDate} 天`}</td>
                 <td><span class="status-badge warning-${warning.level}">${escapeHtml(warning.label)}</span></td>
-                <td><button class="btn btn-outline-secondary btn-sm lock-button" type="button" data-lock-id="${escapeHtml(person.employeeId)}">${person.locked ? "取消已锁" : "确认已锁"}</button></td>
             </tr>
         `).join("")
-        : `<tr><td colspan="8" class="text-center text-muted py-3">当前名单没有识别到北美带队。</td></tr>`;
+        : `<tr><td colspan="7" class="text-center text-muted py-3">当前名单没有识别到北美带队。</td></tr>`;
 }
 
 function renderSummary(people: MedicalExamPerson[], slots: QuotaSlot[]): void {
@@ -120,7 +128,7 @@ function renderSummary(people: MedicalExamPerson[], slots: QuotaSlot[]): void {
         ["北美带队", leaders.length],
         ["已预排", assigned],
         ["待分配", people.length - assigned],
-        ["带队已锁", leaders.filter((person) => person.locked).length],
+        ["带队未安排", leaders.filter((person) => !person.examDate).length],
         ["剩余额度", loads.reduce((sum, load) => sum + Math.max(load.remaining, 0), 0)]
     ];
     requireElement("summaryStrip", HTMLElement).innerHTML = values
@@ -169,7 +177,7 @@ function renderMoveControls(people: MedicalExamPerson[], slots: QuotaSlot[], sel
 function renderWorkspace(people: MedicalExamPerson[], slots: QuotaSlot[], selected: ReadonlySet<string>, today = new Date()): void {
     requireElement("workspace", HTMLElement).hidden = false;
     renderSummary(people, slots);
-    renderLeaders(people, selected, today);
+    renderLeaders(people, slots, selected, today);
     renderDays(people, slots, selected);
     renderMoveControls(people, slots, selected);
 }

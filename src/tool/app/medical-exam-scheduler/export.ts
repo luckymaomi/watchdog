@@ -38,10 +38,8 @@ export function createMedicalExamExporter(XLSX: XlsxApi) {
         output.Sheets[candidateSheetName] = sheet;
         const range = XLSX.utils.decode_range(sheet["!ref"] || "A1:A1");
         const firstAppendColumn = range.e.c + 1;
-        const lockColumn = indexes.lockStatus ?? firstAppendColumn;
-        const notesColumn = indexes.adjustmentNotes ?? Math.max(firstAppendColumn + (indexes.lockStatus === undefined ? 1 : 0), lockColumn + 1);
+        const notesColumn = indexes.adjustmentNotes ?? firstAppendColumn;
         const headerRow = headerRowIndex;
-        sheet[XLSX.utils.encode_cell({ r: headerRow, c: lockColumn })] = { t: "s", v: "锁班状态" };
         sheet[XLSX.utils.encode_cell({ r: headerRow, c: notesColumn })] = { t: "s", v: "调整说明" };
 
         people.forEach((person) => {
@@ -51,12 +49,11 @@ export function createMedicalExamExporter(XLSX: XlsxApi) {
             sheet[examCellAddress] = date
                 ? { t: "d", v: date, z: "yyyy-mm-dd" }
                 : { t: "s", v: "" };
-            sheet[XLSX.utils.encode_cell({ r: rowIndex, c: lockColumn })] = { t: "s", v: person.locked ? "已锁" : "未锁" };
             sheet[XLSX.utils.encode_cell({ r: rowIndex, c: notesColumn })] = { t: "s", v: person.adjustmentNotes.join("；") };
         });
 
         range.e.r = Math.max(range.e.r, ...people.map((person) => person.sourceRow - 1), headerRow);
-        range.e.c = Math.max(range.e.c, lockColumn, notesColumn);
+        range.e.c = Math.max(range.e.c, notesColumn);
         sheet["!ref"] = XLSX.utils.encode_range(range);
         return output;
     }

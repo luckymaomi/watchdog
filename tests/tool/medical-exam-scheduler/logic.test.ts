@@ -29,6 +29,8 @@ describe("medical exam scheduler logic", () => {
     expect(logic.parseBusinessDate(46328)).toBe("2026-11-02");
     expect(logic.parseBusinessDate("20261102")).toBe("2026-11-02");
     expect(logic.parseBusinessDate("2026/11/2")).toBe("2026-11-02");
+    expect(logic.parseBusinessDate("2026-11-2")).toBe("2026-11-02");
+    expect(logic.parseBusinessDate("2026.11.2")).toBe("2026-11-02");
     expect(logic.parseBusinessDate("11/2/26")).toBe("");
   });
 
@@ -57,7 +59,7 @@ describe("medical exam scheduler logic", () => {
     ]);
   });
 
-  it("prioritizes north America leaders and opens the reserved place only after the first pass", () => {
+  it("leaves north America leaders unassigned and allocates only other people", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
       { name: "额度", rows: quotaRows },
@@ -67,15 +69,15 @@ describe("medical exam scheduler logic", () => {
     const result = logic.allocatePeople(people, imported.slots, () => 0.5);
 
     const leaders = result.people.filter((person) => person.isNorthAmericaLeader);
-    expect(leaders.every((person) => person.examDate)).toBe(true);
+    expect(leaders.every((person) => !person.examDate)).toBe(true);
     expect(result.people.find((person) => person.employeeId === "100002")?.examDate).toBe("2026-11-02");
     expect(result.dailyLoads.map((load) => [load.date, load.assigned, load.remaining])).toEqual([
-      ["2026-11-02", 2, 0],
-      ["2026-11-03", 1, 1]
+      ["2026-11-02", 1, 1],
+      ["2026-11-03", 0, 2]
     ]);
   });
 
-  it("fills every unassigned person in one action without changing existing dates", () => {
+  it("fills every unassigned non-leader in one action without changing existing dates", () => {
     const roster = logic.parseRosterSheets([{ name: "花名册", rows: rosterRows }]);
     const imported = logic.parseMedicalSheets([
       { name: "额度", rows: quotaRows },
@@ -93,19 +95,20 @@ describe("medical exam scheduler logic", () => {
     const result = logic.allocatePeople(people, imported.slots, () => 0.5);
 
     expect(result.people.find((person) => person.employeeId === "100001")?.examDate).toBe("2026-11-03");
-    expect(result.people.every((person) => Boolean(person.examDate))).toBe(true);
+    expect(result.people.find((person) => person.employeeId === "100002")?.examDate).toBe("2026-11-02");
+    expect(result.people.find((person) => person.employeeId === "100003")?.examDate).toBe("");
     expect(result.pendingEmployeeIds).toEqual([]);
   });
 
-  it("classifies 30, 15 and 10 day warnings from the planned exam date", () => {
+  it("treats a filled exam date as scheduled and warns unassigned leaders from the next available date", () => {
     const base = new Date(2026, 9, 1, 12);
 
-    expect(logic.getWarning("2026-11-10", false, base).level).toBe("none");
-    expect(logic.getWarning("2026-10-31", false, base).level).toBe("notice30");
-    expect(logic.getWarning("2026-10-16", false, base).level).toBe("warning15");
-    expect(logic.getWarning("2026-10-11", false, base).level).toBe("urgent10");
-    expect(logic.getWarning("2026-10-10", false, base).level).toBe("overdueLock");
-    expect(logic.getWarning("2026-10-11", true, base).level).toBe("locked");
+    expect(logic.getWarning("2026-11-02", "2026-10-11", base).level).toBe("scheduled");
+    expect(logic.getWarning("", "2026-11-10", base).level).toBe("none");
+    expect(logic.getWarning("", "2026-10-31", base).level).toBe("notice30");
+    expect(logic.getWarning("", "2026-10-16", base).level).toBe("warning15");
+    expect(logic.getWarning("", "2026-10-11", base).level).toBe("urgent10");
+    expect(logic.getWarning("", "", base).level).toBe("unassigned");
   });
 
   it("reports unmatched roster people and over-capacity dates in health checks", () => {
@@ -140,15 +143,13 @@ describe("medical exam scheduler logic", () => {
       () => 0.5
     ).people;
 
-    expect(() => logic.movePeople(people, ["100003"], "2026-11-02", imported.slots)).toThrow("额度不足");
+    expect(() => logic.movePeople(people, ["100001", "100003"], "2026-11-02", imported.slots)).toThrow("额度不足");
     const moved = logic.movePeople(people, ["100001"], "2026-11-03", imported.slots);
     expect(moved.find((person) => person.employeeId === "100001")?.examDate).toBe("2026-11-03");
-    expect(moved.find((person) => person.employeeId === "100001")?.adjustmentNotes).toContain("移动：2026-11-02 → 2026-11-03");
+    expect(moved.find((person) => person.employeeId === "100001")?.adjustmentNotes).toContain("移动：待分配 → 2026-11-03");
 
-    moved.find((person) => person.employeeId === "100001")!.locked = true;
     const pending = logic.unassignPeople(moved, ["100001"]);
     expect(pending.find((person) => person.employeeId === "100001")?.examDate).toBe("");
-    expect(pending.find((person) => person.employeeId === "100001")?.locked).toBe(false);
     const notes = pending.find((person) => person.employeeId === "100001")?.adjustmentNotes || [];
     expect(notes[notes.length - 1]).toContain("待分配");
   });

@@ -58,10 +58,7 @@ function shuffled<T>(items: T[], random: () => number): T[] {
 function allocatePeople(people: MedicalExamPerson[], slots: QuotaSlot[], random: () => number = Math.random): AllocationResult {
     const next = people.map(clonePerson);
     const byId = new Map(next.map((person) => [person.employeeId, person]));
-    const queues = [
-        next.filter((person) => !person.examDate && person.isNorthAmericaLeader),
-        shuffled(next.filter((person) => !person.examDate && !person.isNorthAmericaLeader), random)
-    ];
+    const queue = shuffled(next.filter((person) => !person.examDate && !person.isNorthAmericaLeader), random);
     const assignedCounts = new Map(buildLoads(next, slots).map((load) => [load.date, load.assigned]));
 
     const assignQueue = (queue: MedicalExamPerson[], reserve: number): MedicalExamPerson[] => {
@@ -85,11 +82,9 @@ function allocatePeople(people: MedicalExamPerson[], slots: QuotaSlot[], random:
         return pending;
     };
 
-    const afterProtected = queues.map((queue) => assignQueue(queue, 1));
-    const afterFull = afterProtected.map((queue) => assignQueue(queue, 0));
-    const pendingEmployeeIds = afterFull.reduce<string[]>((result, queue) => (
-        result.concat(queue.map((person) => person.employeeId))
-    ), []);
+    const afterProtected = assignQueue(queue, 1);
+    const afterFull = assignQueue(afterProtected, 0);
+    const pendingEmployeeIds = afterFull.map((person) => person.employeeId);
     return { people: next, dailyLoads: buildLoads(next, slots), pendingEmployeeIds };
 }
 
@@ -103,18 +98,17 @@ function parseDateKey(dateKey: string): Date | null {
     return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day ? date : null;
 }
 
-function getWarning(examDate: string, locked: boolean, today = new Date()): ExamWarning {
-    if (locked) return { level: "locked", daysUntilExam: null, label: "已锁班" };
-    const date = parseDateKey(examDate);
-    if (!date) return { level: "unassigned", daysUntilExam: null, label: "尚未预排" };
+function getWarning(examDate: string, availableDate: string, today = new Date()): ExamWarning {
+    if (examDate) return { level: "scheduled", daysUntilAvailableDate: null, label: "已安排" };
+    const date = parseDateKey(availableDate);
+    if (!date) return { level: "unassigned", daysUntilAvailableDate: null, label: "未安排" };
     const current = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12);
-    const daysUntilExam = Math.round((date.getTime() - current.getTime()) / 86400000);
-    if (daysUntilExam < 0) return { level: "pastExam", daysUntilExam, label: "体检日已过" };
-    if (daysUntilExam < 10) return { level: "overdueLock", daysUntilExam, label: "已超过锁班截止" };
-    if (daysUntilExam <= 10) return { level: "urgent10", daysUntilExam, label: "10天锁班截止" };
-    if (daysUntilExam <= 15) return { level: "warning15", daysUntilExam, label: "15天预警" };
-    if (daysUntilExam <= 30) return { level: "notice30", daysUntilExam, label: "30天提醒" };
-    return { level: "none", daysUntilExam, label: "未到提醒窗口" };
+    const daysUntilAvailableDate = Math.round((date.getTime() - current.getTime()) / 86400000);
+    if (daysUntilAvailableDate < 0) return { level: "overdue", daysUntilAvailableDate, label: "未安排" };
+    if (daysUntilAvailableDate <= 10) return { level: "urgent10", daysUntilAvailableDate, label: "10天未安排预警" };
+    if (daysUntilAvailableDate <= 15) return { level: "warning15", daysUntilAvailableDate, label: "15天未安排预警" };
+    if (daysUntilAvailableDate <= 30) return { level: "notice30", daysUntilAvailableDate, label: "30天未安排提醒" };
+    return { level: "none", daysUntilAvailableDate, label: "未安排" };
 }
 
 function healthItem(id: string, severity: HealthItem["severity"], title: string, message: string): HealthItem {
@@ -175,7 +169,6 @@ function movePeople(people: MedicalExamPerson[], employeeIds: string[], targetDa
     moving.forEach((person) => {
         const from = person.examDate || "待分配";
         person.examDate = targetDate;
-        person.locked = false;
         person.adjusted = true;
         person.adjustmentNotes.push(`移动：${from} → ${targetDate}`);
     });
@@ -191,7 +184,6 @@ function unassignPeople(people: MedicalExamPerson[], employeeIds: string[]): Med
     moving.forEach((person) => {
         const from = person.examDate;
         person.examDate = "";
-        person.locked = false;
         person.adjusted = true;
         person.adjustmentNotes.push(`移动：${from} → 待分配`);
     });

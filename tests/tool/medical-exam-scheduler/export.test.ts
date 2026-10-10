@@ -5,7 +5,7 @@ import { createMedicalExamExporter } from "../../../src/tool/app/medical-exam-sc
 import type { MedicalExamPerson } from "../../../src/tool/app/medical-exam-scheduler/models";
 
 describe("medical exam scheduler export", () => {
-  it("fills the selected sheet, preserves other sheets and appends named status columns", () => {
+  it("fills the selected sheet, preserves other sheets and appends adjustment notes", () => {
     const workbook = XLSX.utils.book_new();
     const quota = XLSX.utils.aoa_to_sheet([
       [new Date(2026, 10, 1), "2026/11额度"],
@@ -13,7 +13,7 @@ describe("medical exam scheduler export", () => {
     ]);
     const roster = XLSX.utils.aoa_to_sheet([
       ["员工号", "姓名", "体检日", "备注", ""],
-      [100001, "甲", "", "", "已锁/变更"]
+      [100001, "甲", "", "", "原表其他内容"]
     ]);
     XLSX.utils.book_append_sheet(workbook, quota, "额度");
     XLSX.utils.book_append_sheet(workbook, roster, "2026.10");
@@ -27,7 +27,6 @@ describe("medical exam scheduler export", () => {
       isNorthAmericaLeader: true,
       examDate: "2026-11-02",
       note: "",
-      locked: true,
       matchedRoster: true,
       adjusted: true,
       adjustmentNotes: ["移动：待分配 → 2026-11-02"]
@@ -46,10 +45,8 @@ describe("medical exam scheduler export", () => {
     expect(JSON.stringify(output.Sheets["额度"])).toBe(sourceQuota);
     expect(sheet.C2.t).toBe("d");
     expect(sheet.C2.z).toBe("yyyy-mm-dd");
-    expect(sheet.F1.v).toBe("锁班状态");
-    expect(sheet.F2.v).toBe("已锁");
-    expect(sheet.G1.v).toBe("调整说明");
-    expect(sheet.G2.v).toContain("待分配");
-    expect(sheet.E2.v).toBe("已锁/变更");
+    expect(sheet.F1.v).toBe("调整说明");
+    expect(sheet.F2.v).toContain("待分配");
+    expect(sheet.E2.v).toBe("原表其他内容");
   });
 });

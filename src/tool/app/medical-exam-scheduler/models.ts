@@ -33,7 +33,6 @@ export interface CandidateHeaderIndexes {
     name: number;
     examDate: number;
     note: number;
-    lockStatus?: number;
     adjustmentNotes?: number;
 }
 
@@ -46,7 +45,6 @@ export interface MedicalExamPerson {
     isNorthAmericaLeader: boolean;
     examDate: string;
     note: string;
-    locked: boolean;
     matchedRoster: boolean;
     adjusted: boolean;
     adjustmentNotes: string[];
@@ -85,10 +83,10 @@ export interface AllocationResult {
     pendingEmployeeIds: string[];
 }
 
-export type WarningLevel = "locked" | "unassigned" | "none" | "notice30" | "warning15" | "urgent10" | "overdueLock" | "pastExam";
+export type WarningLevel = "scheduled" | "unassigned" | "none" | "notice30" | "warning15" | "urgent10" | "overdue";
 
 export interface ExamWarning {
     level: WarningLevel;
-    daysUntilExam: number | null;
+    daysUntilAvailableDate: number | null;
     label: string;
 }

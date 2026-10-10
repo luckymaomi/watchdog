@@ -178,8 +178,7 @@ body {
 }
 
 .health-error,
-.warning-overdueLock,
-.warning-pastExam {
+.warning-overdue {
     border-color: var(--watchdog-danger-border) !important;
     background: var(--watchdog-danger-bg) !important;
     color: var(--watchdog-danger-text) !important;
@@ -200,7 +199,7 @@ body {
     color: var(--watchdog-info-text) !important;
 }
 
-.warning-locked {
+.warning-scheduled {
     border-color: var(--watchdog-success-border) !important;
     background: var(--watchdog-success-bg) !important;
     color: var(--watchdog-success-text) !important;

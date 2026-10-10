@@ -83,11 +83,11 @@ function renderCurrent(): void {
     view.renderHealth(health);
     view.renderWorkspace(people, slots, selectedEmployeeIds);
     const valid = !hasErrors(health);
-    const pendingCount = people.filter((person) => !person.examDate).length;
+    const pendingCount = people.filter((person) => !person.examDate && !person.isNorthAmericaLeader).length;
     view.requireElement("allocateButton", HTMLButtonElement).disabled = !valid || pendingCount === 0;
     view.requireElement("allocateButton", HTMLButtonElement).textContent = pendingCount === 0
-        ? "全部人员已分配"
-        : "一键分配全部未排人员";
+        ? "非北美带队已全部分配"
+        : "一键分配非北美带队";
     const hasAssignments = people.some((person) => Boolean(person.examDate));
     view.requireElement("exportButton", HTMLButtonElement).disabled = !valid || !sourceWorkbook || !hasAssignments;
 }
@@ -161,8 +161,8 @@ function allocate(): void {
     renderCurrent();
     const pending = result.pendingEmployeeIds.length;
     view.setStatus("medicalStatus", pending
-        ? `一键分配完成，仍有 ${pending} 人因额度不足未分配。`
-        : "一键分配完成：全部未排人员均已安排。", pending ? "warning" : "success");
+        ? `一键分配完成，仍有 ${pending} 名非北美带队因额度不足未分配。`
+        : "一键分配完成：所有未排的非北美带队均已安排。", pending ? "warning" : "success");
 }
 
 function moveSelected(): void {
@@ -186,20 +186,6 @@ function unassignSelected(): void {
     } catch (error) {
         view.setStatus("medicalStatus", error instanceof Error ? error.message : String(error), "danger");
     }
-}
-
-function toggleLock(employeeId: string): void {
-    people = people.map((person) => {
-        if (person.employeeId !== employeeId) return person;
-        const locked = !person.locked;
-        return {
-            ...person,
-            locked,
-            adjusted: true,
-            adjustmentNotes: [...person.adjustmentNotes, `锁班状态：${locked ? "已锁" : "未锁"}`]
-        };
-    });
-    renderCurrent();
 }
 
 function exportCurrent(): void {
@@ -243,11 +229,6 @@ function bindEvents(): void {
         if (checkbox.checked) selectedEmployeeIds.add(employeeId);
         else selectedEmployeeIds.delete(employeeId);
         renderCurrent();
-    });
-    document.addEventListener("click", (event) => {
-        const button = (event.target as Element | null)?.closest<HTMLButtonElement>(".lock-button");
-        const employeeId = button?.dataset.lockId;
-        if (employeeId) toggleLock(employeeId);
     });
 }
 

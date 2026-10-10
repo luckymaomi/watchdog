@@ -134,7 +134,6 @@ function parseCandidateSheet(sheet: SheetRows): CandidateSheet | null {
         name: header.map.get("姓名") as number,
         examDate: header.map.get("体检日") as number,
         note: header.map.get("备注") as number,
-        ...(header.map.has("锁班状态") ? { lockStatus: header.map.get("锁班状态") as number } : {}),
         ...(header.map.has("调整说明") ? { adjustmentNotes: header.map.get("调整说明") as number } : {})
     };
     const people: MedicalExamPerson[] = [];
@@ -161,7 +160,6 @@ function parseCandidateSheet(sheet: SheetRows): CandidateSheet | null {
             issues.push(healthItem(`${sheet.name}-invalid-date-${sourceRow}`, "error", "体检日无法识别", `${sheet.name} 第 ${sourceRow} 行的体检日无法识别。`));
         }
         const note = normalizeText(row[indexes.note]);
-        const lockStatus = indexes.lockStatus === undefined ? "" : normalizeText(row[indexes.lockStatus]);
         const adjustmentText = indexes.adjustmentNotes === undefined ? "" : normalizeText(row[indexes.adjustmentNotes]);
         people.push({
             employeeId,
@@ -172,7 +170,6 @@ function parseCandidateSheet(sheet: SheetRows): CandidateSheet | null {
             isNorthAmericaLeader: false,
             examDate,
             note,
-            locked: lockStatus.includes("已锁") || note.includes("已锁") || note.includes("锁班完成"),
             matchedRoster: false,
             adjusted: Boolean(adjustmentText),
             adjustmentNotes: adjustmentText.split(/[；;]/).map((item) => item.trim()).filter(Boolean)

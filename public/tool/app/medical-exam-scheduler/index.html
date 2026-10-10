@@ -15,7 +15,7 @@
         <a class="back-link" href="../../index.html">返回工具箱</a>
         <div>
             <h1>体检排班</h1>
-            <p>北美带队优先 · 体检额度均衡 · 锁班提前量预警</p>
+            <p>北美带队单独安排 · 其他人员一键均衡分配 · 未安排提前量预警</p>
         </div>
     </header>
 
@@ -53,7 +53,7 @@
         <div class="action-row">
             <span id="medicalStatus" class="status-line">等待导入体检工作簿。</span>
             <div>
-                <button id="allocateButton" class="btn btn-primary btn-sm" type="button" disabled>一键分配全部未排人员</button>
+                <button id="allocateButton" class="btn btn-primary btn-sm" type="button" disabled>一键分配非北美带队</button>
                 <button id="exportButton" class="btn btn-outline-secondary btn-sm" type="button" disabled>导出 Excel</button>
             </div>
         </div>
@@ -77,7 +77,7 @@
             <div class="section-head">
                 <div>
                     <h2 id="leaderHeading">北美带队名单</h2>
-                    <p>所有 RAMA=1 人员集中在这里；未确认锁班时按体检日提前 30、15、10 天预警。</p>
+                    <p>所有 RAMA=1 人员集中在这里单独安排；未填写体检日时，按最近可安排日提前 30、15、10 天预警。</p>
                 </div>
                 <span id="leaderSummary" class="section-summary"></span>
             </div>
@@ -90,9 +90,8 @@
                         <th>员工号</th>
                         <th>技术信息</th>
                         <th>预排体检日</th>
-                        <th>距离体检</th>
-                        <th>状态</th>
-                        <th>锁班</th>
+                        <th>距最近可排日</th>
+                        <th>安排状态</th>
                     </tr>
                     </thead>
                     <tbody id="leaderTableBody"></tbody>
