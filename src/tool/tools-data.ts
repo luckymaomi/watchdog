@@ -3,6 +3,7 @@ import type { ToolItem } from "./models";
 export const tools: ToolItem[] = [
     { name: "菜鸟教程", desc: "哈哈。好活。置顶。", entry: "beginner-tutorial", status: "done", category: "light", homepageState: "beta" },
     { name: "培训皇帝", desc: "查个人资质、排培训、核对覆盖率、年度负载均衡、更新有效期", entry: "training-workbench", status: "done", category: "heavy" },
+    { name: "体检排班", desc: "北美带队优先预排体检，均衡每日额度并提醒锁班", entry: "medical-exam-scheduler", status: "done", category: "heavy", homepageState: "beta" },
     { name: "换季学习", desc: "换季学习负载均衡", entry: "seasonal-learning", status: "done", category: "heavy" },
     { name: "审计之王", desc: "从检查项检索手册证据，整理审计依据和 PDF 页面", entry: "audit-king", status: "done", category: "heavy" },
     { name: "校对之王", desc: "比对同一本手册新旧版，增删改情况。", entry: "proof-king", status: "done", category: "heavy", homepageState: "beta" },
