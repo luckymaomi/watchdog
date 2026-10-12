@@ -6,8 +6,8 @@ import * as XLSX from "xlsx-js-style";
 import JSZip from "jszip";
 import { DOMParser, XMLSerializer, type Document } from "@xmldom/xmldom";
 
-import { buildCrmFiles } from "../../../src/tool/app/training-attendance/export";
-import type { CrmTemplateBuffers, TrainingAttendanceDraft, TrainingParticipant } from "../../../src/tool/app/training-attendance/models";
+import { buildCrmFiles } from "../../../src/tool/app/training-attendance/programs/crm/export";
+import type { CrmTemplateBuffers, TrainingAttendanceDraft, TrainingParticipant } from "../../../src/tool/app/training-attendance/programs/crm/models";
 
 function bytes(fileName: string): Uint8Array {
   return new Uint8Array(readFileSync(resolve("public/template/training-attendance/crm", fileName)));

@@ -1,5 +1,5 @@
-import { matchRosterEntriesByText } from "../crew-match-name-id/logic";
-import type { CrewRosterEntry } from "../crew-match-name-id/models";
+import { matchRosterEntriesByText } from "../../../crew-match-name-id/logic";
+import type { CrewRosterEntry } from "../../../crew-match-name-id/models";
 import type {
     TrainingAttendanceDraft,
     TrainingAttendanceInput,

@@ -159,11 +159,21 @@ function collectReferencedPaths(contents: string[]): Set<string> {
     const matches = content.matchAll(/(?:\.\/)?(?:libs|template)\/[A-Za-z0-9_./\-\u0080-\uffff]+/g);
     for (const match of matches) {
       const value = match[0].replace(/^\.\//, "").replace(/[)'"`;,]+$/, "");
-      if (value.startsWith("libs/") || value.startsWith("template/")) referenced.add(value);
+      if ((value.startsWith("libs/") || value.startsWith("template/")) && !value.endsWith("/")) referenced.add(value);
     }
   }
   referenced.add("theme.js");
   referenced.add("theme.css");
+  if (contents.some((content) => content.includes("template/training-attendance/dangerous-goods"))) {
+    for (const file of ["instructor-survey.docx", "attitude.docx", "post-survey.docx", "simulation.docx", "exam.docx", "attendance.docx"]) {
+      referenced.add(`template/training-attendance/dangerous-goods/${file}`);
+    }
+  }
+  if (contents.some((content) => content.includes("template/training-attendance/crm"))) {
+    for (const file of ["booking.xlsx", "attendance-day1.xlsx", "attendance-day2.xlsx"]) {
+      referenced.add(`template/training-attendance/crm/${file}`);
+    }
+  }
   if (contents.some((content) => content.includes("./support-shell.css"))) referenced.add("support-shell.css");
   return referenced;
 }
@@ -191,6 +201,8 @@ async function copyReferencedResources(
       ? path.join(distRoot, "tool", relativePath)
       : path.join(distRoot, relativePath);
     try {
+      const sourceStat = await fs.stat(sourcePath);
+      if (!sourceStat.isFile()) continue;
       const content = await fs.readFile(sourcePath);
       addZipBytes(zip, addedFiles, relativePath, content);
       resources.set(relativePath, content);

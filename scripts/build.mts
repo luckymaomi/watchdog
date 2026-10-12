@@ -66,7 +66,9 @@ const pageEntries = [
   { source: "src/tool/app/seasonal-learning/main.ts", output: "tool/app/seasonal-learning/app", page: "tool/app/seasonal-learning/index.html" },
   { source: "src/tool/app/session-bill-check/main.ts", output: "tool/app/session-bill-check/app", page: "tool/app/session-bill-check/index.html" },
   { source: "src/tool/app/text-joiner/main.ts", output: "tool/app/text-joiner/app", page: "tool/app/text-joiner/index.html" },
-  { source: "src/tool/app/training-attendance/main.ts", output: "tool/app/training-attendance/app", page: "tool/app/training-attendance/index.html" },
+  { source: "src/tool/app/training-attendance/hub.ts", output: "tool/app/training-attendance/hub-app", page: "tool/app/training-attendance/index.html" },
+  { source: "src/tool/app/training-attendance/programs/crm/main.ts", output: "tool/app/training-attendance/crm-app", page: "tool/app/training-attendance/crm.html" },
+  { source: "src/tool/app/training-attendance/programs/dangerous-goods/main.ts", output: "tool/app/training-attendance/dangerous-goods-app", page: "tool/app/training-attendance/dangerous-goods.html" },
   { source: "src/tool/app/training-workbench/scripts/app.ts", output: "tool/app/training-workbench/app", page: "tool/app/training-workbench/index.html" },
   { source: "src/tool/app/training-workbench/scripts/rule-reference.ts", output: "tool/app/training-workbench/rule-reference-app", page: "tool/app/training-workbench/rule-reference.html" },
   { source: "src/tool/app/word-template-filler/main.ts", output: "tool/app/word-template-filler/app", page: "tool/app/word-template-filler/index.html" }

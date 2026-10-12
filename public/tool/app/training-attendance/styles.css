@@ -9,6 +9,16 @@ body {
     margin: 0 auto;
 }
 
+.program-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.template-actions { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: var(--watchdog-text-muted); font-size: 12px; }
+.program-card { display: block; min-height: 190px; padding: 24px; border: 2px solid var(--watchdog-border); border-radius: var(--watchdog-radius); background: var(--watchdog-surface); box-shadow: var(--watchdog-shadow-sm); color: inherit; text-decoration: none; }
+.program-card:hover { color: inherit; box-shadow: var(--watchdog-shadow); transform: translateY(-1px); }
+.program-card h2 { margin: 10px 0; font-size: 20px; }
+.program-card p { min-height: 40px; color: var(--watchdog-text-muted); }
+.program-kicker, .program-action { color: var(--watchdog-accent); font-size: 12px; font-weight: 700; }
+.program-action { display: inline-block; margin-top: 14px; }
+.field-wide { grid-column: 1 / -1; }
+
 .app-header,
 .panel {
     border: 2px solid var(--watchdog-border);
@@ -192,4 +202,5 @@ body {
     .app-header { padding-top: 38px; }
     .back-link { top: 12px; }
     .form-grid { grid-template-columns: 1fr; }
+    .program-grid { grid-template-columns: 1fr; }
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { CrewRosterEntry } from "../../../src/tool/app/crew-match-name-id/models";
-import { TrainingAttendanceLogic as logic } from "../../../src/tool/app/training-attendance/logic";
+import { TrainingAttendanceLogic as logic } from "../../../src/tool/app/training-attendance/programs/crm/logic";
 
 const roster: CrewRosterEntry[] = [
   { id: "100001", name: "张三", department: "一分部", techInfo: "777:C类机长", techLevel: "C" },

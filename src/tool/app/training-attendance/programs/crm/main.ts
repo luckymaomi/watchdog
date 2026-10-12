@@ -1,8 +1,8 @@
 import type * as XlsxRuntime from "xlsx-js-style";
 import JSZip from "jszip";
 
-import { parseRosterRows } from "../crew-match-name-id/logic";
-import type { CrewRosterEntry } from "../crew-match-name-id/models";
+import { parseRosterRows } from "../../../crew-match-name-id/logic";
+import type { CrewRosterEntry } from "../../../crew-match-name-id/models";
 import { buildCrmFiles } from "./export";
 import { TrainingAttendanceLogic as logic } from "./logic";
 import type { CrmTemplateBuffers, TrainingAttendanceDraft, TrainingAttendanceInput } from "./models";
