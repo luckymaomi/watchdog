@@ -1,0 +1,58 @@
+[
+  {
+    "name": "noto-serif",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/NotoSerifSC%5Bwght%5D.ttf",
+    "license_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifsc/OFL.txt",
+    "license": "OFL-1.1",
+    "original_sha256": "050080d9255a86808f2945bffac582b31ef32bc36411ce29563b4961670c66f9",
+    "woff2_sha256": "e1a9dfbc2afd73f6c233c701a466c756875ce7daa2a7d8feb2f59d3560e218a5",
+    "bytes": 5733472,
+    "glyphs": 30928,
+    "conversion": "fonttools 4.62.1, regular wght=400 where variable; WOFF2 compression; no glyph subset"
+  },
+  {
+    "name": "noto-sans",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+    "license_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/OFL.txt",
+    "license": "OFL-1.1",
+    "original_sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+    "woff2_sha256": "97a9c9e620bbc2fd183378f83058317dd603a5969ed9dec5ec5b933a14c33c2f",
+    "bytes": 4192572,
+    "glyphs": 30890,
+    "conversion": "fonttools 4.62.1, regular wght=400 where variable; WOFF2 compression; no glyph subset"
+  },
+  {
+    "name": "wenkai",
+    "url": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.522/LXGWWenKai-Regular.ttf",
+    "license_url": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/v1.522/OFL.txt",
+    "license": "OFL-1.1",
+    "original_sha256": "39ad71264b588165b469e35e6afb162a378dacd1f95348160240ba9038ac3009",
+    "woff2_sha256": "243e941767feafe650a98776324564cacb0a80a599de59b5d3fcb91dc8b11dd4",
+    "bytes": 8016756,
+    "glyphs": 46490,
+    "conversion": "fonttools 4.62.1, regular wght=400 where variable; WOFF2 compression; no glyph subset"
+  },
+  {
+    "name": "xiaowei",
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/zcoolxiaowei/ZCOOLXiaoWei-Regular.ttf",
+    "license_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/zcoolxiaowei/OFL.txt",
+    "license": "OFL-1.1",
+    "original_sha256": "a42b620140f493db42f741351dfbf343c0936d58588ee8004b8b2a218d997ff1",
+    "woff2_sha256": "4f1735cfc9fba39cd9ae55dc7c5b9d37eaacaad05721b0a61d6537e8bc0f2aa1",
+    "bytes": 2632868,
+    "glyphs": 7016,
+    "conversion": "fonttools 4.62.1, regular wght=400 where variable; WOFF2 compression; no glyph subset"
+  },
+  {
+    "name": "zhuque",
+    "url": "https://github.com/TrionesType/zhuque/releases/download/v0.212/ZhuqueFangsong-v0.212.zip",
+    "license_url": "https://raw.githubusercontent.com/TrionesType/zhuque/v0.212/LICENSE.txt",
+    "license": "OFL-1.1",
+    "version": "v0.212",
+    "original_sha256": "558c62730844fe54ba220146ed62f859d4e2880188d92d985f8921c6e3743bc4",
+    "woff2_sha256": "b6c72183575c4db997987d1ed06a2df1ce5b31cd61b5fcde405d821e470ddf8e",
+    "bytes": 4805360,
+    "glyphs": 12882,
+    "conversion": "fonttools 4.62.1, WOFF2 compression, no glyph subset"
+  }
+]

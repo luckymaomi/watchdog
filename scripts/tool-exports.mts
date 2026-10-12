@@ -42,6 +42,7 @@ async function buildToolExport(options: ToolExportOptions, definition: ToolExpor
   const pageDirectory = path.resolve(definition.pageDirectory);
   const zip = new JSZip();
   const addedFiles = new Set<string>();
+  const embeddedAssets = new Map<string, Uint8Array>();
   const htmlFiles = await listFiles(pageDirectory, (filePath) => path.extname(filePath).toLowerCase() === ".html");
   if (!htmlFiles.some((filePath) => path.basename(filePath).toLowerCase() === "index.html")) {
     throw new Error(`工具 ${definition.entry} 缺少 index.html。`);
@@ -69,12 +70,14 @@ async function buildToolExport(options: ToolExportOptions, definition: ToolExpor
   });
   for (const pageFile of pageFiles) {
     const relativePath = path.relative(pageDirectory, pageFile).replace(/\\/g, "/");
-    addZipBytes(zip, addedFiles, relativePath, await fs.readFile(pageFile));
+    const content = await fs.readFile(pageFile);
+    addZipBytes(zip, addedFiles, relativePath, content);
+    // 内置字体及授权需要在 file:// 独立工具中通过 fetch 读取。
+    if (relativePath.endsWith(".woff2") || relativePath.endsWith("-OFL.txt")) embeddedAssets.set(relativePath, content);
   }
 
   const applicationBundle = rewriteStandaloneScript(await fs.readFile(definition.applicationBundle, "utf8"));
   const scriptSources = [applicationBundle];
-  const embeddedAssets = new Map<string, Uint8Array>();
   addZipText(zip, addedFiles, "app.js", applicationBundle);
   for (const bundle of definition.auxiliaryBundles || []) {
     const content = rewriteStandaloneScript(await fs.readFile(bundle.source, "utf8"));
@@ -303,6 +306,7 @@ function mediaTypeFor(relativePath: string): string {
   if (extension === ".json") return "application/json;charset=utf-8";
   if (extension === ".js") return "text/javascript;charset=utf-8";
   if (extension === ".txt") return "text/plain;charset=utf-8";
+  if (extension === ".woff2") return "font/woff2";
   if (extension === ".xlsx") return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   return "application/octet-stream";
 }

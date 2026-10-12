@@ -16,6 +16,7 @@ export const tools: ToolItem[] = [
     { name: "PDF 工具", desc: "提取、合并、转图片和图片转 PDF", entry: "pdf-tool", status: "done", category: "light" },
     { name: "PDF 加水印", desc: "在 PDF 每页统一位置添加图片水印", entry: "pdf-stamp", status: "done", category: "light" },
     { name: "图片工具", desc: "转换、压缩、裁剪、缩放和 Base64 互转", entry: "image-tool", status: "done", category: "light" },
+    { name: "印章生成器", desc: "上传参考图对齐圆章，调整文字、五角星和编号并导出透明图片", entry: "seal-generator", status: "done", category: "light" },
     { name: "文本拼接助手", desc: "清除换行与常见分隔符，按指定字符重新拼接", entry: "text-joiner", status: "done", category: "light" },
     { name: "人员结构统计", desc: "查看、复制并导出人员结构 Excel 与填充后的 Word", entry: "personnel-structure-stats", status: "done", category: "light" },
     { name: "运行资质比对", desc: "按员工号核对人员信息与飞行门户运行资质名册", entry: "qualification-roster-compare", status: "done", category: "light" },

@@ -1,5 +1,3 @@
-import type * as XlsxRuntime from "xlsx-js-style";
-
 export interface TrainingAttendanceInput {
     sourceText: string;
     session: string;
@@ -40,7 +38,7 @@ export interface CrmTemplateBuffers {
     attendanceDay2: Uint8Array;
 }
 
-export interface GeneratedWorkbook {
+export interface GeneratedTrainingFile {
     fileName: string;
-    workbook: XlsxRuntime.WorkBook;
+    bytes: Uint8Array;
 }

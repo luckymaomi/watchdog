@@ -1,8 +1,9 @@
 import type * as XlsxRuntime from "xlsx-js-style";
+import JSZip from "jszip";
 
 import { parseRosterRows } from "../crew-match-name-id/logic";
 import type { CrewRosterEntry } from "../crew-match-name-id/models";
-import { createTrainingAttendanceExporter } from "./export";
+import { buildCrmFiles } from "./export";
 import { TrainingAttendanceLogic as logic } from "./logic";
 import type { CrmTemplateBuffers, TrainingAttendanceDraft, TrainingAttendanceInput } from "./models";
 import * as view from "./view";
@@ -14,11 +15,11 @@ const TEMPLATE_PATHS = {
     attendanceDay2: "../../../template/training-attendance/crm/attendance-day2.xlsx"
 } as const;
 const XLSX = window.XLSX as unknown as typeof XlsxRuntime;
-const exporter = createTrainingAttendanceExporter(XLSX);
 
 let roster: CrewRosterEntry[] = [];
 let templates: CrmTemplateBuffers | null = null;
 let currentDraft: TrainingAttendanceDraft | null = null;
+let exporting = false;
 
 function workbookRows(bytes: Uint8Array): unknown[][] {
     const workbook = XLSX.read(bytes, { type: "array" });
@@ -51,6 +52,7 @@ function formInput(): TrainingAttendanceInput {
 function refresh(): void {
     currentDraft = logic.buildTrainingAttendanceDraft(roster, formInput());
     view.renderDraft(currentDraft, Boolean(templates));
+    if (exporting) view.requireElement("exportButton", HTMLButtonElement).disabled = true;
 }
 
 async function loadDefaults(): Promise<void> {
@@ -97,22 +99,26 @@ function downloadBlob(blob: Blob, fileName: string): void {
 }
 
 async function exportFiles(): Promise<void> {
-    if (!templates || !currentDraft || !logic.canExportTrainingAttendance(currentDraft)) return;
+    if (exporting || !templates || !currentDraft || !logic.canExportTrainingAttendance(currentDraft)) return;
+    exporting = true;
     const button = view.requireElement("exportButton", HTMLButtonElement);
     button.disabled = true;
     button.textContent = "正在生成...";
+    const draft = currentDraft;
+    const templateBuffers = templates;
     try {
         const zip = new JSZip();
-        exporter.buildCrmWorkbooks(templates, currentDraft).forEach((item) => {
-            const bytes = XLSX.write(item.workbook, { type: "array", bookType: "xlsx", cellStyles: true });
-            zip.file(item.fileName, bytes);
+        const files = await buildCrmFiles(templateBuffers, draft);
+        files.forEach((item) => {
+            zip.file(item.fileName, item.bytes);
         });
         const blob = await zip.generateAsync({ type: "blob" });
-        downloadBlob(blob, safeZipName(currentDraft.sessionLabel));
+        downloadBlob(blob, safeZipName(draft.sessionLabel));
         view.setStatus("导出完成。", "success");
     } catch (error) {
         view.setStatus(`导出失败：${error instanceof Error ? error.message : String(error)}`, "danger");
     } finally {
+        exporting = false;
         button.textContent = "导出";
         refresh();
     }

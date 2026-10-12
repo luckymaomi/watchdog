@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>印章生成器</title>
+  <script src="../../../theme.js"></script>
+  <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../theme.css">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="page-shell">
+  <header class="app-header">
+    <a href="../../index.html">返回工具箱</a>
+    <h1>印章生成器</h1>
+    <p>填文字，调样式；也可以上传参考图，叠加对齐后导出透明印章。</p>
+  </header>
+  <div class="work-grid">
+    <section class="card">
+      <div class="card-body">
+        <h2>印章内容</h2>
+        <form id="sealForm">
+          <label class="field">单位名称<input id="company" class="form-control" maxlength="120" autocomplete="off" placeholder="填写单位全称"></label>
+          <div class="field-grid">
+            <label class="field">章名（可留空）<input id="caption" class="form-control" maxlength="40" placeholder="如：合同专用章"></label>
+            <label class="field">编号（可留空）<input id="code" class="form-control" maxlength="80" autocomplete="off" placeholder="按原图或已有编号填写"></label>
+            <label class="field">单位名称字体<select id="font" class="form-select"></select></label>
+            <label class="field">印章颜色<input id="color" class="form-control form-control-color" type="color" title="印章颜色"></label>
+          </div>
+          <label class="form-check mb-3"><input id="star" class="form-check-input" type="checkbox"><span class="form-check-label">中央五角星</span></label>
+          <details open>
+            <summary>样式调整</summary>
+            <p class="small text-muted mt-2">移动参考图对齐外圈，再调文字和五角星。右侧数字可自由填写，超过滑块范围会自动扩展；文字不会自动缩小。</p>
+            <div id="nameControls" class="adjustments"></div>
+            <details class="mt-3"><summary>五角星位置与大小</summary><div id="starControls" class="adjustments"></div></details>
+            <details class="mt-3"><summary>章名与编号</summary>
+              <label class="field mt-2">章名字体<select id="captionFont" class="form-select"></select></label>
+              <div id="captionControls" class="adjustments"></div>
+              <label class="field mt-2">编号字体<select id="codeFont" class="form-select"></select></label>
+              <label class="field mt-2">编号排版<select id="codeMode" class="form-select"><option value="arc">底部弧形</option><option value="line">横排</option></select></label>
+              <div id="codeControls" class="adjustments"></div>
+            </details>
+          </details>
+          <details class="mt-3"><summary>导出尺寸</summary>
+            <div class="field-grid mt-2">
+              <label class="field">直径（mm）<input id="diameterMm" class="form-control" type="number" min="20" max="60" step="0.1"></label>
+              <label class="field">PNG 清晰度<select id="dpi" class="form-select"><option value="150">150 DPI</option><option value="300">300 DPI</option><option value="600">600 DPI</option></select></label>
+            </div>
+          </details>
+          <button id="resetSeal" class="btn btn-outline-secondary btn-sm mt-3" type="button">恢复印章默认样式</button>
+        </form>
+      </div>
+    </section>
+    <section class="card preview-card">
+      <div class="card-body">
+        <div class="section-head"><h2>叠加预览</h2><span id="sizeSummary" class="small text-muted"></span></div>
+        <div class="reference-upload">
+          <label class="field">上传参考图<input id="referenceFile" type="file" class="form-control" accept="image/png,image/jpeg,image/webp"></label>
+          <p class="small text-muted mb-2">图片只在本机对照，不进入导出。支持 PNG、JPG、WebP，最大 20 MB。</p>
+        </div>
+        <div id="previewStage" class="preview-stage" aria-label="印章预览，上传参考图后可拖动底图">
+          <img id="referenceImage" alt="参考印章底图" draggable="false" hidden>
+          <div id="sealLayer"></div>
+        </div>
+        <div id="referenceControls" class="reference-controls mt-3" hidden>
+          <div class="section-head">
+            <label class="form-check"><input id="referenceVisible" class="form-check-input" type="checkbox" checked><span class="form-check-label">显示参考图（直接拖动调整位置）</span></label>
+          </div>
+          <label class="slider-row"><span>底图缩放 %</span><input id="reference-zoom" class="form-range" type="range" min="20" max="300" value="100"><input id="reference-zoom-value" class="form-control" type="number" step="any" value="100" aria-label="底图缩放百分比"></label>
+          <label class="slider-row"><span>底图旋转 °</span><input id="reference-rotation" class="form-range" type="range" min="-180" max="180" value="0"><input id="reference-rotation-value" class="form-control" type="number" step="any" value="0" aria-label="底图旋转角度"></label>
+          <label class="slider-row"><span>底图不透明度</span><input id="reference-opacity" class="form-range" type="range" min="0" max="100" value="65"><output id="reference-opacity-value">65%</output></label>
+          <label class="slider-row"><span>生成章不透明度</span><input id="overlayOpacity" class="form-range" type="range" min="0" max="100" value="100"><output id="overlayOpacityValue">100%</output></label>
+          <div class="d-flex gap-2 mt-2"><button id="referenceReset" type="button" class="btn btn-outline-secondary btn-sm">底图回正</button><button id="referenceRemove" type="button" class="btn btn-outline-secondary btn-sm">移除底图</button></div>
+          <p class="small text-muted mt-2 mb-0">把生成章不透明度拉到 0，只看原图；把底图不透明度拉到 0，只看生成章。</p>
+        </div>
+        <div id="validation" class="validation mt-3" aria-live="polite"></div>
+        <div class="export-actions mt-3">
+          <button id="downloadPng" class="btn btn-primary" type="button">下载透明 PNG</button>
+          <button id="downloadSvg" class="btn btn-outline-secondary" type="button">下载 SVG</button>
+        </div>
+        <p id="actionStatus" class="small mt-2 mb-0" role="status"></p>
+        <p class="small text-muted mt-3 mb-0">导出只含生成章，保留原色和完整不透明度。内置字体随 SVG 一起保存，PNG 固定字体效果；选“本机”字体时，SVG 换电脑可能不同。当前生成的是章面图片。</p>
+      </div>
+    </section>
+  </div>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
