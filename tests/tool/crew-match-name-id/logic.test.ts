@@ -39,6 +39,20 @@ describe("crew-match-name-id logic", () => {
     expect(() => logic.parseRosterRows(rows)).toThrow("花名册表头必须包含：员工号、姓名、分部");
   });
 
+  it("matches roster names in their source text order", () => {
+    const entries = [
+      { id: "100001", name: "张三", department: "一分部", techInfo: "777:C类机长", techLevel: "C" },
+      { id: "100002", name: "李四", department: "二分部", techInfo: "777:A2类副驾驶", techLevel: "A2" },
+      { id: "100003", name: "王五", department: "三分部", techInfo: "777:飞行教员A", techLevel: "A" }
+    ];
+
+    expect(logic.matchRosterEntriesByText(entries, "安排李四参加，随后是王五。"))
+      .toEqual([
+        { ...entries[1], pos: 2 },
+        { ...entries[2], pos: 10 }
+      ]);
+  });
+
   it("builds export rows in display order with custom columns mapped by employee id", () => {
     const rows = logic.buildExportRows([
       { id: "123456", name: "张三", department: "一分部", techInfo: "777:飞行教员C", techLevel: "C" },

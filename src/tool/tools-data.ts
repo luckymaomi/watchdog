@@ -1,6 +1,7 @@
 import type { ToolItem } from "./models";
 
 export const tools: ToolItem[] = [
+    { name: "培训签到表", desc: "粘贴姓名并生成 CRM 预订报名表和两天签到表", entry: "training-attendance", status: "done", category: "light" },
     { name: "菜鸟教程", desc: "哈哈。好活。置顶。", entry: "beginner-tutorial", status: "done", category: "light", homepageState: "beta" },
     { name: "培训皇帝", desc: "查个人资质、排培训、核对覆盖率、年度负载均衡、更新有效期", entry: "training-workbench", status: "done", category: "heavy" },
     { name: "换季学习", desc: "换季学习负载均衡", entry: "seasonal-learning", status: "done", category: "heavy" },

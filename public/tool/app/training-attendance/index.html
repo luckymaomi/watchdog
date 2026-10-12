@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>培训签到表</title>
+    <script src="../../../theme.js"></script>
+    <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../theme.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="app-header">
+        <a class="back-link" href="../../index.html">返回工具箱</a>
+        <div>
+            <h1>培训签到表</h1>
+        </div>
+    </header>
+
+    <section class="panel" aria-labelledby="parametersHeading">
+        <div class="section-head">
+            <div>
+                <h2 id="parametersHeading">培训参数</h2>
+                <span id="appStatus" class="status-line">正在加载默认资源...</span>
+            </div>
+            <button id="exportButton" class="btn btn-primary" type="button" disabled>导出</button>
+        </div>
+
+        <div class="form-grid">
+            <label class="field-group">
+                <span>培训项目</span>
+                <select class="form-select" disabled><option>CRM</option></select>
+            </label>
+            <label class="field-group">
+                <span>培训期次</span>
+                <input id="sessionInput" class="form-control" type="text" placeholder="例如：12 或 第12期" data-refresh>
+            </label>
+            <label class="field-group">
+                <span>开始日期</span>
+                <input id="startDateInput" class="form-control" type="date" data-refresh>
+            </label>
+            <label class="field-group">
+                <span>结束日期</span>
+                <input id="endDateInput" class="form-control" type="date" data-refresh>
+            </label>
+            <label class="field-group">
+                <span>教员1</span>
+                <input id="instructor1Input" class="form-control" type="text" data-refresh>
+            </label>
+            <label class="field-group">
+                <span>教员2</span>
+                <input id="instructor2Input" class="form-control" type="text" data-refresh>
+            </label>
+            <label class="field-group">
+                <span>第二天教员3</span>
+                <input id="instructor3Input" class="form-control" type="text" data-refresh>
+            </label>
+        </div>
+
+        <label class="field-group source-field">
+            <span>参训人员姓名文本</span>
+            <textarea id="sourceText" class="form-control" rows="6" placeholder="直接粘贴包含姓名的通知、名单或一段文字" data-refresh></textarea>
+        </label>
+
+        <details class="advanced-options">
+            <summary>高级选项</summary>
+            <label class="field-group advanced-content">
+                <span>替换默认机组花名册</span>
+                <input id="rosterFile" class="form-control" type="file" accept=".xlsx,.xls">
+            </label>
+        </details>
+    </section>
+
+    <section class="panel" aria-labelledby="healthHeading">
+        <div class="section-head compact-head">
+            <h2 id="healthHeading">数据健康检查</h2>
+        </div>
+        <div id="healthList" class="health-list"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="previewHeading">
+        <div class="section-head compact-head">
+            <h2 id="previewHeading">人员预览</h2>
+            <span id="previewSummary" class="section-summary">尚未匹配人员</span>
+        </div>
+        <div class="table-shell">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>序号</th><th>姓名</th><th>员工号</th><th>技术等级</th></tr></thead>
+                <tbody id="previewBody"><tr><td colspan="4" class="empty-cell">等待匹配人员</td></tr></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="../../../libs/xlsx-js-style.min.js"></script>
+<script src="../../../libs/jszip.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

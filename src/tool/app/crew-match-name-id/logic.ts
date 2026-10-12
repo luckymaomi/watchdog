@@ -1,4 +1,4 @@
-import type { CrewExportColumn, CrewExportOptions, CrewRosterEntry } from "./models";
+import type { CrewExportColumn, CrewExportOptions, CrewMatchResult, CrewRosterEntry } from "./models";
 
 function normalizeText(value: unknown): string {
     if (value === null || value === undefined) return "";
@@ -90,6 +90,13 @@ export function parseRosterRows(rows: unknown[][]): CrewRosterEntry[] {
     }
 
     return parsed;
+}
+
+export function matchRosterEntriesByText(entries: CrewRosterEntry[], sourceText: string): CrewMatchResult[] {
+    return entries
+        .map((entry) => ({ ...entry, pos: sourceText.indexOf(entry.name) }))
+        .filter((entry) => entry.pos !== -1)
+        .sort((left, right) => left.pos - right.pos);
 }
 
 export function buildExportRows(

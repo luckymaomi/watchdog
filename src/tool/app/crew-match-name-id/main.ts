@@ -3,7 +3,7 @@ const ROSTER_PATH = "../../../template/机组花名册.xlsx";
 import type * as XlsxRuntime from "xlsx-js-style";
 
 import { createCrewMatchNameIdExporter } from "./export";
-import { parseRosterRows } from "./logic";
+import { matchRosterEntriesByText, parseRosterRows } from "./logic";
 import type { CrewExportOptions, CrewMatchResult, CrewRosterEntry, Html2CanvasApi } from "./models";
 import {
     clearTableEditor,
@@ -78,10 +78,7 @@ function executeSearch(): void {
         return;
     }
 
-    const results = employeeData
-        .map((employee) => ({ ...employee, pos: text.indexOf(employee.name) }))
-        .filter((employee) => employee.pos !== -1)
-        .sort((left, right) => left.pos - right.pos);
+    const results = matchRosterEntriesByText(employeeData, text);
     setTableResults(results);
 }
 
