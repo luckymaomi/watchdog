@@ -119,6 +119,8 @@ const Utils = TrainingToolUtils;
       row.name,
       row.expiry,
       row.scheduledDate,
+      row.scheduleNotice,
+      row.historyDate,
       row.reason
     ]);
   }

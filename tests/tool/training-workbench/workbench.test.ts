@@ -64,7 +64,7 @@ describe("training-workbench workbench", () => {
     expect(byName.get("王五").status).toBe("必须排");
     expect(byName.get("王五").reason).toContain("未找到可覆盖本轮到期的安排");
 
-    expect(byName.get("王五").reason).toContain("本月不处理就会过期");
+    expect(byName.get("王五").reason).toContain("落在当前评估区间内");
 
     expect(byName.get("赵六").status).toBe("已过期");
     expect(byName.get("赵六").reason).toContain("当前有效期已过期");
@@ -87,19 +87,20 @@ describe("training-workbench workbench", () => {
       { label: "已过期", value: 1 },
       { label: "必须排", value: 3 },
       { label: "推荐排", value: 1 },
-      { label: "已排未覆盖", value: 0 },
       { label: "异常", value: 2 },
-      { label: "已过期已排补训", value: 0 }
+      { label: "已排", value: 2 },
+      { label: "暂不需排", value: 1 }
     ]);
-    expect(result.displayColumns).toEqual(["状态", "项目", "姓名", "当前有效期", "已排日期", "说明"]);
-    expect(result.detailColumns).toEqual(["状态", "项目", "员工号", "姓名", "当前有效期", "到期月份", "最晚完成日期", "已排日期", "来源", "说明"]);
+    expect(result.displayColumns).toEqual(["状态", "项目", "姓名", "当前有效期", "已排日期", "补充提示", "历史培训日期", "说明"]);
+    expect(result.detailColumns).toEqual(["状态", "项目", "员工号", "姓名", "当前有效期", "到期月份", "最晚完成日期", "已排日期", "补充提示", "历史培训日期", "来源", "说明"]);
 
     const coveredView = Workbench.viewFromRows(result, {
-      statuses: ["正常"]
+      statuses: ["已排"]
     });
     expect(coveredView.detailRows.map((row: any) => `${row.name}/${row.projectName}`)).toContain("张三/危险品");
     expect(coveredView.detailRows.map((row: any) => `${row.name}/${row.projectName}`)).toContain("李四/危险品");
-    expect(coveredView.detailRows.map((row: any) => `${row.name}/${row.projectName}`)).toContain("周八/危险品");
+    const inactiveView = Workbench.viewFromRows(result, { statuses: ["暂不需排"] });
+    expect(inactiveView.detailRows.map((row: any) => `${row.name}/${row.projectName}`)).toEqual(["周八/危险品"]);
   });
 
   it("filters workbench rows in the workbench module and exports the current view", () => {
@@ -120,9 +121,9 @@ describe("training-workbench workbench", () => {
       { label: "已过期", value: 0 },
       { label: "必须排", value: 1 },
       { label: "推荐排", value: 0 },
-      { label: "已排未覆盖", value: 0 },
       { label: "异常", value: 0 },
-      { label: "已过期已排补训", value: 0 }
+      { label: "已排", value: 0 },
+      { label: "暂不需排", value: 0 }
     ]);
 
     const exported = WorkbenchExport.buildWorkbook(view);
@@ -142,7 +143,7 @@ describe("training-workbench workbench", () => {
     expect(selectedSheet.A1?.v).toBe("项目");
     expect(selectedSheet.C1?.v).toBe("姓名");
     expect(selectedSheet.C2?.v).toBe("吴九");
-    expect(selectedSheet.H2?.v).toContain("未找到可覆盖本轮到期的安排");
-    expect(selectedSheet.I2?.v).toBe("人员信息表 第8行");
+    expect(selectedSheet.J2?.v).toContain("未找到可覆盖本轮到期的安排");
+    expect(selectedSheet.K2?.v).toBe("人员信息表 第8行");
   });
 });

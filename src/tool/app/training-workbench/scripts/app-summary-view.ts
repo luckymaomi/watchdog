@@ -31,8 +31,8 @@ const Utils = TrainingToolUtils;
   }
 
   function findDefaultSelection(rows: TrainingProjectSummaryRow[]): { projectName: string; status: string } {
-    for (const row of rows || []) {
-      for (const statusItem of STATUS_KEYS) {
+    for (const statusItem of STATUS_KEYS) {
+      for (const row of rows || []) {
         if (row[statusItem.field] > 0) {
           return {
             projectName: row.projectName,
@@ -76,6 +76,8 @@ const Utils = TrainingToolUtils;
               <th>当前有效期</th>
               <th>最晚完成日期</th>
               <th>已排日期</th>
+              <th>补充提示</th>
+              <th>历史培训日期</th>
               <th>判断说明</th>
             </tr>
           </thead>
@@ -87,6 +89,8 @@ const Utils = TrainingToolUtils;
                 <td>${Utils.escapeHtml(row.expiry || "-")}</td>
                 <td>${Utils.escapeHtml(row.dueDate || "-")}</td>
                 <td>${Utils.escapeHtml(row.scheduledDate || "-")}</td>
+                <td>${Utils.escapeHtml(row.scheduleNotice || "-")}</td>
+                <td>${Utils.escapeHtml(row.historyDate || "-")}</td>
                 <td>${Utils.escapeHtml(row.reason || "-")}</td>
               </tr>
             `).join("")}
@@ -115,7 +119,7 @@ const Utils = TrainingToolUtils;
     if (!currentSummaryRows.length) {
       selectedProject = "";
       selectedStatus = "";
-      elements.workbenchProjectSummaryBody.innerHTML = `<tr><td class="empty-block" colspan="6">当前没有项目风险统计。</td></tr>`;
+      elements.workbenchProjectSummaryBody.innerHTML = `<tr><td class="empty-block" colspan="${STATUS_KEYS.length + 2}">当前没有项目统计。</td></tr>`;
       renderSelectedPeople("", "");
       return;
     }

@@ -2,33 +2,31 @@ import type { TrainingStatusTone, TrainingVisibleStatusBucket, TrainingVisibleSt
 
 const STATUSES = {
     expired: "已过期",
-    expiredScheduled: "已过期已排补训",
     must: "必须排",
     recommended: "推荐排",
-    uncoveredScheduled: "已排未覆盖",
-    normal: "正常",
+    scheduled: "已排",
+    notNeeded: "暂不需排",
     abnormal: "异常"
   };
 
   const VISIBLE_STATUS_FIELDS: Array<{ status: string; field: TrainingVisibleStatusField }> = [
     { status: STATUSES.expired, field: "expired" },
-    { status: STATUSES.expiredScheduled, field: "expiredScheduled" },
     { status: STATUSES.must, field: "must" },
-    { status: STATUSES.uncoveredScheduled, field: "uncoveredScheduled" },
     { status: STATUSES.recommended, field: "recommended" },
-    { status: STATUSES.abnormal, field: "abnormal" }
+    { status: STATUSES.abnormal, field: "abnormal" },
+    { status: STATUSES.scheduled, field: "scheduled" },
+    { status: STATUSES.notNeeded, field: "notNeeded" }
   ];
 
-  const DEFAULT_VISIBLE_STATUSES = new Set(VISIBLE_STATUS_FIELDS.map((item) => item.status));
+  const DEFAULT_VISIBLE_STATUSES = new Set([STATUSES.expired, STATUSES.must, STATUSES.recommended, STATUSES.abnormal]);
 
   const STATUS_ORDER = new Map<string, number>([
     [STATUSES.expired, 0],
-    [STATUSES.expiredScheduled, 1],
-    [STATUSES.must, 2],
-    [STATUSES.uncoveredScheduled, 3],
-    [STATUSES.recommended, 4],
-    [STATUSES.abnormal, 5],
-    [STATUSES.normal, 6]
+    [STATUSES.must, 1],
+    [STATUSES.recommended, 2],
+    [STATUSES.abnormal, 3],
+    [STATUSES.scheduled, 4],
+    [STATUSES.notNeeded, 5]
   ]);
 
   const TONE_ORDER = new Map<TrainingStatusTone, number>([
@@ -57,11 +55,11 @@ const STATUSES = {
     return {
       ...extra,
       expired: 0,
-      expiredScheduled: 0,
       must: 0,
-      uncoveredScheduled: 0,
       recommended: 0,
-      abnormal: 0
+      abnormal: 0,
+      scheduled: 0,
+      notNeeded: 0
     };
   }
 
@@ -74,13 +72,11 @@ const STATUSES = {
     switch (status) {
       case STATUSES.expired:
       case STATUSES.must:
-      case STATUSES.uncoveredScheduled:
       case STATUSES.abnormal:
         return "red";
       case STATUSES.recommended:
         return "orange";
-      case STATUSES.expiredScheduled:
-      case STATUSES.normal:
+      case STATUSES.scheduled:
         return "green";
       default:
         return "gray";
@@ -91,14 +87,11 @@ const STATUSES = {
     switch (status) {
       case STATUSES.expired:
       case STATUSES.abnormal:
-      case STATUSES.uncoveredScheduled:
         return "danger";
       case STATUSES.must:
       case STATUSES.recommended:
         return "warn";
-      case STATUSES.expiredScheduled:
-      case STATUSES.normal:
-      case "已排已录入":
+      case STATUSES.scheduled:
         return "ok";
       default:
         return "info";

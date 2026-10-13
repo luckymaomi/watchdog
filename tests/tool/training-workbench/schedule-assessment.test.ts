@@ -85,10 +85,11 @@ describe("schedule assessment", () => {
     expect(visibleRows.get("异常日期/危险品").status).toBe("异常");
     expect(visibleRows.get("安保推荐/航空安保").status).toBe("必须排");
     expect(visibleRows.get("TSA必须排/TSA").status).toBe("必须排");
-    expect(allRows.get("TSA已排/TSA").status).toBe("正常");
+    expect(allRows.get("TSA已排/TSA").status).toBe("已排");
     expect(visibleRows.get("同日航空安保和TSA分别记录/TSA").status).toBe("必须排");
-    expect(allRows.get("同日航空安保和TSA分别记录/航空安保").status).toBe("正常");
-    expect(visibleRows.get("过期已排补训/危险品").status).toBe("已过期已排补训");
+    expect(allRows.get("同日航空安保和TSA分别记录/航空安保").status).toBe("已排");
+    expect(visibleRows.get("过期已排补训/危险品").status).toBe("已过期");
+    expect(visibleRows.get("过期已排补训/危险品").scheduleNotice).toBe("已排未覆盖");
     expect(visibleRows.get("过期已排补训/危险品").scheduledDate).toBe("2026-05-07");
     expect(visibleRows.has("程春林/航空安保")).toBe(false);
     expect(visibleRows.has("程春林/TSA")).toBe(false);
@@ -108,47 +109,47 @@ describe("schedule assessment", () => {
     expect(visibleRows.get("王峰/危险品").status).toBe("必须排");
     expect(visibleRows.get("沈欣/危险品").status).toBe("必须排");
 
-    expect(allRows.get("未录入有效安排/危险品").status).toBe("正常");
-    expect(allRows.get("已录入有效安排/危险品").status).toBe("正常");
+    expect(allRows.get("未录入有效安排/危险品").status).toBe("已排");
+    expect(allRows.get("已录入有效安排/危险品").status).toBe("已排");
     expect(result.detailRows.some((row: any) => row.name === "未录入有效安排")).toBe(false);
     expect(result.detailRows.some((row: any) => row.name === "已录入有效安排")).toBe(false);
 
     expect(simplifyStats(result.statsCards)).toEqual([
-      { label: "已过期", value: 1 },
+      { label: "已过期", value: 2 },
       { label: "必须排", value: 8 },
       { label: "推荐排", value: 0 },
-      { label: "已排未覆盖", value: 0 },
       { label: "异常", value: 1 },
-      { label: "已过期已排补训", value: 1 }
+      { label: "已排", value: 4 },
+      { label: "暂不需排", value: 0 }
     ]);
 
     expect(result.chartData.statusRows).toEqual([
-      { name: "已过期", value: 1 },
-      { name: "已过期已排补训", value: 1 },
+      { name: "已过期", value: 2 },
       { name: "必须排", value: 8 },
-      { name: "已排未覆盖", value: 0 },
       { name: "推荐排", value: 0 },
-      { name: "异常", value: 1 }
+      { name: "异常", value: 1 },
+      { name: "已排", value: 4 },
+      { name: "暂不需排", value: 0 }
     ]);
     expect(result.chartData.projectRows).toEqual([
-      { projectName: "危险品", expired: 1, expiredScheduled: 1, must: 5, uncoveredScheduled: 0, recommended: 0, abnormal: 1 },
-      { projectName: "TSA", expired: 0, expiredScheduled: 0, must: 2, uncoveredScheduled: 0, recommended: 0, abnormal: 0 },
-      { projectName: "航空安保", expired: 0, expiredScheduled: 0, must: 1, uncoveredScheduled: 0, recommended: 0, abnormal: 0 }
+      { projectName: "危险品", expired: 2, must: 5, recommended: 0, abnormal: 1, scheduled: 2, notNeeded: 0 },
+      { projectName: "TSA", expired: 0, must: 2, recommended: 0, abnormal: 0, scheduled: 1, notNeeded: 0 },
+      { projectName: "航空安保", expired: 0, must: 1, recommended: 0, abnormal: 0, scheduled: 1, notNeeded: 0 }
     ]);
     expect(result.summaryData.projectSummaryRows.map((row: any) => ({
       projectName: row.projectName,
       expired: row.expired,
-      expiredScheduled: row.expiredScheduled,
       must: row.must,
-      uncoveredScheduled: row.uncoveredScheduled,
       recommended: row.recommended,
       abnormal: row.abnormal,
+      scheduled: row.scheduled,
+      notNeeded: row.notNeeded,
       total: row.total
     }))).toEqual([
-      { projectName: "危险品", expired: 1, expiredScheduled: 1, must: 5, uncoveredScheduled: 0, recommended: 0, abnormal: 1, total: 8 },
-      { projectName: "TSA", expired: 0, expiredScheduled: 0, must: 2, uncoveredScheduled: 0, recommended: 0, abnormal: 0, total: 2 },
-      { projectName: "航空安保", expired: 0, expiredScheduled: 0, must: 1, uncoveredScheduled: 0, recommended: 0, abnormal: 0, total: 1 },
-      { projectName: "飞行作风", expired: 0, expiredScheduled: 0, must: 0, uncoveredScheduled: 0, recommended: 0, abnormal: 0, total: 0 }
+      { projectName: "危险品", expired: 2, must: 5, recommended: 0, abnormal: 1, scheduled: 2, notNeeded: 0, total: 10 },
+      { projectName: "TSA", expired: 0, must: 2, recommended: 0, abnormal: 0, scheduled: 1, notNeeded: 0, total: 3 },
+      { projectName: "航空安保", expired: 0, must: 1, recommended: 0, abnormal: 0, scheduled: 1, notNeeded: 0, total: 2 },
+      { projectName: "飞行作风", expired: 0, must: 0, recommended: 0, abnormal: 0, scheduled: 0, notNeeded: 0, total: 0 }
     ]);
     expect(result.summaryData.projectGroups.map((group: any) => `${group.projectName}/${group.status}/${group.total}`)).toContain("危险品/必须排/5");
     expect(result.summaryData.personRiskRows.map((row: any) => `${row.name}/${row.total}`)).toContain("取消后必须排/1");

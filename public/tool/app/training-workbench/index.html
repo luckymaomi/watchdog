@@ -143,7 +143,7 @@
             <div class="section-head">
                 <div>
                     <h2 class="section-title">排班总览</h2>
-                    <p class="section-intro">默认评估今天到下月底，先看已过期、必须排、推荐排、已排未覆盖和异常；已排未录入、已录入待更新、正常可在状态下拉中查看。</p>
+                    <p class="section-intro">默认评估今天到下月底，明细先看已过期、必须排、推荐排和异常；已排、暂不需排或全部状态可在状态下拉中查看。已排未覆盖只作补充提示，历史培训不算本轮安排。</p>
                 </div>
             </div>
             <div class="form-grid form-grid-4">
@@ -164,7 +164,7 @@
                 <div class="field">
                     <label for="workbenchStatusSelect">状态</label>
                     <select id="workbenchStatusSelect" disabled>
-                        <option value="">全部状态</option>
+                        <option value="">待处理与异常（默认）</option>
                     </select>
                 </div>
                 <div class="field">
@@ -187,7 +187,7 @@
                 <div class="section-head">
                     <div>
                         <h2 class="section-title" id="dailyMonitorTitle">每日监控</h2>
-                        <p class="section-intro">这些数字是每天打开后最先看的风险入口：红色先处理，推荐排用于提前安排本月和下月培训。</p>
+                        <p class="section-intro">优先处理已过期、必须排和异常，推荐排用于提前安排。六个主分类互斥，相加等于当前筛选范围内的评估人项；默认隐藏的已排、暂不需排明细也计入统计。</p>
                     </div>
                 </div>
                 <div class="stats-grid" id="statsGrid">
@@ -212,7 +212,7 @@
                     <div class="section-head">
                         <div>
                             <h2 class="section-title">项目风险矩阵</h2>
-                            <p class="section-intro">点击数字后，在下方人员明细中查看对应项目和状态下的人员。</p>
+                            <p class="section-intro">每个人每个项目只计入一个主分类，合计为当前筛选范围内的评估人项。点击数字查看人员；补充提示不重复计数。</p>
                         </div>
                     </div>
                     <div class="table-shell">
@@ -221,11 +221,11 @@
                                 <tr>
                                     <th>项目</th>
                                     <th>已过期</th>
-                                    <th>过期已排</th>
                                     <th>必须排</th>
-                                    <th>已排未覆盖</th>
                                     <th>推荐排</th>
                                     <th>异常</th>
+                                    <th>已排</th>
+                                    <th>暂不需排</th>
                                     <th>合计</th>
                                 </tr>
                             </thead>

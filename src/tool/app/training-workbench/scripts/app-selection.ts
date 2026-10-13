@@ -1,4 +1,5 @@
 import { TrainingToolUtils } from "./utils";
+import { TrainingToolWorkbenchStatus } from "./workbench-status";
 import type { TrainingAssessmentFilters, TrainingToolAppRuntime, TrainingToolProjectAnalysis } from "./models";
 
 export function installTrainingAppSelection(runtime: TrainingToolAppRuntime): void {
@@ -51,7 +52,9 @@ const Utils = TrainingToolUtils;
   function getWorkbenchFilters(): TrainingAssessmentFilters {
     return {
       projects: elements.workbenchProjectSelect.value ? [elements.workbenchProjectSelect.value] : [],
-      statuses: elements.workbenchStatusSelect.value ? [elements.workbenchStatusSelect.value] : [],
+      statuses: elements.workbenchStatusSelect.value === "全部状态"
+        ? TrainingToolWorkbenchStatus.VISIBLE_STATUS_FIELDS.map((item) => item.status)
+        : elements.workbenchStatusSelect.value ? [elements.workbenchStatusSelect.value] : [],
       months: elements.workbenchMonthSelect.value ? [elements.workbenchMonthSelect.value] : [],
       searchText: elements.workbenchSearchInput.value
     };

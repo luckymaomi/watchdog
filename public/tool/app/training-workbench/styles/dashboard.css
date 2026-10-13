@@ -699,7 +699,7 @@
 }
 
 .selected-person-table {
-    min-width: 920px;
+    min-width: 1220px;
 }
 
 .selected-person-table :is(th, td) {
@@ -729,7 +729,13 @@
     white-space: nowrap;
 }
 
-.selected-person-table :is(th, td):nth-child(6) {
+.selected-person-table :is(th, td):nth-child(6),
+.selected-person-table :is(th, td):nth-child(7) {
+    width: 120px;
+    white-space: nowrap;
+}
+
+.selected-person-table :is(th, td):nth-child(8) {
     width: 360px;
 }
 

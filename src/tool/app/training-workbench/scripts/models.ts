@@ -148,19 +148,19 @@ export type TrainingStatusTone = "red" | "orange" | "green" | "gray";
 export type TrainingBadgeTone = "danger" | "warn" | "info" | "ok";
 export type TrainingVisibleStatusField =
   | "expired"
-  | "expiredScheduled"
   | "must"
-  | "uncoveredScheduled"
   | "recommended"
-  | "abnormal";
+  | "abnormal"
+  | "scheduled"
+  | "notNeeded";
 
 export interface TrainingVisibleStatusBucket {
   expired: number;
-  expiredScheduled: number;
   must: number;
-  uncoveredScheduled: number;
   recommended: number;
   abnormal: number;
+  scheduled: number;
+  notNeeded: number;
 }
 
 export interface TrainingAssessmentFilters {
@@ -185,6 +185,8 @@ export interface TrainingAssessmentRow {
   dueMonth: string;
   dueDate: string;
   scheduledDate: string;
+  scheduleNotice: "" | "已排未覆盖";
+  historyDate: string;
   source: string;
   reason: string;
 }

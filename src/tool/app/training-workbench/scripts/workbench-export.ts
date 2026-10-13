@@ -16,6 +16,8 @@ const Utils = TrainingToolUtils;
         row.dueMonth,
         row.dueDate,
         row.scheduledDate,
+        row.scheduleNotice,
+        row.historyDate,
         row.source,
         row.reason
       ])
@@ -25,7 +27,7 @@ const Utils = TrainingToolUtils;
   function buildSelectionRows(selection: TrainingWorkbenchSelection): unknown[][] {
     const rows = selection && selection.rows ? selection.rows : [];
     return [
-      ["项目", "状态", "姓名", "员工号", "有效期截止日期", "最晚完成日期", "已排日期", "说明", "来源"],
+      ["项目", "状态", "姓名", "员工号", "有效期截止日期", "最晚完成日期", "已排日期", "补充提示", "历史培训日期", "说明", "来源"],
       ...rows.map((row) => [
         row.projectName,
         row.status,
@@ -34,6 +36,8 @@ const Utils = TrainingToolUtils;
         row.expiry,
         row.dueDate,
         row.scheduledDate,
+        row.scheduleNotice,
+        row.historyDate,
         row.reason,
         row.source
       ])

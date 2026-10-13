@@ -169,7 +169,7 @@
 }
 
 .selected-person-table {
-    min-width: 940px;
+    min-width: 1220px;
 }
 
 .person-validity-table-shell {
@@ -353,11 +353,13 @@
 .selected-person-table :is(th, td):nth-child(2),
 .selected-person-table :is(th, td):nth-child(3),
 .selected-person-table :is(th, td):nth-child(4),
-.selected-person-table :is(th, td):nth-child(5) {
+.selected-person-table :is(th, td):nth-child(5),
+.selected-person-table :is(th, td):nth-child(6),
+.selected-person-table :is(th, td):nth-child(7) {
     white-space: nowrap;
 }
 
-.selected-person-table :is(th, td):nth-child(6) {
+.selected-person-table :is(th, td):nth-child(8) {
     width: 360px;
 }
 

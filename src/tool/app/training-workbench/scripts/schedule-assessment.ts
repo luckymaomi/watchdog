@@ -46,6 +46,7 @@ const Utils = TrainingToolUtils;
     recorded: boolean;
     recordState: TrainingRecordState;
     covered: boolean;
+    historical: boolean;
     dueDate?: Date | null;
     reason: string;
   };
@@ -120,6 +121,8 @@ const Utils = TrainingToolUtils;
             covered: false,
             reason: recordState.reason
           };
+        const historical = Boolean(recordState.active && recordState.recorded && trainingDate
+          && RuleEngine.computeExpiry(project.rule, trainingDate, candidate.expiry).newExpiry <= candidate.expiry);
         return {
           rowNumber: row.rowNumber,
           source: `${project.sheetName} 第${row.rowNumber}行`,
@@ -128,6 +131,7 @@ const Utils = TrainingToolUtils;
           recorded: recordState.recorded,
           recordState,
           covered: coverage.covered,
+          historical,
           dueDate: coverage.dueDate,
           reason: coverage.reason
         };
@@ -164,7 +168,7 @@ const Utils = TrainingToolUtils;
         dueDate,
         dueMonth: Utils.toMonthKey(dueDate),
         windowInfo,
-        reason: `本月不处理就会过期，最晚完成日期为 ${Utils.formatDate(dueDate)}。`
+        reason: `最晚完成日期 ${Utils.formatDate(dueDate)} 落在当前评估区间内，必须安排。`
       };
     }
 
@@ -193,7 +197,7 @@ const Utils = TrainingToolUtils;
     }
 
     return {
-      status: STATUSES.normal,
+      status: STATUSES.notNeeded,
       dueDate,
       dueMonth: Utils.toMonthKey(dueDate),
       windowInfo,
@@ -226,6 +230,8 @@ const Utils = TrainingToolUtils;
           dueMonth: "",
           dueDate: "",
           scheduledDate: "",
+          scheduleNotice: "",
+          historyDate: "",
           source,
           reason: `当前有效期“${Utils.normalizeText(rawExpiry)}”无法解析为日期。`
           });
@@ -236,7 +242,9 @@ const Utils = TrainingToolUtils;
       const candidate = { employeeId, name, expiry };
       const matches = buildCandidateMatches(project, candidate);
       const abnormalMatches = matches.filter((item) => item.recordState && item.recordState.abnormal);
-      const activeMatches = matches.filter((item) => item.recordState && item.recordState.active);
+      const activeMatches = matches.filter((item) => item.recordState.active && !item.historical);
+      const historyMatches = matches.filter((item) => item.historical);
+      const latestHistory = historyMatches[historyMatches.length - 1];
       const coveredMatches = matches.filter((item) => item.covered);
       const earliestActive = activeMatches[0];
       const earliestCovered = coveredMatches[0];
@@ -245,24 +253,19 @@ const Utils = TrainingToolUtils;
       let status = scheduleNeed.status;
       let reason = scheduleNeed.reason;
       let rowSource = source;
+      let scheduleNotice: TrainingAssessmentRow["scheduleNotice"] = "";
 
       if (abnormalMatches.length) {
         status = STATUSES.abnormal;
         reason = `${abnormalMatches[0].recordState.reason}（项目 sheet 第${abnormalMatches[0].rowNumber}行）`;
         rowSource = abnormalMatches[0].source;
       } else if (coveredMatches.length) {
-        status = STATUSES.normal;
+        status = STATUSES.scheduled;
         reason = "已找到可覆盖本轮到期的有效安排，排班层面不用重复排。";
         rowSource = earliestCovered.source;
-      } else if (activeMatches.length && scheduleNeed.status === STATUSES.expired) {
-        status = STATUSES.expiredScheduled;
-        reason = `当前有效期已过期，已有安排 ${earliestActive.trainingDateText || "日期无法解析"}，但不能覆盖本轮到期。${earliestActive.reason}`;
-        rowSource = earliestActive.source;
-      } else if (activeMatches.length && (
-        scheduleNeed.status === STATUSES.must || scheduleNeed.status === STATUSES.recommended
-      )) {
-        status = STATUSES.uncoveredScheduled;
-        reason = `已有安排 ${earliestActive.trainingDateText || "日期无法解析"}，但不能覆盖本轮到期。${earliestActive.reason}`;
+      } else if (activeMatches.length) {
+        scheduleNotice = "已排未覆盖";
+        reason = `${scheduleNeed.reason}已有安排 ${earliestActive.trainingDateText || "日期无法解析"}，但不能覆盖本轮到期。${earliestActive.reason}`;
         rowSource = earliestActive.source;
       } else if (scheduleNeed.status === STATUSES.expired) {
         reason = "当前有效期已过期，且未找到可覆盖本轮到期的安排。";
@@ -270,6 +273,10 @@ const Utils = TrainingToolUtils;
         reason = `未找到可覆盖本轮到期的安排。${scheduleNeed.reason}`;
       } else if (scheduleNeed.status === STATUSES.recommended) {
         reason = `未找到可覆盖本轮到期的安排。${scheduleNeed.reason}`;
+      }
+
+      if (latestHistory) {
+        reason += `历史培训 ${latestHistory.trainingDateText} 已计入当前有效期，不作为本轮安排。`;
       }
 
       rows.push({
@@ -281,6 +288,8 @@ const Utils = TrainingToolUtils;
         dueMonth: scheduleNeed.dueMonth,
         dueDate: Utils.formatDate(scheduleNeed.dueDate),
         scheduledDate: earliestCovered ? earliestCovered.trainingDateText : (earliestActive ? earliestActive.trainingDateText : ""),
+        scheduleNotice,
+        historyDate: latestHistory ? latestHistory.trainingDateText : "",
         source: rowSource,
         reason
       });
@@ -337,6 +346,8 @@ const Utils = TrainingToolUtils;
       row.expiry,
       row.dueMonth,
       row.scheduledDate,
+      row.scheduleNotice,
+      row.historyDate,
       row.source,
       row.reason
     ].some((value) => Utils.normalizeText(value).includes(keyword));
@@ -386,22 +397,22 @@ const Utils = TrainingToolUtils;
         hint: "已经进入窗口期或管理提前期，适合提前排班。"
       },
       {
-        label: STATUSES.uncoveredScheduled,
-        value: counts[STATUSES.uncoveredScheduled] || 0,
-        tone: "danger",
-        hint: "项目 sheet 里有安排，但按规则不能覆盖本轮到期。"
-      },
-      {
         label: STATUSES.abnormal,
         value: counts[STATUSES.abnormal] || 0,
         tone: "danger",
         hint: "日期或取消备注存在矛盾，需要人工确认。"
       },
       {
-        label: STATUSES.expiredScheduled,
-        value: counts[STATUSES.expiredScheduled] || 0,
+        label: STATUSES.scheduled,
+        value: counts[STATUSES.scheduled] || 0,
         tone: "ok",
-        hint: "人员信息表已过期，但项目 sheet 里已有补训安排。"
+        hint: "已有能够覆盖当前这轮到期的有效安排。"
+      },
+      {
+        label: STATUSES.notNeeded,
+        value: counts[STATUSES.notNeeded] || 0,
+        tone: "info",
+        hint: "尚未进入需要安排的阶段。"
       }
     ];
   }
@@ -414,7 +425,7 @@ const Utils = TrainingToolUtils;
   function buildFilterOptions(rows: TrainingAssessmentRow[]): TrainingWorkbenchResult["filterOptions"] {
     return {
       projects: uniqueSortedText(rows.map((row) => row.projectName)),
-      statuses: uniqueSortedText(rows.map((row) => row.status), false),
+      statuses: VISIBLE_STATUS_FIELDS.map((item) => item.status),
       months: uniqueSortedText(rows.map((row) => row.dueMonth))
     };
   }
@@ -430,7 +441,6 @@ const Utils = TrainingToolUtils;
   function buildProjectChartRows(rows: TrainingAssessmentRow[]): TrainingProjectChartRow[] {
     const projectMap = new Map<string, TrainingProjectChartRow>();
     rows.forEach((row) => {
-      if (!WorkbenchStatus.isDefaultVisible(row.status)) return;
       if (!projectMap.has(row.projectName)) {
         projectMap.set(row.projectName, WorkbenchStatus.createVisibleStatusBucket({
           projectName: row.projectName,
@@ -451,14 +461,7 @@ const Utils = TrainingToolUtils;
       projectName,
       ...WorkbenchStatus.createVisibleStatusBucket(),
       total: 0,
-      rowsByStatus: {
-        [STATUSES.expired]: [],
-        [STATUSES.expiredScheduled]: [],
-        [STATUSES.must]: [],
-        [STATUSES.uncoveredScheduled]: [],
-        [STATUSES.recommended]: [],
-        [STATUSES.abnormal]: []
-      }
+      rowsByStatus: Object.fromEntries(VISIBLE_STATUS_FIELDS.map((item) => [item.status, []]))
     };
   }
 
@@ -487,19 +490,17 @@ const Utils = TrainingToolUtils;
       });
     }
     rows.forEach((row) => {
-      if (!WorkbenchStatus.isDefaultVisible(row.status)) return;
       if (!projectMap.has(row.projectName)) {
         projectMap.set(row.projectName, createProjectSummaryItem(row.projectName));
       }
       incrementProjectSummary(projectMap.get(row.projectName)!, row);
     });
     return [...projectMap.values()].sort((left, right) => {
-      return right.total - left.total
-        || right.expired - left.expired
-        || right.expiredScheduled - left.expiredScheduled
+      return right.expired - left.expired
         || right.must - left.must
-        || right.uncoveredScheduled - left.uncoveredScheduled
         || right.recommended - left.recommended
+        || right.abnormal - left.abnormal
+        || right.total - left.total
         || left.projectName.localeCompare(right.projectName);
     });
   }
@@ -575,9 +576,7 @@ const Utils = TrainingToolUtils;
       const rightDue = parseDisplayDate(right.nearestDueDate);
       const dueSort = leftDue && rightDue ? leftDue.getTime() - rightDue.getTime() : 0;
       return right.expired - left.expired
-        || right.expiredScheduled - left.expiredScheduled
         || right.must - left.must
-        || right.uncoveredScheduled - left.uncoveredScheduled
         || right.recommended - left.recommended
         || right.abnormal - left.abnormal
         || dueSort
@@ -600,20 +599,32 @@ const Utils = TrainingToolUtils;
     };
   }
 
+  function filterScopeRows(rows: TrainingAssessmentRow[], filters: AssessmentFilters): TrainingAssessmentRow[] {
+    return filterRows(rows, {
+      ...filters,
+      statuses: normalizeFilterSet(filters.statuses).size
+        ? filters.statuses
+        : VISIBLE_STATUS_FIELDS.map((item) => item.status)
+    });
+  }
+
+  function summarizeView(detailCount: number, scopeCount: number, scanCount: number, explicitStatus: boolean): string {
+    return `排班总览${explicitStatus ? "显示" : "默认显示"} ${detailCount} 条${explicitStatus ? "" : "待处理或异常记录"}；当前筛选范围共 ${scopeCount} 人项，六类统计互斥，原始扫描 ${scanCount} 人项。`;
+  }
+
   function buildResult(analysis: TrainingToolAnalysis, options: TrainingAssessmentOptions = {}): TrainingWorkbenchResult {
     const assessment = buildRows(analysis, options);
     const allRows = assessment.rows;
     const detailRows = filterRows(allRows, options.filters || {});
+    const scopeRows = filterScopeRows(allRows, options.filters || {});
     const hasExplicitStatusFilter = normalizeFilterSet((options.filters || {}).statuses).size > 0;
     return {
-      summaryText: hasExplicitStatusFilter
-        ? `排班总览显示 ${detailRows.length} 条，原始扫描 ${allRows.length} 条。`
-        : `排班总览默认显示 ${detailRows.length} 条待处理或异常记录，原始扫描 ${allRows.length} 条。`,
-      statsCards: buildStatsCards(detailRows),
-      chartData: buildChartData(detailRows),
-      summaryData: buildSummaryData(detailRows, { analysis }),
-      displayColumns: ["状态", "项目", "姓名", "当前有效期", "已排日期", "说明"],
-      detailColumns: ["状态", "项目", "员工号", "姓名", "当前有效期", "到期月份", "最晚完成日期", "已排日期", "来源", "说明"],
+      summaryText: summarizeView(detailRows.length, scopeRows.length, allRows.length, hasExplicitStatusFilter),
+      statsCards: buildStatsCards(scopeRows),
+      chartData: buildChartData(scopeRows),
+      summaryData: buildSummaryData(scopeRows, { analysis }),
+      displayColumns: ["状态", "项目", "姓名", "当前有效期", "已排日期", "补充提示", "历史培训日期", "说明"],
+      detailColumns: ["状态", "项目", "员工号", "姓名", "当前有效期", "到期月份", "最晚完成日期", "已排日期", "补充提示", "历史培训日期", "来源", "说明"],
       allDetailRows: allRows,
       detailRows,
       skippedColumns: [],
@@ -627,20 +638,19 @@ const Utils = TrainingToolUtils;
   function viewFromRows(baseResult: TrainingWorkbenchResult, filters: AssessmentFilters = {}): TrainingWorkbenchResult {
     const allRows = baseResult.allDetailRows || baseResult.detailRows || [];
     const detailRows = filterRows(allRows, filters);
+    const scopeRows = filterScopeRows(allRows, filters);
     const hasExplicitStatusFilter = normalizeFilterSet(filters.statuses).size > 0;
     return {
       ...baseResult,
-      summaryText: hasExplicitStatusFilter
-        ? `排班总览显示 ${detailRows.length} 条，原始扫描 ${allRows.length} 条。`
-        : `排班总览默认显示 ${detailRows.length} 条待处理或异常记录，原始扫描 ${allRows.length} 条。`,
-      statsCards: buildStatsCards(detailRows),
-      chartData: buildChartData(detailRows),
-      summaryData: buildSummaryData(detailRows, {
+      summaryText: summarizeView(detailRows.length, scopeRows.length, allRows.length, hasExplicitStatusFilter),
+      statsCards: buildStatsCards(scopeRows),
+      chartData: buildChartData(scopeRows),
+      summaryData: buildSummaryData(scopeRows, {
         baseRows: baseResult.summaryData && baseResult.summaryData.projectSummaryRows
           ? baseResult.summaryData.projectSummaryRows
           : []
       }),
-      displayColumns: baseResult.displayColumns || ["状态", "项目", "姓名", "当前有效期", "已排日期", "说明"],
+      displayColumns: baseResult.displayColumns,
       detailRows,
       allDetailRows: allRows,
       filterOptions: baseResult.filterOptions || buildFilterOptions(allRows)

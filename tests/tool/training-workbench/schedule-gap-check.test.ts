@@ -53,10 +53,10 @@ describe("training workbench schedule gap check", () => {
 
   it("excludes covered and abnormal rows but keeps schedules that cannot cover the expiry", () => {
     const result = gapCheck.buildFromRows([
-      row({ employeeId: "10", name: "正确覆盖", status: "正常" }),
+      row({ employeeId: "10", name: "正确覆盖", status: "已排" }),
       row({ employeeId: "11", name: "数据异常", status: "异常" }),
-      row({ employeeId: "12", name: "已排错日期", status: "已排未覆盖", scheduledDate: "2026-04-01" }),
-      row({ employeeId: "13", name: "过期后补训", status: "已过期已排补训", dueDate: "2026-05-01", expiry: "2026-05-01", scheduledDate: "2026-06-10" })
+      row({ employeeId: "12", name: "已排错日期", status: "必须排", scheduleNotice: "已排未覆盖", scheduledDate: "2026-04-01" }),
+      row({ employeeId: "13", name: "过期后补训", status: "已过期", scheduleNotice: "已排未覆盖", dueDate: "2026-05-01", expiry: "2026-05-01", scheduledDate: "2026-06-10" })
     ], "2026-06-01", 30);
 
     expect(result.rows.map((item: any) => item.name)).toEqual(["过期后补训", "已排错日期"]);
@@ -95,7 +95,7 @@ describe("training workbench schedule gap check", () => {
         return {
           allDetailRows: [
             row({ employeeId: "30", name: "仍需安排", dueDate: "2026-07-01" }),
-            row({ employeeId: "31", name: "已经覆盖", dueDate: "2026-07-01", status: "正常" })
+            row({ employeeId: "31", name: "已经覆盖", dueDate: "2026-07-01", status: "已排" })
           ]
         } as any;
     });

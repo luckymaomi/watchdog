@@ -186,7 +186,7 @@ const Utils = TrainingToolUtils;
       ? result.filterOptions
       : { projects: [], statuses: [], months: [] };
     renderSelectOptions(elements.workbenchProjectSelect, options.projects, "全部项目");
-    renderSelectOptions(elements.workbenchStatusSelect, options.statuses, "全部状态");
+    renderSelectOptions(elements.workbenchStatusSelect, ["全部状态", ...options.statuses], "待处理与异常（默认）");
     renderSelectOptions(elements.workbenchMonthSelect, options.months, "全部月份");
   }
 

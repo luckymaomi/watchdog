@@ -15,6 +15,7 @@ const Utils = TrainingToolUtils;
     expiry?: string;
     dueDate?: string;
     scheduledDate?: string;
+    scheduleNotice?: string;
     source?: string;
     reason?: string;
   };
@@ -81,10 +82,8 @@ const Utils = TrainingToolUtils;
 
   function needsAttention(status: string): boolean {
     return status === STATUSES.expired
-      || status === STATUSES.expiredScheduled
       || status === STATUSES.must
-      || status === STATUSES.recommended
-      || status === STATUSES.uncoveredScheduled;
+      || status === STATUSES.recommended;
   }
 
   function classifyWindow(baseDate: Date, dueDate: Date, horizonDays: number): GapWindow | null {
@@ -110,10 +109,6 @@ const Utils = TrainingToolUtils;
 
   function rowKey(row: GapSourceRow): string {
     return `${personIdentity(row.employeeId, row.name)}|${Utils.normalizeText(row.projectName)}`;
-  }
-
-  function isScheduledButUncovered(status: string): boolean {
-    return status === STATUSES.expiredScheduled || status === STATUSES.uncoveredScheduled;
   }
 
   function compareRows(left: GapCheckRow, right: GapCheckRow): number {
@@ -148,7 +143,7 @@ const Utils = TrainingToolUtils;
         windowLabel: windowInfo.label,
         windowTone: windowInfo.tone,
         workbenchStatus: row.status,
-        attentionLabel: isScheduledButUncovered(row.status) ? "已排未覆盖" : "未安排",
+        attentionLabel: row.scheduleNotice === "已排未覆盖" ? "已排未覆盖" : "未安排",
         projectName: Utils.normalizeText(row.projectName),
         employeeId: Utils.normalizeText(row.employeeId),
         name: Utils.normalizeText(row.name),
