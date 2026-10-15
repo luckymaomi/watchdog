@@ -14,13 +14,13 @@ const roster: CrewRosterEntry[] = [
 ];
 const input: CourseNoticeInput = {
   role: "机长", year: "2027", period: "一", addressee: "测试单位", participantUnit: "测试单位", classNumber: "TEST-2701",
-  startDate: "2027-03-01", endDate: "2027-03-23", issueDate: "2027-02-25", sourceText: "001002、001001"
+  startDate: "2027-03-01", endDate: "2027-03-23", issueDate: "2027-02-25", sourceText: "测试乙、测试甲"
 };
 const loadTemplate = (role: string): Uint8Array => new Uint8Array(readFileSync(resolve("public", COURSE_NOTICE_TEMPLATES[role].replace("../../../", ""))));
 const textOf = (xml: string): string => new DOMParser().parseFromString(xml, "application/xml").documentElement!.textContent || "";
 
 describe("course opening notice", () => {
-  it("matches exact employee IDs in input order, keeps leading zeros and generates the original list punctuation", () => {
+  it("matches names to employee IDs in input order, keeps leading zeros and generates the original list punctuation", () => {
     const draft = buildCourseNoticeDraft(roster, input);
     expect(draft.participants.map(person => person.employeeId)).toEqual(["001002", "001001"]);
     expect(draft.fields["参训人员"]).toBe("测试乙(001002)、测试甲(001001)");
@@ -29,20 +29,29 @@ describe("course opening notice", () => {
     expect(canExportCourseNotice(draft)).toBe(true);
   });
 
-  it("deduplicates repeated IDs and blocks unknown, partial, invalid or ambiguous IDs", () => {
-    const duplicate = buildCourseNoticeDraft(roster, { ...input, sourceText: "001001\n001002,001001；001002" });
+  it("deduplicates repeated names and blocks unmatched, partial or ambiguous names", () => {
+    const duplicate = buildCourseNoticeDraft(roster, { ...input, sourceText: "测试甲\n测试乙,测试甲；测试乙" });
     expect(duplicate.participants).toHaveLength(2);
+    expect(duplicate.participants.map(person => person.name)).toEqual(["测试甲", "测试乙"]);
     expect(duplicate.issues.some(issue => issue.severity === "warning")).toBe(true);
     expect(canExportCourseNotice(duplicate)).toBe(true);
-    for (const sourceText of ["1001", "001001 999999", "001001 姓名", "001001XYZ"]) {
-      expect(canExportCourseNotice(buildCourseNoticeDraft(roster, { ...input, sourceText }))).toBe(false);
+    for (const sourceText of ["测试", "测试甲 不在册", "001001", "测试甲XYZ"]) {
+      const unmatched = buildCourseNoticeDraft(roster, { ...input, sourceText });
+      expect(canExportCourseNotice(unmatched)).toBe(false);
+      expect(unmatched.issues.some(issue => issue.message.includes("未匹配"))).toBe(true);
     }
-    const conflict = buildCourseNoticeDraft([...roster, { ...roster[0], name: "另一人" }], { ...input, sourceText: "001001" });
+    const conflict = buildCourseNoticeDraft([...roster, { ...roster[0], id: "001003" }], { ...input, sourceText: "测试甲" });
     expect(conflict.participants).toHaveLength(0);
-    expect(conflict.issues.some(issue => issue.message.includes("多个姓名"))).toBe(true);
+    expect(conflict.issues.some(issue => issue.message.includes("多个员工号"))).toBe(true);
     expect(canExportCourseNotice(conflict)).toBe(false);
     const identical = buildCourseNoticeDraft([...roster, { ...roster[0] }], input);
     expect(identical.participants).toHaveLength(2);
+  });
+
+  it("blocks conflicting roster records sharing an employee ID", () => {
+    const conflict = buildCourseNoticeDraft([...roster, { ...roster[0], name: "另一人" }], { ...input, sourceText: "测试甲、另一人" });
+    expect(canExportCourseNotice(conflict)).toBe(false);
+    expect(conflict.issues.some(issue => issue.message.includes("多个姓名"))).toBe(true);
   });
 
   it("validates dates, roles and required notice fields without inventing missing values", () => {
@@ -83,7 +92,7 @@ describe("course opening notice", () => {
 
   it("supports a long roster and escapes XML values while keeping exact text", async () => {
     const many = Array.from({ length: 60 }, (_, i) => ({ ...roster[0], id: String(100000 + i), name: `测试${i}` }));
-    const draft = buildCourseNoticeDraft(many, { ...input, addressee: "A&B<单位>", sourceText: many.map(p => p.id).join("\n") });
+    const draft = buildCourseNoticeDraft(many, { ...input, addressee: "A&B<单位>", sourceText: many.map(p => p.name).join("\n") });
     const file = await buildCourseNoticeFile(loadTemplate("机长"), draft);
     const xml = await (await JSZip.loadAsync(file.bytes)).file("word/document.xml")!.async("string");
     expect(textOf(xml)).toContain("A&B<单位>");
@@ -92,7 +101,7 @@ describe("course opening notice", () => {
   });
 
   it("refuses invalid drafts and templates with missing fields", async () => {
-    await expect(buildCourseNoticeFile(loadTemplate("机长"), buildCourseNoticeDraft(roster, { ...input, sourceText: "999999" }))).rejects.toThrow();
+    await expect(buildCourseNoticeFile(loadTemplate("机长"), buildCourseNoticeDraft(roster, { ...input, sourceText: "不在册" }))).rejects.toThrow();
     const zip = await JSZip.loadAsync(loadTemplate("机长"));
     zip.file("word/document.xml", (await zip.file("word/document.xml")!.async("string")).replace("{班级编号}", "缺失字段"));
     await expect(buildCourseNoticeFile(await zip.generateAsync({ type: "uint8array" }), buildCourseNoticeDraft(roster, input))).rejects.toThrow("班级编号");

@@ -17,28 +17,32 @@ export function buildCourseNoticeDraft(roster: CrewRosterEntry[], input: CourseN
     const issues: CourseNoticeIssue[] = [];
     const error = (message: string): void => { issues.push({ severity: "error", message }); };
     const byId = new Map<string, Set<string>>();
+    const byName = new Map<string, Set<string>>();
     for (const person of roster) {
         const id = person.id.trim();
         const name = person.name.trim();
         if (!id || !name) continue;
         if (!byId.has(id)) byId.set(id, new Set());
         byId.get(id)!.add(name);
+        if (!byName.has(name)) byName.set(name, new Set());
+        byName.get(name)!.add(id);
     }
     const participants: CourseNoticeParticipant[] = [];
     const seen = new Set<string>();
     const duplicates = new Set<string>();
     const tokens = input.sourceText.trim().split(/[\s,，、;；]+/).filter(Boolean);
-    if (!tokens.length) error("请粘贴参训人员员工号。");
+    if (!tokens.length) error("请粘贴参训人员姓名。");
     for (const token of tokens) {
-        if (!/^\d+$/.test(token)) { error(`员工号格式无效：${token}，请只输入数字员工号。`); continue; }
         if (seen.has(token)) { duplicates.add(token); continue; }
         seen.add(token);
-        const names = byId.get(token);
-        if (!names?.size) { error(`员工号 ${token} 未匹配到花名册，请核对或替换花名册。`); continue; }
-        if (names.size > 1) { error(`员工号 ${token} 在花名册对应多个姓名，需先核对。`); continue; }
-        participants.push({ employeeId: token, name: [...names][0] });
+        const ids = byName.get(token);
+        if (!ids?.size) { error(`姓名 ${token} 未匹配到花名册，请核对姓名或替换花名册。`); continue; }
+        if (ids.size > 1) { error(`姓名 ${token} 在花名册对应多个员工号，存在重名，需先核对花名册。`); continue; }
+        const employeeId = [...ids][0];
+        if (byId.get(employeeId)!.size > 1) { error(`员工号 ${employeeId} 在花名册对应多个姓名，需先核对。`); continue; }
+        participants.push({ employeeId, name: token });
     }
-    if (duplicates.size) issues.push({ severity: "warning", message: `重复员工号已去重，保留首次顺序：${[...duplicates].join("、")}。` });
+    if (duplicates.size) issues.push({ severity: "warning", message: `重复姓名已去重，保留首次顺序：${[...duplicates].join("、")}。` });
     const start = dateValue(input.startDate);
     const end = dateValue(input.endDate);
     const issued = dateValue(input.issueDate);
@@ -62,7 +66,7 @@ export function buildCourseNoticeDraft(roster: CrewRosterEntry[], input: CourseN
     for (const [key, value] of Object.entries(fields)) {
         if (INVALID_XML.test(value) || /[{}\r\n\t]/.test(value)) error(`${key}包含控制字符、换行或花括号，请清理后重试。`);
     }
-    if (participants.length) issues.push({ severity: "info", message: `已匹配 ${participants.length} 人，按员工号输入顺序生成名单。` });
+    if (participants.length) issues.push({ severity: "info", message: `已匹配 ${participants.length} 人，按姓名输入顺序生成名单。` });
     const title = `关于${year}年第${period}期B777机型${role}转机型理论培训开课的通知`;
     return { role, title, fields, participants, issues };
 }

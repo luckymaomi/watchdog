@@ -32,8 +32,8 @@
             <label class="field-group"><span>发文日期</span><input id="issueDateInput" class="form-control" type="date" data-refresh></label>
         </div>
         <p class="section-summary">机型固定 B777，落款固定“南货航飞行部”，地点及其他事项沿用原通知。</p>
-        <label class="field-group source-field"><span>参训人员员工号</span><textarea id="sourceText" class="form-control" rows="5" placeholder="粘贴员工号，可用换行、空格、逗号、顿号或分号分隔" data-refresh></textarea></label>
-        <p class="section-summary">按员工号精确匹配姓名，保留首次输入顺序；人数自动计算。未匹配时可在高级选项替换花名册。</p>
+        <label class="field-group source-field"><span>参训人员姓名</span><textarea id="sourceText" class="form-control" rows="5" placeholder="粘贴姓名，可用换行、空格、逗号、顿号或分号分隔" data-refresh></textarea></label>
+        <p class="section-summary">按姓名匹配员工号，自动生成“姓名(员工号)、姓名(员工号)”；保留首次输入顺序，人数自动计算。未匹配或重名时请先核对花名册。</p>
         <details class="advanced-options"><summary>高级选项</summary><label class="field-group advanced-content"><span>替换默认机组花名册</span><input id="rosterFile" class="form-control" type="file" accept=".xlsx,.xls"></label></details>
     </section>
     <section class="panel">
