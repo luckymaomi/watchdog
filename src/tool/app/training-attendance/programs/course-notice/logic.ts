@@ -1,3 +1,4 @@
+import { matchRosterEntriesByText } from "../../../crew-match-name-id/logic";
 import type { CrewRosterEntry } from "../../../crew-match-name-id/models";
 import type { CourseNoticeDraft, CourseNoticeInput, CourseNoticeIssue, CourseNoticeParticipant } from "./models";
 
@@ -18,10 +19,12 @@ export function buildCourseNoticeDraft(roster: CrewRosterEntry[], input: CourseN
     const error = (message: string): void => { issues.push({ severity: "error", message }); };
     const byId = new Map<string, Set<string>>();
     const byName = new Map<string, Set<string>>();
+    const normalizedRoster: CrewRosterEntry[] = [];
     for (const person of roster) {
         const id = person.id.trim();
         const name = person.name.trim();
         if (!id || !name) continue;
+        normalizedRoster.push({ ...person, id, name });
         if (!byId.has(id)) byId.set(id, new Set());
         byId.get(id)!.add(name);
         if (!byName.has(name)) byName.set(name, new Set());
@@ -29,20 +32,18 @@ export function buildCourseNoticeDraft(roster: CrewRosterEntry[], input: CourseN
     }
     const participants: CourseNoticeParticipant[] = [];
     const seen = new Set<string>();
-    const duplicates = new Set<string>();
-    const tokens = input.sourceText.trim().split(/[\s,，、;；]+/).filter(Boolean);
-    if (!tokens.length) error("请粘贴参训人员姓名。");
-    for (const token of tokens) {
-        if (seen.has(token)) { duplicates.add(token); continue; }
-        seen.add(token);
-        const ids = byName.get(token);
-        if (!ids?.size) { error(`姓名 ${token} 未匹配到花名册，请核对姓名或替换花名册。`); continue; }
-        if (ids.size > 1) { error(`姓名 ${token} 在花名册对应多个员工号，存在重名，需先核对花名册。`); continue; }
+    const matched = matchRosterEntriesByText(normalizedRoster, input.sourceText);
+    if (!input.sourceText.trim()) error("请粘贴包含参训人员姓名的文本。");
+    else if (!matched.length) error("粘贴内容没有匹配到花名册人员。");
+    for (const person of matched) {
+        if (seen.has(person.name)) continue;
+        seen.add(person.name);
+        const ids = byName.get(person.name)!;
+        if (ids.size > 1) { error(`姓名 ${person.name} 在花名册对应多个员工号，存在重名，需先核对花名册。`); continue; }
         const employeeId = [...ids][0];
         if (byId.get(employeeId)!.size > 1) { error(`员工号 ${employeeId} 在花名册对应多个姓名，需先核对。`); continue; }
-        participants.push({ employeeId, name: token });
+        participants.push({ employeeId, name: person.name });
     }
-    if (duplicates.size) issues.push({ severity: "warning", message: `重复姓名已去重，保留首次顺序：${[...duplicates].join("、")}。` });
     const start = dateValue(input.startDate);
     const end = dateValue(input.endDate);
     const issued = dateValue(input.issueDate);

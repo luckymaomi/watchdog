@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import JSZip from "jszip";
 import { DOMParser } from "@xmldom/xmldom";
 import type { CrewRosterEntry } from "../../../src/tool/app/crew-match-name-id/models";
+import { matchRosterEntriesByText } from "../../../src/tool/app/crew-match-name-id/logic";
 import { buildCourseNoticeDraft, canExportCourseNotice } from "../../../src/tool/app/training-attendance/programs/course-notice/logic";
 import { buildCourseNoticeFile, COURSE_NOTICE_TEMPLATES } from "../../../src/tool/app/training-attendance/programs/course-notice/export";
 import type { CourseNoticeInput } from "../../../src/tool/app/training-attendance/programs/course-notice/models";
@@ -14,7 +15,7 @@ const roster: CrewRosterEntry[] = [
 ];
 const input: CourseNoticeInput = {
   role: "机长", year: "2027", period: "一", addressee: "测试单位", participantUnit: "测试单位", classNumber: "TEST-2701",
-  startDate: "2027-03-01", endDate: "2027-03-23", issueDate: "2027-02-25", sourceText: "测试乙、测试甲"
+  startDate: "2027-03-01", endDate: "2027-03-23", issueDate: "2027-02-25", sourceText: "培训安排：测试乙(001002)、测试甲；其他说明和不在册文字。"
 };
 const loadTemplate = (role: string): Uint8Array => new Uint8Array(readFileSync(resolve("public", COURSE_NOTICE_TEMPLATES[role].replace("../../../", ""))));
 const textOf = (xml: string): string => new DOMParser().parseFromString(xml, "application/xml").documentElement!.textContent || "";
@@ -29,19 +30,26 @@ describe("course opening notice", () => {
     expect(canExportCourseNotice(draft)).toBe(true);
   });
 
-  it("deduplicates repeated names and blocks unmatched, partial or ambiguous names", () => {
+  it("extracts names from mixed text just like the name-to-ID tool and ignores other words", () => {
+    for (const sourceText of ["测试甲 不在册", "通知：测试乙/测试甲，请按时参加。", "测试甲XYZ", "测试乙(001002)、测试甲（001001），备注：待定"]) {
+      const draft = buildCourseNoticeDraft(roster, { ...input, sourceText });
+      expect(draft.participants.map(person => person.employeeId)).toEqual(matchRosterEntriesByText(roster, sourceText).map(person => person.id));
+      expect(canExportCourseNotice(draft)).toBe(true);
+    }
+    for (const sourceText of ["测试", "001001", "纯说明文字"]) {
+      const draft = buildCourseNoticeDraft(roster, { ...input, sourceText });
+      expect(draft.participants).toHaveLength(0);
+      expect(canExportCourseNotice(draft)).toBe(false);
+    }
+  });
+
+  it("deduplicates repeated names and still identifies ambiguous roster names", () => {
     const duplicate = buildCourseNoticeDraft(roster, { ...input, sourceText: "测试甲\n测试乙,测试甲；测试乙" });
     expect(duplicate.participants).toHaveLength(2);
     expect(duplicate.participants.map(person => person.name)).toEqual(["测试甲", "测试乙"]);
-    expect(duplicate.issues.some(issue => issue.severity === "warning")).toBe(true);
     expect(canExportCourseNotice(duplicate)).toBe(true);
-    for (const sourceText of ["测试", "测试甲 不在册", "001001", "测试甲XYZ"]) {
-      const unmatched = buildCourseNoticeDraft(roster, { ...input, sourceText });
-      expect(canExportCourseNotice(unmatched)).toBe(false);
-      expect(unmatched.issues.some(issue => issue.message.includes("未匹配"))).toBe(true);
-    }
-    const conflict = buildCourseNoticeDraft([...roster, { ...roster[0], id: "001003" }], { ...input, sourceText: "测试甲" });
-    expect(conflict.participants).toHaveLength(0);
+    const conflict = buildCourseNoticeDraft([...roster, { ...roster[0], id: "001003" }], { ...input, sourceText: "通知：测试甲、测试乙，请参加。" });
+    expect(conflict.participants.map(person => person.name)).toEqual(["测试乙"]);
     expect(conflict.issues.some(issue => issue.message.includes("多个员工号"))).toBe(true);
     expect(canExportCourseNotice(conflict)).toBe(false);
     const identical = buildCourseNoticeDraft([...roster, { ...roster[0] }], input);
