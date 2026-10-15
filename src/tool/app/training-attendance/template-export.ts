@@ -14,7 +14,9 @@ export const TRAINING_TEMPLATE_FILES: TrainingTemplateFile[] = [
     { source: "../../../template/training-attendance/dangerous-goods/post-survey.docx", target: "危险品复训/打3份 学员培训后调查问卷3份.docx" },
     { source: "../../../template/training-attendance/dangerous-goods/simulation.docx", target: "危险品复训/打N+1份 飞行机组任务模拟评估表.docx" },
     { source: "../../../template/training-attendance/dangerous-goods/exam.docx", target: "危险品复训/打N+1份 飞行机组试卷.docx" },
-    { source: "../../../template/training-attendance/dangerous-goods/attendance.docx", target: "危险品复训/危险品（复训）签到表.docx" }
+    { source: "../../../template/training-attendance/dangerous-goods/attendance.docx", target: "危险品复训/危险品（复训）签到表.docx" },
+    { source: "../../../template/training-notice/B777机型机长转机型理论培训开课通知模板.docx", target: "开课通知/B777机型机长转机型理论培训开课通知模板.docx" },
+    { source: "../../../template/training-notice/B777机型副驾驶转机型理论培训开课通知模板.docx", target: "开课通知/B777机型副驾驶转机型理论培训开课通知模板.docx" }
 ];
 
 export async function buildTrainingTemplateArchive(

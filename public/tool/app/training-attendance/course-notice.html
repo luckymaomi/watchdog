@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>培训签到表 · 开课通知</title>
+    <script src="../../../theme.js"></script>
+    <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../theme.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="app-header">
+        <a class="back-link" href="./index.html">返回培训签到表</a>
+        <div><h1>开课通知</h1><p>B777 机长／副驾驶转机型理论培训</p></div>
+    </header>
+    <section class="panel">
+        <div class="section-head">
+            <div><h2>通知参数</h2><span id="appStatus" class="status-line" role="status">正在加载默认资源...</span></div>
+            <button id="exportButton" class="btn btn-primary" type="button" disabled>导出开课通知 Word</button>
+        </div>
+        <div class="form-grid">
+            <label class="field-group"><span>培训岗位</span><select id="roleInput" class="form-select" data-refresh><option>机长</option><option>副驾驶</option></select></label>
+            <label class="field-group"><span>标题年份</span><input id="yearInput" class="form-control" type="number" min="1000" max="9999" data-refresh></label>
+            <label class="field-group"><span>培训期数</span><input id="periodInput" class="form-control" type="text" placeholder="如：一、二、三" data-refresh></label>
+            <label class="field-group"><span>班级编号</span><input id="classNumberInput" class="form-control" type="text" data-refresh></label>
+            <label class="field-group"><span>主送单位（通知抬头）</span><input id="addresseeInput" class="form-control" type="text" placeholder="如：飞行总队、重庆航空" data-refresh></label>
+            <label class="field-group"><span>参训单位（名单前缀）</span><input id="participantUnitInput" class="form-control" type="text" placeholder="如：飞行总队、重庆航空" data-refresh></label>
+            <label class="field-group"><span>学习开始／开课日期</span><input id="startDateInput" class="form-control" type="date" data-refresh></label>
+            <label class="field-group"><span>学习结束日期</span><input id="endDateInput" class="form-control" type="date" data-refresh></label>
+            <label class="field-group"><span>发文日期</span><input id="issueDateInput" class="form-control" type="date" data-refresh></label>
+        </div>
+        <p class="section-summary">机型固定 B777，落款固定“南货航飞行部”，地点及其他事项沿用原通知。</p>
+        <label class="field-group source-field"><span>参训人员员工号</span><textarea id="sourceText" class="form-control" rows="5" placeholder="粘贴员工号，可用换行、空格、逗号、顿号或分号分隔" data-refresh></textarea></label>
+        <p class="section-summary">按员工号精确匹配姓名，保留首次输入顺序；人数自动计算。未匹配时可在高级选项替换花名册。</p>
+        <details class="advanced-options"><summary>高级选项</summary><label class="field-group advanced-content"><span>替换默认机组花名册</span><input id="rosterFile" class="form-control" type="file" accept=".xlsx,.xls"></label></details>
+    </section>
+    <section class="panel">
+        <div class="section-head compact-head"><h2>数据健康检查</h2></div>
+        <div id="healthList" class="health-list" aria-live="polite"></div>
+    </section>
+    <section class="panel">
+        <div class="section-head compact-head"><h2>通知内容预览</h2><span id="previewSummary" class="section-summary">尚未匹配人员</span></div>
+        <p id="noticeTitle" class="notice-title"></p>
+        <p id="noticeOpening" class="notice-text"></p>
+        <label class="field-group"><span>参训人员段落</span><textarea id="noticeParticipants" class="form-control" rows="4" readonly aria-label="自动生成的参训人员段落"></textarea></label>
+        <p id="noticeDates" class="notice-text"></p>
+        <div class="table-shell notice-table-shell"><table class="table table-sm align-middle mb-0"><thead><tr><th>序号</th><th>员工号</th><th>姓名</th></tr></thead><tbody id="previewBody"><tr><td colspan="3" class="empty-cell">等待匹配人员</td></tr></tbody></table></div>
+    </section>
+</main>
+<script src="../../../libs/xlsx-js-style.min.js"></script>
+<script type="module" src="./course-notice-app.js"></script>
+</body>
+</html>

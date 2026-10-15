@@ -18,6 +18,9 @@ body {
 .program-kicker, .program-action { color: var(--watchdog-accent); font-size: 12px; font-weight: 700; }
 .program-action { display: inline-block; margin-top: 14px; }
 .field-wide { grid-column: 1 / -1; }
+.notice-title { font-weight: 700; overflow-wrap: anywhere; }
+.notice-text { margin: 12px 0; line-height: 1.8; overflow-wrap: anywhere; }
+.notice-table-shell { height: 300px; overflow: auto; }
 
 .app-header,
 .panel {
