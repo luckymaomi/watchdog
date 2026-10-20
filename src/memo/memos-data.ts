@@ -7,6 +7,12 @@ export const memoItems: MemoItem[] = [
   { name: "特殊机场资格代码", path: "memos/04/MEMO.md", audience: "human" },
   { name: "危险品培训录入", path: "memos/07/MEMO.md", audience: "human" },
   {
+    name: "屁眼子",
+    path: "memos/10/MEMO.md",
+    audience: "agent",
+    downloadName: "skill-屁眼子.md"
+  },
+  {
     name: "副驾驶流转更新",
     path: "memos/08/MEMO.md",
     audience: "agent",

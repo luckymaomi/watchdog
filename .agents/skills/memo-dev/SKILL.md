@@ -5,7 +5,7 @@ description: 维护 watchdog 内的备忘录业务子站。用户要求新增、
 
 # 备忘录维护
 
-备忘录是 watchdog 下的独立静态子应用，用于查询飞行部日常工作记录，以及供 Agent 执行的操作说明。业务正文与项目级 Agent Skill（`.agents/skills/`）是两类内容，不能混放；页面上的“Agent看”条目仍存放在 `public/memo/memos/`。
+备忘录是 watchdog 下的独立静态子应用，用于查询飞行部日常工作记录，以及供 Agent 执行的操作说明。业务正文与项目级 Agent Skill（`.agents/skills/`）是两类内容，不能混放；页面上的“屁眼子”条目仍存放在 `public/memo/memos/`。
 
 ## 当前入口
 
@@ -28,8 +28,8 @@ description: 维护 watchdog 内的备忘录业务子站。用户要求新增、
 
 ## 分类与下载
 
-- 每条索引必须带 `audience`：`human`（人类看）或 `agent`（Agent看）。
-- 页面提供「全部 / 人类看 / Agent看」筛选；搜索只在当前分类内进行。
+- 每条索引必须带 `audience`：`human`（人类看）或 `agent`（屁眼子）。变量名仍用 `agent`，界面显示为「屁眼子」。
+- 页面提供「全部 / 人类看 / 屁眼子」筛选；搜索只在当前分类内进行。
 - 每篇正文上方提供「下载 Markdown」；默认文件名为 `{name}.md`。
 - Agent Skill 建议设置 `downloadName`（例如 `skill-副驾驶流转更新.md`），方便下载后直接给 Agent 使用。
 
