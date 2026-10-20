@@ -67,6 +67,9 @@
 .sidebar-menu {
     position: sticky;
     top: 112px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     max-height: calc(100vh - 136px);
     padding: 14px;
     overflow-y: auto;
@@ -75,12 +78,59 @@
     box-shadow: var(--hard-shadow-medium);
 }
 
+.audience-filter {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.audience-filter-button {
+    flex: 1 1 auto;
+    min-width: 4.5em;
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 2px solid var(--soft-border);
+    background: var(--soft-surface-muted);
+    box-shadow: var(--hard-shadow-small);
+    color: var(--soft-muted);
+    font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    transition: box-shadow 150ms ease-out, transform 150ms ease-out, background 150ms ease-out, color 150ms ease-out;
+}
+
+.audience-filter-button:hover,
+.audience-filter-button:focus-visible {
+    background: var(--soft-sky);
+    color: var(--soft-on-pastel);
+    transform: translate(1px, 1px);
+}
+
+.audience-filter-button:focus-visible {
+    outline: 2px solid var(--soft-focus);
+    outline-offset: 2px;
+}
+
+.audience-filter-button.active {
+    background: var(--soft-mint);
+    color: var(--soft-on-pastel);
+    font-weight: 750;
+}
+
 #memoList {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
     min-width: 0;
+    width: 100%;
 }
 
 #memoList .nav-link {
     display: block;
+    width: 100%;
     padding: 10px;
     border: 2px solid transparent;
     color: var(--soft-muted);
@@ -88,7 +138,76 @@
     line-height: 1.45;
     text-align: left;
     white-space: normal;
+    overflow-wrap: normal;
+    word-break: keep-all;
     transition: box-shadow 150ms ease-out, transform 150ms ease-out, color 150ms ease-out, background 150ms ease-out, border-color 150ms ease-out;
+}
+
+#memoList .memo-link-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+#memoList .memo-link-title,
+#memoList .search-result-name {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+}
+
+.memo-audience-badge {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--soft-border) 70%, transparent);
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10px;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.memo-audience-human {
+    background: color-mix(in srgb, var(--soft-sky) 28%, var(--soft-surface));
+    color: var(--soft-ink);
+}
+
+.memo-audience-agent {
+    background: color-mix(in srgb, var(--soft-amber) 34%, var(--soft-surface));
+    color: var(--soft-ink);
+}
+
+.memo-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+}
+
+.memo-download-button {
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 2px solid var(--soft-border);
+    background: var(--soft-surface);
+    box-shadow: var(--hard-shadow-small);
+    color: var(--soft-ink);
+    font-family: "Cascadia Mono", Consolas, "Microsoft YaHei UI", monospace;
+    font-size: 12px;
+    transition: box-shadow 150ms ease-out, transform 150ms ease-out, background 150ms ease-out;
+}
+
+.memo-download-button:hover,
+.memo-download-button:focus-visible {
+    background: var(--soft-sky);
+    color: var(--soft-on-pastel);
+    transform: translate(1px, 1px);
+}
+
+.memo-download-button:focus-visible {
+    outline: 2px solid var(--soft-focus);
+    outline-offset: 2px;
 }
 
 #memoList .nav-link:hover,

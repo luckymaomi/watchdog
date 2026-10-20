@@ -1,4 +1,11 @@
-type MemoItem = readonly [name: string, path: string];
+type MemoAudience = "human" | "agent";
+
+interface MemoItem {
+  name: string;
+  path: string;
+  audience: MemoAudience;
+  downloadName?: string;
+}
 
 interface MemoSearchSource {
   name: string;

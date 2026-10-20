@@ -49,7 +49,12 @@
 
     <div class="workspace">
       <aside class="sidebar">
-        <div id="sidebarMenu" class="sidebar-menu collapse d-md-flex">
+        <div id="sidebarMenu" class="sidebar-menu collapse d-md-flex flex-column">
+          <div id="audienceFilter" class="audience-filter" role="group" aria-label="备忘录分类">
+            <button type="button" class="audience-filter-button active" data-audience="all" aria-pressed="true">全部</button>
+            <button type="button" class="audience-filter-button" data-audience="human" aria-pressed="false">人类看</button>
+            <button type="button" class="audience-filter-button" data-audience="agent" aria-pressed="false">Agent看</button>
+          </div>
           <nav id="memoList" class="nav flex-column gap-1"></nav>
         </div>
       </aside>
