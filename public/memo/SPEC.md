@@ -21,9 +21,9 @@
 | [资质代码](./memos/03/MEMO.md) | 人类看 | 资质代码表 |
 | [特殊机场资格代码](./memos/04/MEMO.md) | 人类看 | 特殊机场资格代码表 |
 | [危险品培训录入](./memos/07/MEMO.md) | 人类看 | 危险品培训 OSM 系统录入模板 |
-| [屁眼子](./memos/10/MEMO.md) | 屁眼子 | Agent Skill 合集入口：唤醒词、说话风格、有哪些 Skill |
-| [副驾驶流转更新](./memos/08/MEMO.md) | 屁眼子 | Agent 维护副驾驶积分表与清洗表（屁眼子 Skill） |
-| [检查单手册比对填写](./memos/09/MEMO.md) | 屁眼子 | Agent 按手册原文填写检查单符合性声明，并按条款抽取手册 PDF（条款号高亮注释）佐证页（屁眼子 Skill） |
+| [屁眼子](./memos/piyanzi/MEMO.md) | 屁眼子 | Agent Skill 合集入口：唤醒词、拼装规则、编号索引（能力正文在各 Skill「报装」） |
+| [检查单手册比对填写](./memos/piyanzi/001/MEMO.md) | 屁眼子 | 按手册原文填写符合性声明，并按条款抽取手册 PDF 佐证页 |
+| [副驾驶流转更新](./memos/piyanzi/002/MEMO.md) | 屁眼子 | 维护副驾驶积分表与清洗表 |
 ## 数据边界
 
 - 页面是 GitHub Pages 静态子应用，不上传用户数据。
@@ -43,7 +43,7 @@
 | `public/memo/site.css` | 页面样式 |
 | `public/tool/support-shell.css` | 支持页面共享主题、顶栏和滚动条 |
 | `src/tool/support-shell.ts` | 支持页面共享主题切换 |
-| `public/memo/memos/` | 备忘录正文和图片附件 |
+| `public/memo/memos/` | 备忘录正文和图片附件（人类看：`01`…；屁眼子合集：`piyanzi/`，Skill 为 `001`…） |
 | `public/memo/MEMO_INDEX.md` | 备忘录人工索引 |
 | `src/memo/memos-data.ts` | 页面导航索引（含 audience） |
 | `src/memo/search.ts` | 正文搜索和命中摘要 |

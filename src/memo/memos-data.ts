@@ -8,20 +8,20 @@ export const memoItems: MemoItem[] = [
   { name: "危险品培训录入", path: "memos/07/MEMO.md", audience: "human" },
   {
     name: "屁眼子",
-    path: "memos/10/MEMO.md",
+    path: "memos/piyanzi/MEMO.md",
     audience: "agent",
     downloadName: "skill-屁眼子.md"
   },
   {
-    name: "副驾驶流转更新",
-    path: "memos/08/MEMO.md",
-    audience: "agent",
-    downloadName: "skill-副驾驶流转更新.md"
-  },
-  {
     name: "检查单手册比对填写",
-    path: "memos/09/MEMO.md",
+    path: "memos/piyanzi/001/MEMO.md",
     audience: "agent",
     downloadName: "skill-检查单手册比对填写.md"
+  },
+  {
+    name: "副驾驶流转更新",
+    path: "memos/piyanzi/002/MEMO.md",
+    audience: "agent",
+    downloadName: "skill-副驾驶流转更新.md"
   }
 ];

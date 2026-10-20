@@ -14,7 +14,7 @@ description: 维护 watchdog 内的备忘录业务子站。用户要求新增、
 - 页面逻辑：`src/memo/site.ts`
 - 搜索规则：`src/memo/search.ts`
 - 页面索引：`src/memo/memos-data.ts`
-- 业务正文：`public/memo/memos/<数字>/MEMO.md`
+- 业务正文：`public/memo/memos/<数字>/MEMO.md`（人类看）；屁眼子合集：`public/memo/memos/piyanzi/`（入口 `MEMO.md` + `README.md`，Skill 为 `001/MEMO.md`…）
 - 模块规范：`public/memo/SPEC.md`
 - 人工索引：`public/memo/MEMO_INDEX.md`
 - 自动验证：`tests/smoke/memo.test.ts`
@@ -31,7 +31,7 @@ description: 维护 watchdog 内的备忘录业务子站。用户要求新增、
 - 每条索引必须带 `audience`：`human`（人类看）或 `agent`（屁眼子）。变量名仍用 `agent`，界面显示为「屁眼子」。
 - 页面提供「全部 / 人类看 / 屁眼子」筛选；搜索只在当前分类内进行。
 - 每篇正文上方提供「下载 Markdown」；默认文件名为 `{name}.md`。
-- Agent Skill 建议设置 `downloadName`（例如 `skill-副驾驶流转更新.md`），方便下载后直接给 Agent 使用。
+- Agent Skill 建议设置 `downloadName`（例如 `skill-副驾驶流转更新.md`），方便下载后直接给 Agent 使用。合集目录可用数字文件夹排盘，Skill 正文与对用户话术只用名称，不报文件夹号。
 
 ## 维护流程
 
