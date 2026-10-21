@@ -70,9 +70,8 @@ describe("memo subsite", () => {
     expect(results[0].snippet).toContain("重航划转");
   });
 
-  it("includes agent skills with download names", () => {
+  it("requires downloadName for any agent-audience memo", () => {
     const agents = loadPublishedItems().filter((item) => item.audience === "agent");
-    expect(agents.length).toBeGreaterThanOrEqual(2);
     agents.forEach((item) => {
       expect(item.downloadName, `${item.name} missing downloadName`).toBeTruthy();
       expect(item.downloadName).toMatch(/^skill-.+\.md$/);

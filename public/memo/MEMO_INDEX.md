@@ -7,8 +7,5 @@
 | 03 | [资质代码](./memos/03/MEMO.md) | 人类看 | `memos/03/MEMO.md` |
 | 04 | [特殊机场资格代码](./memos/04/MEMO.md) | 人类看 | `memos/04/MEMO.md` |
 | 07 | [危险品培训录入](./memos/07/MEMO.md) | 人类看 | `memos/07/MEMO.md` |
-| — | [屁眼子](./memos/piyanzi/MEMO.md) | 屁眼子 | `memos/piyanzi/MEMO.md` |
-| — | [检查单手册比对填写](./memos/piyanzi/001/MEMO.md) | 屁眼子 | `memos/piyanzi/001/MEMO.md` |
-| — | [副驾驶流转更新](./memos/piyanzi/002/MEMO.md) | 屁眼子 | `memos/piyanzi/002/MEMO.md` |
 
-维护规则：新增或调整备忘录时同步更新 `src/memo/memos-data.ts`、`public/memo/SPEC.md` 和本文件；并填写正确的 `audience`（`human` / `agent`）。Agent Skill 如需固定下载文件名，在索引中设置 `downloadName`。
+维护规则：新增或调整备忘录时同步更新 `src/memo/memos-data.ts`、`public/memo/SPEC.md` 和本文件；并填写正确的 `audience`（`human` / `agent`）。Agent 业务 Skill（屁眼子）维护在独立仓库 `repository/piyanzi`，不写入本索引。
