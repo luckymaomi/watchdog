@@ -1,11 +1,11 @@
 ---
 name: memo-dev
-description: 维护 watchdog 内的备忘录业务子站。用户要求新增、删除、重命名或调整飞行部日常备忘录，修改备忘录页面、导航、分类、下载、Markdown 正文、图片附件、维护说明或索引时使用。屁眼子 Agent Skill 合集在独立仓库 piyanzi，不在本 Skill 范围。
+description: 维护 watchdog 内的备忘录业务子站。用户要求新增、删除、重命名或调整飞行部日常备忘录，修改备忘录页面、导航、分类、下载、Markdown 正文、图片附件、维护说明或索引时使用。皮燕子 Agent Skill 合集在独立仓库 piyanzi，不在本 Skill 范围。
 ---
 
 # 备忘录维护
 
-备忘录是 watchdog 下的独立静态子应用，用于查询飞行部日常工作记录。业务正文与项目级 Agent Skill（`.agents/skills/`）是两类内容，不能混放。Agent 业务 Skill 合集「屁眼子」在与 watchdog 同级的独立仓库 `piyanzi`。
+备忘录是 watchdog 下的独立静态子应用，用于查询飞行部日常工作记录。业务正文与项目级 Agent Skill（`.agents/skills/`）是两类内容，不能混放。Agent 业务 Skill 合集「皮燕子」在与 watchdog 同级的独立仓库 `piyanzi`。
 
 ## 当前入口
 
@@ -28,8 +28,8 @@ description: 维护 watchdog 内的备忘录业务子站。用户要求新增、
 
 ## 分类与下载
 
-- 每条索引必须带 `audience`：`human`（人类看）或 `agent`（屁眼子）。变量名仍用 `agent`，界面显示为「屁眼子」。
-- 页面提供「全部 / 人类看 / 屁眼子」筛选；搜索只在当前分类内进行。当前索引仅为人类看；`agent` 分类留给将来若再挂接条目时使用。
+- 每条索引必须带 `audience`：`human`（人类看）或 `agent`（皮燕子）。变量名仍用 `agent`，界面显示为「皮燕子」。
+- 页面提供「全部 / 人类看 / 皮燕子」筛选；搜索只在当前分类内进行。当前索引仅为人类看；`agent` 分类留给将来若再挂接条目时使用。
 - 每篇正文上方提供「下载 Markdown」；默认文件名为 `{name}.md`。
 - 可选 `downloadName` 指定下载文件名。
 
@@ -42,7 +42,7 @@ description: 维护 watchdog 内的备忘录业务子站。用户要求新增、
 5. 备忘录用户事实写入模块 `SPEC.md`，通用贡献说明使用仓库根 `CONTRIBUTING.md`，Agent 执行流程写入本 Skill。
 6. 不复制 Bootstrap、marked、许可证或第二套 Git；统一复用 watchdog 主仓库能力。
 7. Markdown、HTML、CSS 和 JavaScript 文本统一使用 UTF-8 无 BOM。
-8. 修改屁眼子 Skill 时打开 `repository/piyanzi`，不要在本仓库 `public/memo/memos/` 下重建合集。
+8. 修改皮燕子 Skill 时打开 `repository/piyanzi`，不要在本仓库 `public/memo/memos/` 下重建合集。
 
 ## 验证
 

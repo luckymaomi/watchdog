@@ -6,7 +6,7 @@
 
 用户从 watchdog 工具主页点击“备忘录”，在新标签页打开独立页面。页面与工具首页和开发者页共用双主题壳层。桌面端通过左侧导航切换备忘录，移动端通过命令栏中的折叠菜单切换；右侧显示对应 Markdown 正文、表格和图片。
 
-左侧提供分类筛选：全部 / 人类看 / 屁眼子。筛选只影响导航列表与搜索范围，不改变正文渲染规则。当前索引仅有「人类看」条目；「屁眼子」分类对应的 Agent Skill 合集在独立仓库 `repository/piyanzi`（与 watchdog 同级）。每篇备忘录正文上方提供“下载 Markdown”，可将当前全文（含 frontmatter）保存为本地 `.md` 文件。
+左侧提供分类筛选：全部 / 人类看 / 皮燕子。筛选只影响导航列表与搜索范围，不改变正文渲染规则。当前索引仅有「人类看」条目；「皮燕子」分类对应的 Agent Skill 合集在独立仓库 `repository/piyanzi`（与 watchdog 同级）。每篇备忘录正文上方提供“下载 Markdown”，可将当前全文（含 frontmatter）保存为本地 `.md` 文件。
 
 命令栏搜索框按关键词检索当前分类下的备忘录正文。命中后左侧显示备忘录名称和上下文摘要，右侧打开首个命中项，滚动到首个命中位置并高亮正文中的全部命中词；点击其他搜索结果可切换到对应全文。清空搜索后恢复完整导航和普通正文显示。
 
@@ -29,7 +29,7 @@
 - `MEMO.md` frontmatter 只提供文件元数据，页面正文和全文搜索不显示或索引这些字段；下载文件保留完整 Markdown（含 frontmatter）。
 - 每条索引项包含 `audience`（`human` / `agent`）；可选 `downloadName` 指定下载文件名。
 - Markdown、HTML、CSS 和 JavaScript 文本统一使用 UTF-8 无 BOM。
-- 业务备忘录与开发者页中的项目级 Agent Skill 相互独立；业务正文不放入 `.agents/skills/`。Agent 业务 Skill（屁眼子）在独立仓库 `piyanzi`，不在本备忘录目录。
+- 业务备忘录与开发者页中的项目级 Agent Skill 相互独立；业务正文不放入 `.agents/skills/`。Agent 业务 Skill（皮燕子）在独立仓库 `piyanzi`，不在本备忘录目录。
 - 备忘录复用 watchdog 的 Bootstrap、marked、构建、测试、Pages 和 MIT License，不维护第二套仓库基础设施。
 - 桌面与移动端使用同一套搜索、导航和正文节点；响应式样式只改变布局和折叠状态，不复制业务逻辑。
 

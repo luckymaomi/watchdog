@@ -136,7 +136,7 @@ function highlightContent(value: string): void {
 }
 
 function audienceLabel(audience: MemoAudience): string {
-  return audience === "agent" ? "屁眼子" : "人类看";
+  return audience === "agent" ? "皮燕子" : "人类看";
 }
 
 function createNavLink(item: MemoItem, snippet?: string): HTMLAnchorElement {

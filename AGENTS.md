@@ -40,7 +40,7 @@
 - 涉及面试人员名单整理成锁班导入模板时，看 `.agents/skills/interview-lock-list/SKILL.md`。
 - 涉及人员结构统计和 Word 报告结果核对时，看 `.agents/skills/personnel-report-check/SKILL.md`。
 - 涉及备忘录业务子站、日常备忘录正文、图片附件、导航或索引时，看 `.agents/skills/memo-dev/SKILL.md`。
-- 涉及屁眼子唤醒、Agent 业务 Skill（检查单手册比对、副驾驶流转等）时，在与本仓同级的独立仓库 `piyanzi` 中处理，不要写回 `public/memo/memos/`。
+- 涉及皮燕子唤醒、Agent 业务 Skill（检查单手册比对、副驾驶流转等）时，在与本仓同级的独立仓库 `piyanzi` 中处理，不要写回 `public/memo/memos/`。
 - 如果 skill 和 owner 当前明确需求冲突，以 owner 当前需求为准，并说明冲突点。
 
 ## Spec、测试与完成标准
