@@ -16,6 +16,28 @@ const result = analyzeApprovals(parse([[9, "CSG", "广州", "伦敦", "<&>\nG", 
 const options = { season: "2026夏秋", effective: "2026-03-29", expiry: "2026-10-24" };
 
 describe("原模板导出", () => {
+  it("墨西哥城明确机场匹配代码且不展开，城市名称仍展开两机场", async () => {
+    expect(catalog.ports.get("墨西哥城空运机场")).toBe("NLU");
+    expect(catalog.ports.get("墨西哥城国际")).toBe("MEX");
+    const analysis = analyzeApprovals(parse([
+      [1, "CSG", "广州", "墨西哥城空运机场", "G", "B"],
+      [2, "CSG", "广州", "墨西哥城国际", "G", "B"],
+      [3, "CSG", "广州", "墨西哥城", "G", "B"]
+    ]), { rows: [], issues: [] }, catalog);
+    expect(analysis.issues).toEqual([]);
+    expect(analysis.go.map(r => [r.right, r.multi])).toEqual([
+      ["墨西哥城空运机场", false], ["墨西哥城国际", false], ["墨西哥城1", true], ["墨西哥城2", true]
+    ]);
+    expect(analysis.back.map(r => r.left)).toEqual(analysis.go.map(r => r.right));
+    const output = XLSX.read(await buildApprovalWorkbook(bytes, analysis, options), { cellStyles: true });
+    const exported = readAirportCatalog(XLSX, output);
+    expect(exported.ports.get(output.Sheets["去程"].D2.v)).toBe("NLU");
+    expect(exported.ports.get(output.Sheets["去程"].D3.v)).toBe("MEX");
+    expect(exported.ports.get(output.Sheets["回程"].C2.v)).toBe("NLU");
+    expect(exported.ports.get(output.Sheets["回程"].C3.v)).toBe("MEX");
+    expect(output.Sheets["去程"].F2.f).toBe("VLOOKUP(D2,机场列表!A:B,2,FALSE)");
+    expect(output.Sheets["回程"].E2.f).toBe("VLOOKUP(C2,机场列表!A:B,2,FALSE)");
+  });
   it("三张结果表只含所选航司，空选或无命中拒绝导出", async () => {
     const opened = parse([[1, "CSN", "广州", "伦敦", "OTHER", "OTHER"], [2, "CSG", "广州", "伦敦", "G", "B"]]);
     for (const selection of [undefined, ["CSN"], ["CSG", "CSN"]]) {
