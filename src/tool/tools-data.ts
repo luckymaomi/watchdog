@@ -1,6 +1,7 @@
 import type { ToolItem } from "./models";
 
 export const tools: ToolItem[] = [
+    { name: "外籍航线批复录入", desc: "合并开放与临开批复，展开多机场并生成去程回程录入表", entry: "foreign-route-approval", status: "done", category: "light" },
     { name: "培训签到表", desc: "签到表与开课通知制作", entry: "training-attendance", status: "done", category: "light" },
     { name: "菜鸟教程", desc: "哈哈。好活。置顶。", entry: "beginner-tutorial", status: "done", category: "light", homepageState: "beta" },
     { name: "培训皇帝", desc: "查个人资质、排培训、核对覆盖率、年度负载均衡、更新有效期", entry: "training-workbench", status: "done", category: "heavy" },

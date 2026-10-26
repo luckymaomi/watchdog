@@ -40,6 +40,7 @@ function resolveDistRoot(): string {
 }
 
 const pageEntries = [
+  { source: "src/tool/app/foreign-route-approval/main.ts", output: "tool/app/foreign-route-approval/app", page: "tool/app/foreign-route-approval/index.html" },
   { source: "src/tool/tools-render.ts", output: "tool/app", page: "tool/index.html" },
   { source: "src/tool/developer.ts", output: "tool/developer-app", page: "tool/developer.html" },
   { source: "src/tool/app/beginner-tutorial/main.ts", output: "tool/app/beginner-tutorial/app", page: "tool/app/beginner-tutorial/index.html" },

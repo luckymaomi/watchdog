@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>外籍航线批复录入</title>
+  <script src="../../../theme.js"></script>
+  <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../theme.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="container py-4">
+  <div class="card mb-4"><div class="card-body">
+    <nav class="d-flex justify-content-between gap-3 mb-3"><a href="../../index.html">返回工具首页</a><a href="../../../template/foreign-route-approval/approval-template.xlsx" download="外籍带飞批复合并-模板.xlsx">下载原空模板</a></nav>
+    <h1 class="h4">外籍航线批复录入</h1>
+    <p class="text-muted mb-0">上传开放、临开两份批复，合并后展开多机场，生成去程与回程录入表。文件仅在本机浏览器处理。</p>
+  </div></div>
+  <section class="card mb-4"><div class="card-body">
+    <h2 class="h5 mb-3">1. 上传两份批复</h2>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <label for="openFile" class="form-label">开放部分 Excel（需有表头）</label>
+        <input id="openFile" type="file" class="form-control" accept=".xlsx,.xls">
+        <p id="openStatus" class="small text-muted my-2">未选择文件</p>
+        <label for="openSheet" class="form-label">开放部分工作表</label><select id="openSheet" class="form-select" disabled></select>
+      </div>
+      <div class="col-md-6">
+        <label for="temporaryFile" class="form-label">临开部分 Excel（可无表头）</label>
+        <input id="temporaryFile" type="file" class="form-control" accept=".xlsx,.xls">
+        <p id="temporaryStatus" class="small text-muted my-2">未选择文件</p>
+        <label for="temporarySheet" class="form-label">临开部分工作表</label><select id="temporarySheet" class="form-select" disabled></select>
+      </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">标准字段：序号、公司、航站、航站、去程、回程、是否有台湾地区飞行员。无表头临开按此列序读取。</p>
+  </div></section>
+  <section class="card mb-4"><div class="card-body">
+    <h2 class="h5 mb-3">2. 日期与预检</h2>
+    <div class="row g-3 mb-3">
+      <div class="col-md-4"><label for="effective" class="form-label">生效日期（必填）</label><input id="effective" type="date" class="form-control" required></div>
+      <div class="col-md-4"><label for="expiry" class="form-label">失效日期（必填）</label><input id="expiry" type="date" class="form-control" required></div>
+      <div class="col-md-4"><label for="season" class="form-label">航季标签（用于文件名，可选）</label><input id="season" type="text" class="form-control" placeholder="例如：2026夏秋"></div>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3"><span id="templateStatus" class="small text-muted">正在加载内置模板…</span><button id="retryTemplate" class="btn btn-sm btn-outline-secondary">重试加载模板</button></div>
+    <div class="d-flex flex-wrap gap-2 mb-3"><button id="analyze" class="btn btn-primary" disabled>预检并生成预览</button><button id="export" class="btn btn-outline-primary" disabled>导出录入 Excel</button></div>
+    <div id="status" class="alert alert-info mb-0" role="status" aria-live="polite">请上传两份批复。</div>
+  </div></section>
+  <section id="results" class="card mb-4" hidden><div class="card-body">
+    <h2 class="h5">3. 结果核对</h2><p id="summary" class="my-3"></p>
+    <h3 class="h6">输入与机场检查</h3><ul id="issues" class="issue-list mb-3"></ul>
+    <div class="d-flex align-items-center gap-3 mb-3"><label for="previewKind" class="form-label mb-0">预览</label><select id="previewKind" class="form-select preview-select"><option value="merged">合并 OD</option><option value="go">去程展开</option><option value="back">回程展开</option></select></div>
+    <div class="preview-shell"><table class="table table-bordered mb-0"><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
+    <p class="small text-muted mt-2 mb-0">来源位置仅供页面核对，导出合并表不增加来源列。展开后的航路码每行保留，多机场行使用蓝字。</p>
+  </div></section>
+  <section class="card"><div class="card-body">
+    <h2 class="h5">处理口径</h2>
+    <ul class="text-muted mb-0">
+      <li>开放在前、临开在后，不去重；台湾飞行员字段照抄，空白作“否”。</li>
+      <li>源回程为空的 OD 只进入去程表。两侧多机场分别展开后做全部组合。</li>
+      <li>机场名称严格按原模板列表匹配，未知机场显示提示并保留原值。缺少公司、航站或去程需修正后导出。</li>
+      <li>导出保留五张工作表及原 VLOOKUP 公式。在 Excel 打开后重算；俄罗斯列表只含俄罗斯机场，未命中返回 #N/A，与模板一致。</li>
+    </ul>
+  </div></section>
+</main>
+<script src="../../../libs/xlsx.full.min.js"></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
