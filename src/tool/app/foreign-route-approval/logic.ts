@@ -13,7 +13,7 @@ export function validateDates(effective: string, expiry: string): string[] {
 
 export function analyzeApprovals(opened: ParsedSource, temporary: ParsedSource, catalog: AirportCatalog): Analysis {
   const merged = [...opened.rows, ...temporary.rows];
-  const result: Analysis = { merged, go: [], back: [], issues: [...opened.issues, ...temporary.issues], openCount: opened.rows.length, temporaryCount: temporary.rows.length, skippedBack: 0, multiCount: 0 };
+  const result: Analysis = { merged, go: [], back: [], issues: [...opened.issues, ...temporary.issues], openCount: opened.rows.length, temporaryCount: temporary.rows.length, skippedGo: 0, skippedBack: 0, multiCount: 0 };
   for (const row of merged) {
     const left = catalog.multi.get(row.stationA) ?? [row.stationA];
     const right = catalog.multi.get(row.stationB) ?? [row.stationB];
@@ -22,10 +22,12 @@ export function analyzeApprovals(opened: ParsedSource, temporary: ParsedSource, 
     for (const name of new Set([...left, ...right])) {
       if (!catalog.ports.has(name)) result.issues.push({ severity: "warning", message: `机场列表未收录“${name}”，VLOOKUP 将返回 #N/A；保留源值，请核对源表航站。`, source: row.source, sourceRow: row.sourceRow });
     }
+    if (!row.go) result.skippedGo++;
     if (!row.back) result.skippedBack++;
+    if (!row.go && !row.back) result.issues.push({ severity: "warning", message: "去程、回程均为空，仅保留合并原记录，不生成录入航段。", source: row.source, sourceRow: row.sourceRow });
     for (const a of left) for (const b of right) {
       const shared = { company: row.company, tw: row.tw, multi, source: row.source, sourceRow: row.sourceRow };
-      result.go.push({ ...shared, left: a, right: b, code: row.go });
+      if (row.go) result.go.push({ ...shared, left: a, right: b, code: row.go });
       if (row.back) result.back.push({ ...shared, left: b, right: a, code: row.back });
     }
   }

@@ -24,6 +24,15 @@ describe("外籍批复核心规则", () => {
       expect(parse(rows, "temporary").rows).toHaveLength(1);
     }
   });
+  it("识别航空公司表头及其中换行，不能把临开表头当作航线", () => {
+    const alternate = ["序号", "航空\n公司", "航站", "航站", "去程", "回程", "是否有台湾\n地区飞行员"];
+    for (const kind of ["open", "temporary"] as const) {
+      const result = parse([["冬春批复"], alternate, [1, "CSG", "广州", "伦敦", "G", "B", "否"]], kind);
+      expect(result.issues).toEqual([]);
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0]).toMatchObject({ company: "CSG", sourceRow: 3, go: "G", back: "B" });
+    }
+  });
   it("跳过序号列的执行要求说明尾注，仍报告真实不完整航线", () => {
     const note = "执行日期：2026年3月29日-2026年10月24日。\n相关要求：按批复航线执行。";
     const data = [1, "CSG", "广州", "伦敦", "G", "B", "否"];
@@ -36,7 +45,7 @@ describe("外籍批复核心规则", () => {
     const broken = parse([header, [2], [3, "CSG", "广州", "", "G", "B"], ["无法识别内容"]]);
     expect(broken.issues.filter(i => i.severity === "error")).toHaveLength(3);
   });
-  it("缺列、空去程、缺公司或航站、错误单元格均显式报告", () => {
+  it("缺列、缺公司或航站、错误单元格均显式报告", () => {
     expect(parse([["公司", "去程"], ["CSG", "G"]]).issues.length).toBeGreaterThan(0);
     const result = parse([header, [1, "", "广州", "伦敦", "", "B"]]);
     expect(result.issues.some(i => i.severity === "error")).toBe(true);
@@ -44,6 +53,23 @@ describe("外籍批复核心规则", () => {
     sheet.E2 = { t: "e", v: 7 };
     expect(readApprovals(XLSX, sheet, "测试", "open").issues.some(i => i.severity === "error")).toBe(true);
     expect(parse([header]).issues.some(i => i.severity === "error")).toBe(true);
+  });
+  it("方向只看空白与非空白，各自决定出表；双空保留 OD 并提示", () => {
+    const route = "NIXAL-ZGGG-01R,SARIN-ZGGG-01,MORIT-ZGGG-01";
+    const opened = parse([header,
+      [1, "CSG", "广州", "伦敦", "非空文本\n原样保留", route, "否"],
+      [2, "CSG", "广州", "伦敦", "   \n", route, "否"],
+      [3, "CSG", "广州", "伦敦", route, "\t ", "否"],
+      [4, "CSG", "广州", "伦敦", "", null, "否"]
+    ]);
+    expect(opened.issues).toEqual([]);
+    const result = analyzeApprovals(opened, { rows: [], issues: [] }, catalog);
+    expect(result.merged).toHaveLength(4);
+    expect(result.go.map(r => r.code)).toEqual([...Array(3).fill("非空文本\n原样保留"), ...Array(3).fill(route)]);
+    expect(result.back.map(r => r.code)).toEqual(Array(6).fill(route));
+    expect(result.skippedGo).toBe(2);
+    expect(result.skippedBack).toBe(2);
+    expect(result.issues).toEqual([{ severity: "warning", source: "测试", sourceRow: 5, message: "去程、回程均为空，仅保留合并原记录，不生成录入航段。" }]);
   });
   it("开放先临开后，双侧展开及重复 OD 均保留，空回程只生成去程", () => {
     const opened = parse([header, [1, "CSG", "伦敦", "迪拜", "G", "B"], [2, "CSG", "广州", "伦敦", "G2", ""], [3, "CSG", "广州", "伦敦", "G3", "B3"]]);

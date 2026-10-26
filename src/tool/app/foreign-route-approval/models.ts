@@ -35,6 +35,7 @@ export interface Analysis {
   issues: Issue[];
   openCount: number;
   temporaryCount: number;
+  skippedGo: number;
   skippedBack: number;
   multiCount: number;
 }

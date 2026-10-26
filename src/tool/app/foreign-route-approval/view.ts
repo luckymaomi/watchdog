@@ -14,7 +14,7 @@ export function clearResult(): void {
 }
 export function showResult(result: Analysis): void {
   byId("results").hidden = false;
-  byId("summary").textContent = `开放 ${result.openCount} 条 + 临开 ${result.temporaryCount} 条 = 合并 ${result.merged.length} 条；去程 ${result.go.length} 行，回程 ${result.back.length} 行；源回程空跳过 ${result.skippedBack} 条，多机场命中 ${result.multiCount} 条。`;
+  byId("summary").textContent = `开放 ${result.openCount} 条 + 临开 ${result.temporaryCount} 条 = 合并 ${result.merged.length} 条；去程 ${result.go.length} 行，回程 ${result.back.length} 行；源去程空跳过 ${result.skippedGo} 条，源回程空跳过 ${result.skippedBack} 条，多机场命中 ${result.multiCount} 条。`;
   const issues = byId("issues");
   issues.replaceChildren();
   for (const issue of result.issues) {

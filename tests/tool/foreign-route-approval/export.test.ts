@@ -51,4 +51,23 @@ describe("原模板导出", () => {
     await expect(buildApprovalWorkbook(bytes, result, { ...options, effective: "" })).rejects.toThrow();
     await expect(buildApprovalWorkbook(bytes, { ...result, issues: [{ source: "测试", severity: "error", message: "机场缺失" }] }, options)).rejects.toThrow();
   });
+  it("仅回程、仅去程和双向空白按方向输出，不导出空码航段", async () => {
+    const route = "NIXAL-ZGGG-01R,SARIN-ZGGG-01,MORIT-ZGGG-01";
+    const analysis = analyzeApprovals(parse([
+      [1, "CSG", "广州", "伦敦", "", route, "否"],
+      [2, "CSG", "广州", "上海/浦东", "任何非空字符串", "", "是"],
+      [3, "CSG", "广州", "伦敦", " ", "\n", "否"]
+    ]), { rows: [], issues: [] }, catalog);
+    const workbook = XLSX.read(await buildApprovalWorkbook(bytes, analysis, options));
+    expect(workbook.Sheets["开放与临开合并"]["!ref"]).toBe("A1:G4");
+    const go = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets["去程"], { header: 1 });
+    const back = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets["回程"], { header: 1 });
+    expect(go.slice(1).map(r => [r[0], r[2], r[3], r[6]])).toEqual([[1, "广州", "上海/浦东", "任何非空字符串"]]);
+    expect(back.slice(1).map(r => [r[0], r[2], r[3], r[6]])).toEqual([1, 2, 3].map(i => [i, `伦敦${i}`, "广州", route]));
+    const empty = analyzeApprovals(parse([[1, "CSG", "广州", "伦敦", "", "", "否"]]), { rows: [], issues: [] }, catalog);
+    const emptyWorkbook = XLSX.read(await buildApprovalWorkbook(bytes, empty, options));
+    expect(emptyWorkbook.Sheets["去程"]["!ref"]).toBe("A1:L1");
+    expect(emptyWorkbook.Sheets["回程"]["!ref"]).toBe("A1:L1");
+    expect(emptyWorkbook.Sheets["开放与临开合并"]["!ref"]).toBe("A1:G2");
+  });
 });
