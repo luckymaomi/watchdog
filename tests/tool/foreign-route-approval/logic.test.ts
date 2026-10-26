@@ -24,6 +24,18 @@ describe("外籍批复核心规则", () => {
       expect(parse(rows, "temporary").rows).toHaveLength(1);
     }
   });
+  it("跳过序号列的执行要求说明尾注，仍报告真实不完整航线", () => {
+    const note = "执行日期：2026年3月29日-2026年10月24日。\n相关要求：按批复航线执行。";
+    const data = [1, "CSG", "广州", "伦敦", "G", "B", "否"];
+    for (const kind of ["open", "temporary"] as const) {
+      const rows = kind === "open" ? [header, data, [note]] : [["临开批复"], data, [note]];
+      const result = parse(rows, kind);
+      expect(result.rows).toHaveLength(1);
+      expect(result.issues).toEqual([]);
+    }
+    const broken = parse([header, [2], [3, "CSG", "广州", "", "G", "B"], ["无法识别内容"]]);
+    expect(broken.issues.filter(i => i.severity === "error")).toHaveLength(3);
+  });
   it("缺列、空去程、缺公司或航站、错误单元格均显式报告", () => {
     expect(parse([["公司", "去程"], ["CSG", "G"]]).issues.length).toBeGreaterThan(0);
     const result = parse([header, [1, "", "广州", "伦敦", "", "B"]]);

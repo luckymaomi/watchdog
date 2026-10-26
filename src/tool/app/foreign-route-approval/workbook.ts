@@ -37,6 +37,8 @@ export function readApprovals(api: WorkbookApi, sheet: WorkSheet, source: string
       const values = columns.map(c => c < 0 ? "" : text(raw[c]));
       if (values[1] === "公司" && values[4] === "去程") continue;
       const badCell = columns.some(c => c >= 0 && sheet[api.utils.encode_cell({ r, c })]?.t === "e");
+      // 原始批复尾部的执行日期/要求说明只占序号列，不是 OD 数据。
+      if (!badCell && values.slice(1).every(v => !v) && /^(?:执行日期|相关要求|说明|备注)(?:[：:]|\s)/.test(values[0])) continue;
       if (badCell) error("存在 Excel 错误单元格，请修正后重新上传。", r + 1);
       const [, company, stationA, stationB, go, back, tw] = values;
       if (!company || !stationA || !stationB || !go) error("公司、航站A、航站B、去程不能为空。", r + 1);
