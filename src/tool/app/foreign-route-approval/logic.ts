@@ -1,4 +1,27 @@
-import type { Analysis, AirportCatalog, ExportOptions, ParsedSource } from "./models";
+import type { AirlineOption, Analysis, AirportCatalog, ExportOptions, ParsedSource } from "./models";
+
+export const normalizeAirline = (code: string): string => code.trim().toUpperCase();
+
+function sourceCompanies(source: ParsedSource): string[] {
+  const rows = new Set(source.rows.map(row => row.sourceRow));
+  const failed = new Map<number, string>();
+  for (const issue of source.issues) if (issue.sourceRow && !rows.has(issue.sourceRow)) failed.set(issue.sourceRow, issue.company ?? "");
+  return [...source.rows.map(row => row.company), ...failed.values()];
+}
+
+export function listAirlines(opened: ParsedSource, temporary: ParsedSource): AirlineOption[] {
+  const counts = new Map<string, AirlineOption>([["CSG", { code: "CSG", openCount: 0, temporaryCount: 0 }]]);
+  for (const [source, field] of [[opened, "openCount"], [temporary, "temporaryCount"]] as const) {
+    for (const value of sourceCompanies(source)) {
+      const code = normalizeAirline(value);
+      if (!code) continue;
+      const item = counts.get(code) ?? { code, openCount: 0, temporaryCount: 0 };
+      item[field]++;
+      counts.set(code, item);
+    }
+  }
+  return [...counts.values()].sort((a, b) => a.code === "CSG" ? -1 : b.code === "CSG" ? 1 : a.code.localeCompare(b.code));
+}
 
 export function validateDates(effective: string, expiry: string): string[] {
   const valid = (value: string): boolean => {
@@ -11,9 +34,17 @@ export function validateDates(effective: string, expiry: string): string[] {
   return effective > expiry ? ["失效日期不能早于生效日期。"] : [];
 }
 
-export function analyzeApprovals(opened: ParsedSource, temporary: ParsedSource, catalog: AirportCatalog): Analysis {
-  const merged = [...opened.rows, ...temporary.rows];
-  const result: Analysis = { merged, go: [], back: [], issues: [...opened.issues, ...temporary.issues], openCount: opened.rows.length, temporaryCount: temporary.rows.length, skippedGo: 0, skippedBack: 0, multiCount: 0 };
+export function analyzeApprovals(opened: ParsedSource, temporary: ParsedSource, catalog: AirportCatalog, airlines: readonly string[] = ["CSG"]): Analysis {
+  const selected = new Set(airlines.map(normalizeAirline).filter(Boolean));
+  const openRows = opened.rows.filter(row => selected.has(normalizeAirline(row.company)));
+  const tempRows = temporary.rows.filter(row => selected.has(normalizeAirline(row.company)));
+  const merged = [...openRows, ...tempRows];
+  const issues = [...opened.issues, ...temporary.issues].filter(issue => !issue.company || selected.has(normalizeAirline(issue.company)));
+  const rawOpenCount = sourceCompanies(opened).length;
+  const rawTemporaryCount = sourceCompanies(temporary).length;
+  const includedCount = [...sourceCompanies(opened), ...sourceCompanies(temporary)].filter(code => !code || selected.has(normalizeAirline(code))).length;
+  const result: Analysis = { merged, go: [], back: [], issues, openCount: openRows.length, temporaryCount: tempRows.length, rawOpenCount, rawTemporaryCount, excludedCount: rawOpenCount + rawTemporaryCount - includedCount, airlines: [...selected], skippedGo: 0, skippedBack: 0, multiCount: 0 };
+  if (!selected.size) result.issues.push({ severity: "error", message: "请至少选择一个航司后运行。", source: "航司筛选" });
   for (const row of merged) {
     const left = catalog.multi.get(row.stationA) ?? [row.stationA];
     const right = catalog.multi.get(row.stationB) ?? [row.stationB];
@@ -31,7 +62,7 @@ export function analyzeApprovals(opened: ParsedSource, temporary: ParsedSource, 
       if (row.back) result.back.push({ ...shared, left: b, right: a, code: row.back });
     }
   }
-  if (!merged.length) result.issues.push({ severity: "error", message: "两份源表均无数据。", source: "输入" });
+  if (selected.size && !merged.length) result.issues.push({ severity: "error", message: `所选航司 ${[...selected].join("、")} 在两份源表中没有可处理记录，请核对航司范围。`, source: "航司筛选" });
   return result;
 }
 

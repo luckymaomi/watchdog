@@ -1,17 +1,60 @@
 import { readFileSync } from "node:fs";
 import * as XLSX from "xlsx-js-style";
 import { describe, expect, it } from "vitest";
-import { analyzeApprovals, validateDates } from "../../../src/tool/app/foreign-route-approval/logic";
+import { analyzeApprovals, listAirlines, validateDates } from "../../../src/tool/app/foreign-route-approval/logic";
 import { readApprovals, readAirportCatalog } from "../../../src/tool/app/foreign-route-approval/workbook";
 
 const template = XLSX.read(readFileSync("public/template/foreign-route-approval/approval-template.xlsx"));
 const catalog = readAirportCatalog(XLSX, template);
 const header = ["序号", "公司", "航站", "航站", "去程", "回程", "是否有台湾地区飞行员"];
 function parse(rows: unknown[][], kind: "open" | "temporary" = "open") {
-  return readApprovals(XLSX, XLSX.utils.aoa_to_sheet(rows), "测试", kind);
+  return readApprovals(XLSX, XLSX.utils.aoa_to_sheet(rows, { cellDates: true }), "测试", kind);
 }
 
 describe("外籍批复核心规则", () => {
+  it("默认仅CSG，按完整代码筛选，筛选后保留来源顺序和重复", () => {
+    const opened = parse([header,
+      [1, "CSG", "广州", "伦敦", "G", "B"],
+      [2, "CSN", "未知外航站", "广州", "", ""],
+      [3, " csg ", "广州", "伦敦", "G", "B"],
+      [4, "CSGX", "广州", "伦敦", "X", ""]
+    ]);
+    const temporary = parse([[1, "CSG", "广州", "伦敦", "T", ""]], "temporary");
+    expect(listAirlines(opened, temporary)).toEqual([
+      { code: "CSG", openCount: 2, temporaryCount: 1 },
+      { code: "CSGX", openCount: 1, temporaryCount: 0 },
+      { code: "CSN", openCount: 1, temporaryCount: 0 }
+    ]);
+    const result = analyzeApprovals(opened, temporary, catalog);
+    expect(result.merged.map(r => r.sourceRow)).toEqual([2, 4, 1]);
+    expect(result.merged.map(r => r.go)).toEqual(["G", "G", "T"]);
+    expect(result).toMatchObject({ airlines: ["CSG"], rawOpenCount: 4, rawTemporaryCount: 1, openCount: 2, temporaryCount: 1, excludedCount: 2, skippedGo: 0, skippedBack: 1 });
+    expect(result.issues).toEqual([]);
+    const other = analyzeApprovals(opened, temporary, catalog, ["CSN", "CSGX"]);
+    expect(other.merged.map(r => r.company)).toEqual(["CSN", "CSGX"]);
+    expect(other.skippedGo).toBe(1);
+    expect(other.issues.some(i => i.message.includes("未知外航站"))).toBe(true);
+  });
+  it("未选择、无命中、归属不明阻止导出，未选航司坏字段不影响已选范围", () => {
+    const opened = parse([header, [1, "CSG", "广州", "伦敦", "G", "B"], [2, "CSN", "广州", "", "", ""]]);
+    expect(analyzeApprovals(opened, { rows: [], issues: [] }, catalog).issues).toEqual([]);
+    for (const selected of [[], ["ABC"]]) {
+      const result = analyzeApprovals(opened, { rows: [], issues: [] }, catalog, selected);
+      expect(result.merged).toEqual([]);
+      expect(result.issues.some(i => i.severity === "error")).toBe(true);
+    }
+    expect(analyzeApprovals(parse([header, [1, "", "广州", "伦敦", "G", "B"]]), { rows: [], issues: [] }, catalog).issues.some(i => i.severity === "error")).toBe(true);
+    expect(analyzeApprovals(opened, { rows: [], issues: [] }, catalog, ["CSN"]).issues.some(i => i.severity === "error")).toBe(true);
+    const dated = parse([header, [1, "CSN", "广州", "伦敦", new Date(2026, 9, 25), "B"], [2, "CSG", "广州", "伦敦", "G", "B"]]);
+    const selected = analyzeApprovals(dated, { rows: [], issues: [] }, catalog);
+    expect(selected.issues).toEqual([]);
+    expect(selected).toMatchObject({ rawOpenCount: 2, excludedCount: 1, openCount: 1 });
+    expect(selected.merged[0].sourceRow).toBe(3);
+    const headerless = parse([[1, "CSN", "广州", "伦敦", new Date(2026, 9, 25), "B"], [2, "CSG", "广州", "伦敦", "G", "B"]], "temporary");
+    expect(analyzeApprovals({ rows: [], issues: [] }, headerless, catalog).issues).toEqual([]);
+    expect(analyzeApprovals({ rows: [], issues: [] }, headerless, catalog, ["CSN"]).issues.some(i => i.severity === "error")).toBe(true);
+    expect(listAirlines({ rows: [], issues: [] }, { rows: [], issues: [] })).toEqual([{ code: "CSG", openCount: 0, temporaryCount: 0 }]);
+  });
   it("按表头定位、跳空行、保留来源行和台湾原文，空白为否", () => {
     const parsed = parse([["批复标题"], header, [99, "CSG", "广州", "伦敦", "G\nG2", "B", ""], [], [1, "CSG", "上海/浦东", "迪拜", "G2", "", "另行批复"]]);
     expect(parsed.issues).toEqual([]);

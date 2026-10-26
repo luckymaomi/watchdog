@@ -13,14 +13,14 @@ const key = (value: unknown): string => {
 
 export function readApprovals(api: WorkbookApi, sheet: WorkSheet, source: string, kind: SourceKind): ParsedSource {
   const result: ParsedSource = { rows: [], issues: [] };
-  const error = (message: string, sourceRow?: number): void => { result.issues.push({ severity: "error", source, sourceRow, message }); };
+  const error = (message: string, sourceRow?: number, company?: string): void => { result.issues.push({ severity: "error", source, sourceRow, message, ...(company ? { company } : {}) }); };
   const grid = api.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: true, defval: "", blankrows: true, range: 0 });
   let columns = [0, 1, 2, 3, 4, 5, 6];
   let start = 0;
   let headerFound = false;
   try {
     for (let r = 0; r < Math.min(grid.length, 20); r++) {
-      const names = grid[r].map(key);
+      const names = grid[r].map(value => value instanceof Date ? "" : key(value));
       if (!names.includes("公司") || !names.includes("去程")) continue;
       headerFound = true;
       const stations = names.flatMap((name, i) => name === "航站" ? [i] : []);
@@ -33,22 +33,26 @@ export function readApprovals(api: WorkbookApi, sheet: WorkSheet, source: string
     }
     if (!headerFound && kind === "open") { error("开放部分未找到完整表头。请选择正确工作表。"); return result; }
     for (let r = start; r < grid.length; r++) {
-      const raw = grid[r];
-      if (raw.every(v => v == null || v === "")) continue;
-      // 无表头临开只允许单个单元格的标题行；含其他字段的坏行必须报告。
-      if (!headerFound && raw.filter(v => text(v)).length === 1 && /批复|临开|临时|航季/.test(text(raw[0]))) continue;
-      const values = columns.map(c => c < 0 ? "" : text(raw[c]));
-      if (key(values[1]) === "公司" && key(values[4]) === "去程") continue;
-      const badCell = columns.some(c => c >= 0 && sheet[api.utils.encode_cell({ r, c })]?.t === "e");
-      // 原始批复尾部的执行日期/要求说明只占序号列，不是 OD 数据。
-      if (!badCell && values.slice(1).every(v => !v) && /^(?:执行日期|相关要求|说明|备注)(?:[：:]|\s)/.test(values[0])) continue;
-      if (badCell) error("存在 Excel 错误单元格，请修正后重新上传。", r + 1);
-      const [, company, stationA, stationB, go, back, tw] = values;
-      if (!company || !stationA || !stationB) error("公司、航站A、航站B不能为空。", r + 1);
-      result.rows.push({ company, stationA, stationB, go, back, tw: tw || "否", source, sourceRow: r + 1 });
+      let company = "";
+      try {
+        const raw = grid[r];
+        if (raw.every(v => v == null || v === "")) continue;
+        company = text(raw[columns[1]]);
+        // 无表头临开只允许单个单元格的标题行；含其他字段的坏行必须报告。
+        if (!headerFound && raw.filter(v => text(v)).length === 1 && /批复|临开|临时|航季/.test(text(raw[0]))) continue;
+        const values = columns.map(c => c < 0 ? "" : text(raw[c]));
+        if (key(values[1]) === "公司" && key(values[4]) === "去程") continue;
+        const badCell = columns.some(c => c >= 0 && sheet[api.utils.encode_cell({ r, c })]?.t === "e");
+        // 原始批复尾部的执行日期/要求说明只占序号列，不是 OD 数据。
+        if (!badCell && values.slice(1).every(v => !v) && /^(?:执行日期|相关要求|说明|备注)(?:[：:]|\s)/.test(values[0])) continue;
+        const [, , stationA, stationB, go, back, tw] = values;
+        if (badCell) error("存在 Excel 错误单元格，请修正后重新上传。", r + 1, sheet[api.utils.encode_cell({ r, c: columns[1] })]?.t === "e" ? undefined : company);
+        if (!company || !stationA || !stationB) error("公司、航站A、航站B不能为空。", r + 1, company);
+        result.rows.push({ company, stationA, stationB, go, back, tw: tw || "否", source, sourceRow: r + 1 });
+      } catch (e) { error(e instanceof Error ? e.message : String(e), r + 1, company); }
     }
   } catch (e) { error(e instanceof Error ? e.message : String(e)); }
-  if (!result.rows.length) error("没有可处理的数据行。请选择正确工作表。");
+  if (!result.rows.length && !result.issues.length) error("没有可处理的数据行。请选择正确工作表。");
   return result;
 }
 

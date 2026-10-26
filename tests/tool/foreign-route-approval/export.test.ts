@@ -16,6 +16,19 @@ const result = analyzeApprovals(parse([[9, "CSG", "广州", "伦敦", "<&>\nG", 
 const options = { season: "2026夏秋", effective: "2026-03-29", expiry: "2026-10-24" };
 
 describe("原模板导出", () => {
+  it("三张结果表只含所选航司，空选或无命中拒绝导出", async () => {
+    const opened = parse([[1, "CSN", "广州", "伦敦", "OTHER", "OTHER"], [2, "CSG", "广州", "伦敦", "G", "B"]]);
+    for (const selection of [undefined, ["CSN"], ["CSG", "CSN"]]) {
+      const filtered = analyzeApprovals(opened, { rows: [], issues: [] }, catalog, selection);
+      const output = XLSX.read(await buildApprovalWorkbook(bytes, filtered, options));
+      for (const name of output.SheetNames.slice(0, 3)) {
+        const rows = XLSX.utils.sheet_to_json<unknown[]>(output.Sheets[name], { header: 1 });
+        expect(rows.slice(1).every(row => (selection ?? ["CSG"]).includes(String(row[1])))).toBe(true);
+      }
+      expect(output.Sheets["开放与临开合并"]["!ref"]).toBe(selection?.length === 2 ? "A1:G3" : "A1:G2");
+    }
+    for (const selection of [[], ["NO_MATCH"]]) await expect(buildApprovalWorkbook(bytes, analyzeApprovals(opened, { rows: [], issues: [] }, catalog, selection), options)).rejects.toThrow();
+  });
   it("保留五表、原表头和机场部件，按行写公式、Excel 日期与蓝字全挂码", async () => {
     const output = await buildApprovalWorkbook(bytes, result, options);
     const workbook = XLSX.read(output, { cellStyles: true, cellNF: true });

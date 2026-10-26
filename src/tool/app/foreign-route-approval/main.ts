@@ -1,13 +1,14 @@
 import type { WorkBook } from "xlsx-js-style";
 import { buildApprovalWorkbook } from "./export";
-import { analyzeApprovals, inferSeason, outputFilename, validateDates } from "./logic";
-import { TEMPLATE_URL, type AirportCatalog, type Analysis, type ExportOptions, type SourceKind } from "./models";
+import { analyzeApprovals, inferSeason, listAirlines, outputFilename, validateDates } from "./logic";
+import { TEMPLATE_URL, type AirportCatalog, type Analysis, type ExportOptions, type ParsedSource, type SourceKind } from "./models";
 import { readAirportCatalog, readApprovals } from "./workbook";
-import { clearResult, message, showPreview, showResult } from "./view";
+import { clearResult, message, showAirlines, showPreview, showResult } from "./view";
 
 const element = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 const state: Partial<Record<SourceKind, { workbook: WorkBook; name: string }>> = {};
 const versions: Record<SourceKind, number> = { open: 0, temporary: 0 };
+const selectedAirlines = new Set(["CSG"]);
 let template: Uint8Array | undefined;
 let catalog: AirportCatalog | undefined;
 let analysis: Analysis | undefined;
@@ -18,8 +19,20 @@ const errorText = (e: unknown): string => e instanceof Error ? e.message : Strin
 const options = (): ExportOptions => ({ effective: element<HTMLInputElement>("effective").value, expiry: element<HTMLInputElement>("expiry").value, season: element<HTMLInputElement>("season").value });
 
 function updateButtons(): void {
-  element<HTMLButtonElement>("analyze").disabled = !state.open || !state.temporary || !catalog;
+  element<HTMLButtonElement>("analyze").disabled = !state.open || !state.temporary || !catalog || !selectedAirlines.size;
   element<HTMLButtonElement>("export").disabled = exporting || !analysis || analysis.issues.some(i => i.severity === "error") || validateDates(options().effective, options().expiry).length > 0;
+}
+function readSource(kind: SourceKind): ParsedSource {
+  const source = state[kind];
+  if (!source) return { rows: [], issues: [] };
+  const sheet = element<HTMLSelectElement>(`${kind}Sheet`).value;
+  return readApprovals(XLSX, source.workbook.Sheets[sheet], `${source.name} / ${sheet}`, kind);
+}
+function refreshAirlines(): void {
+  const airlines = listAirlines(readSource("open"), readSource("temporary"));
+  const available = new Set(airlines.map(airline => airline.code));
+  for (const code of selectedAirlines) if (!available.has(code)) selectedAirlines.delete(code);
+  showAirlines(airlines, selectedAirlines);
 }
 function invalidate(): void {
   revision++;
@@ -43,7 +56,7 @@ async function loadTemplate(): Promise<void> {
     template = bytes;
     catalog = airports;
     element("templateStatus").textContent = `内置原模板已就绪，机场 ${airports.ports.size} 个，多机场基地 ${airports.multi.size} 个。`;
-    message("上传两份批复，选择工作表并填写生效、失效日期，然后预检。");
+    message("上传两份批复，确认航司（默认 CSG 货航），填写生效、失效日期后预检。");
   } catch (e) {
     if (request !== templateRequest) return;
     element("templateStatus").textContent = errorText(e);
@@ -59,6 +72,7 @@ for (const kind of ["open", "temporary"] as const) {
     delete state[kind];
     selector.replaceChildren();
     selector.disabled = true;
+    refreshAirlines();
     invalidate();
     const file = fileInput.files?.[0];
     if (!file) { element(`${kind}Status`).textContent = "未选择文件"; return; }
@@ -73,6 +87,7 @@ for (const kind of ["open", "temporary"] as const) {
       selector.disabled = false;
       element(`${kind}Status`).textContent = `${file.name} · ${workbook.SheetNames.length} 张工作表，请确认所选表。`;
       if (!element<HTMLInputElement>("season").value) element<HTMLInputElement>("season").value = inferSeason(file.name);
+      refreshAirlines();
     } catch (e) {
       if (version !== versions[kind]) return;
       element(`${kind}Status`).textContent = `读取失败：${errorText(e)}`;
@@ -80,24 +95,25 @@ for (const kind of ["open", "temporary"] as const) {
     }
     updateButtons();
   });
-  selector.addEventListener("change", invalidate);
+  selector.addEventListener("change", () => { refreshAirlines(); invalidate(); });
 }
+element("airlineOptions").addEventListener("change", () => {
+  selectedAirlines.clear();
+  for (const input of Array.from(element("airlineOptions").querySelectorAll<HTMLInputElement>("input:checked"))) selectedAirlines.add(input.value);
+  invalidate();
+  if (!selectedAirlines.size) message("请至少选择一个航司后运行。", true);
+});
 for (const id of ["effective", "expiry", "season"]) element(id).addEventListener("input", invalidate);
 element("retryTemplate").addEventListener("click", () => void loadTemplate());
 element("analyze").addEventListener("click", () => {
   if (!state.open || !state.temporary || !catalog) return;
   try {
-    const read = (kind: SourceKind) => {
-      const source = state[kind]!;
-      const sheet = element<HTMLSelectElement>(`${kind}Sheet`).value;
-      return readApprovals(XLSX, source.workbook.Sheets[sheet], `${source.name} / ${sheet}`, kind);
-    };
-    analysis = analyzeApprovals(read("open"), read("temporary"), catalog);
+    analysis = analyzeApprovals(readSource("open"), readSource("temporary"), catalog, [...selectedAirlines]);
     element<HTMLSelectElement>("previewKind").value = "merged";
     showResult(analysis);
     const dates = validateDates(options().effective, options().expiry);
     const errors = analysis.issues.filter(i => i.severity === "error").length;
-    message(errors ? `预检发现 ${errors} 项错误，请修正源表后重新上传。` : dates.length ? `预检完成。${dates.join(" ")}` : analysis.issues.length ? "预检完成，存在机场匹配提示，请查看下方问题后导出。" : "预检通过，可以导出录入表。", errors > 0);
+    message(errors ? `预检发现 ${errors} 项错误，请核对航司范围和下方问题。` : dates.length ? `预检完成。${dates.join(" ")}` : analysis.issues.length ? "预检完成，存在提示，请查看下方问题后导出。" : "预检通过，可以导出录入表。", errors > 0);
   } catch (e) { analysis = undefined; clearResult(); message(errorText(e), true); }
   updateButtons();
 });
@@ -123,4 +139,5 @@ element("export").addEventListener("click", async () => {
   } catch (e) { if (snapshot === revision) message(`导出失败：${errorText(e)}`, true); }
   finally { exporting = false; updateButtons(); }
 });
+refreshAirlines();
 void loadTemplate();

@@ -5,6 +5,7 @@ export interface Issue {
   message: string;
   source: string;
   sourceRow?: number;
+  company?: string;
 }
 export interface Approval {
   company: string;
@@ -18,6 +19,7 @@ export interface Approval {
 }
 export interface ParsedSource { rows: Approval[]; issues: Issue[] }
 export interface AirportCatalog { ports: Map<string, string>; multi: Map<string, string[]> }
+export interface AirlineOption { code: string; openCount: number; temporaryCount: number }
 export interface Leg {
   company: string;
   left: string;
@@ -35,6 +37,10 @@ export interface Analysis {
   issues: Issue[];
   openCount: number;
   temporaryCount: number;
+  rawOpenCount: number;
+  rawTemporaryCount: number;
+  excludedCount: number;
+  airlines: string[];
   skippedGo: number;
   skippedBack: number;
   multiCount: number;

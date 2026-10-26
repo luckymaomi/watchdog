@@ -1,5 +1,6 @@
 .container { max-width: 1280px; }
 .preview-select { width: auto; min-width: 180px; }
+.airline-options { max-height: 220px; overflow: auto; padding: 12px; border: 1px solid var(--watchdog-border); background: var(--watchdog-surface-soft); }
 .issue-list { max-height: 220px; overflow: auto; padding: 12px 12px 12px 30px; background: var(--watchdog-surface-soft); border: 1px solid var(--watchdog-border); }
 .issue-list li + li { margin-top: 6px; }
 .preview-shell { height: 480px; overflow: auto; border: 1px solid var(--watchdog-border); }

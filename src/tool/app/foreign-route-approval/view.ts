@@ -1,4 +1,4 @@
-import type { Analysis, Leg } from "./models";
+import type { AirlineOption, Analysis, Leg } from "./models";
 
 const byId = (id: string): HTMLElement => document.getElementById(id)!;
 export function message(text: string, error = false): void {
@@ -12,9 +12,26 @@ export function clearResult(): void {
   byId("issues").replaceChildren();
   byId("previewBody").replaceChildren();
 }
+export function showAirlines(airlines: AirlineOption[], selected: ReadonlySet<string>): void {
+  const fragment = document.createDocumentFragment();
+  for (const airline of airlines) {
+    const label = document.createElement("label");
+    label.className = "form-check d-flex align-items-start gap-2 mb-0";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.className = "form-check-input flex-shrink-0";
+    input.value = airline.code;
+    input.checked = selected.has(airline.code);
+    const text = document.createElement("span");
+    text.textContent = `${airline.code}${airline.code === "CSG" ? "（货航）" : ""} · 开放 ${airline.openCount} / 临开 ${airline.temporaryCount}`;
+    label.append(input, text);
+    fragment.append(label);
+  }
+  byId("airlineOptions").replaceChildren(fragment);
+}
 export function showResult(result: Analysis): void {
   byId("results").hidden = false;
-  byId("summary").textContent = `开放 ${result.openCount} 条 + 临开 ${result.temporaryCount} 条 = 合并 ${result.merged.length} 条；去程 ${result.go.length} 行，回程 ${result.back.length} 行；源去程空跳过 ${result.skippedGo} 条，源回程空跳过 ${result.skippedBack} 条，多机场命中 ${result.multiCount} 条。`;
+  byId("summary").textContent = `航司：${result.airlines.join("、") || "未选择"}；源表开放 ${result.rawOpenCount} 条 + 临开 ${result.rawTemporaryCount} 条，排除未选航司 ${result.excludedCount} 条；筛选后开放 ${result.openCount} 条 + 临开 ${result.temporaryCount} 条 = 合并 ${result.merged.length} 条；去程 ${result.go.length} 行，回程 ${result.back.length} 行；源去程空跳过 ${result.skippedGo} 条，源回程空跳过 ${result.skippedBack} 条，多机场命中 ${result.multiCount} 条。`;
   const issues = byId("issues");
   issues.replaceChildren();
   for (const issue of result.issues) {
