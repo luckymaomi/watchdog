@@ -23,7 +23,7 @@ PNG/SVG 共享同一份章面 SVG。SVG 保留毫米尺寸；PNG 像素为 `roun
 
 内置字库按实际选用字体加载，失败时阻止预览和导出，重新切换或操作可重试。SVG 在导出时嵌入实际使用的 WOFF2 数据和 OFL 授权，PNG 使用该 SVG 光栅化；本机字体不嵌入，SVG 在不同机器上的效果可能不同。内置字体未裁剪字形，不保证覆盖任意生僻字。
 
-字体文件在 `public/tool/app/seal-generator/fonts/`，来源、转换方式和 SHA256 记录在 `sources.json`；保留各自完整 OFL 文件。独立导出 ZIP 含字库文件，同时在 `standalone-runtime.js` 中提供字体及授权的本地 fetch 读取，支持 file:// 使用。完整中文字体让工具包约增加 25 MB 的字库数据，字体按需加载，SVG 内嵌字库体积取决于实际选用数量。
+字体文件在 `public/tool/app/seal-generator/fonts/`，来源和转换方式记录在 `sources.json`；保留各自完整 OFL 文件。独立导出 ZIP 含字库文件，同时在 `standalone-runtime.js` 中提供字体及授权的本地 fetch 读取，支持 file:// 使用。完整中文字体让工具包约增加 25 MB 的字库数据，字体按需加载，SVG 内嵌字库体积取决于实际选用数量。
 
 ## 职责与验证
 

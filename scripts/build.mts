@@ -431,8 +431,7 @@ async function main() {
   await generateBeginnerTutorialDataFile();
   const documentation = await buildDocumentation({
     specRoot: path.join(projectRoot, "spec"),
-    outputFile: path.join(distRoot, "downloads", DOCUMENTATION_FILENAME),
-    commit: await readGitText(["rev-parse", "HEAD"])
+    outputFile: path.join(distRoot, "downloads", DOCUMENTATION_FILENAME)
   });
   await buildPageEntries();
   const standaloneRoot = await buildStandaloneApplicationBundles();

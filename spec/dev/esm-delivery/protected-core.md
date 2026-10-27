@@ -6,10 +6,10 @@
 
 | 工具 | 受保护的核心 API 或结果 | 主要自动证据 |
 | --- | --- | --- |
-| 培训皇帝 | `Utils` 日期/文本归一，`Scanner` 工作簿识别，`TrainingRecordPolicy`，`RuleEngine`，`ScheduleAssessment`，`ScheduleGapCheck`，`PersonValidityQuery`，`TrainingCalendar`，`ScheduledDistribution`，`AnnualTrainingStats`，`CrmAnnual`，`WorkbookHealth`，`Validity`，`Workbench`，各 Excel 导出模型 | `tests/tool/training-workbench/` 及 owner 本地总表结果哈希 |
-| 换季学习 | 工作簿读取与日期归一、健康检查、岗位与 Hook/过滤分组、确定性均衡、恢复与移动记录、导出排序/格式 | `tests/tool/seasonal-learning/` 3 个测试文件及 owner 本地换季表结果哈希 |
-| 审计之王 | 稳定文档/块 ID、文本归一、精确与宽松检索、来源恢复、证据状态、工作簿、PDF 槽位、项目包、文件夹脚本 | `tests/tool/audit-king/` 及生成 DOCX 读取结果哈希 |
-| 校对之王 | DOCX/PDF 读取、噪音过滤、文本切分、锚点和 1:N/N:1/N:M 对齐、事件分类排序、导航分组、人工决定、Excel/Word 报告、项目包 | `tests/tool/proof-king/` 及生成 DOCX 对比结果哈希 |
+| 培训皇帝 | `Utils` 日期/文本归一，`Scanner` 工作簿识别，`TrainingRecordPolicy`，`RuleEngine`，`ScheduleAssessment`，`ScheduleGapCheck`，`PersonValidityQuery`，`TrainingCalendar`，`ScheduledDistribution`，`AnnualTrainingStats`，`CrmAnnual`，`WorkbookHealth`，`Validity`，`Workbench`，各 Excel 导出模型 | `tests/tool/training-workbench/` |
+| 换季学习 | 工作簿读取与日期归一、健康检查、岗位与 Hook/过滤分组、确定性均衡、恢复与移动记录、导出排序/格式 | `tests/tool/seasonal-learning/` |
+| 审计之王 | 稳定文档/块 ID、文本归一、精确与宽松检索、来源恢复、证据状态、工作簿、PDF 槽位、项目包、文件夹脚本 | `tests/tool/audit-king/` |
+| 校对之王 | DOCX/PDF 读取、噪音过滤、文本切分、锚点和 1:N/N:1/N:M 对齐、事件分类排序、导航分组、人工决定、Excel/Word 报告、项目包 | `tests/tool/proof-king/` |
 | 航线班次统计 | 名单顺序解析、文本姓名匹配、航线统计、未匹配单元格、人员顺序、导出行 | `tests/tool/crew-flight-stats/logic.test.ts` |
 | 酒店皇帝 | 酒店账单/入住表读取、姓名与日期匹配、差异分类、导出工作簿结构 | `tests/tool/hotel-bill-check/export.test.ts` |
 | 重点人员标注 | 表头识别、员工号归一、重点人员匹配、单元格样式与导出 | `tests/tool/focus-crew/logic.test.ts` |
@@ -28,8 +28,7 @@
 ## 自动验证证据与边界
 
 - 全部工具与现有测试的对应关系见[规格核对](../../system/alignment.md)，上表列出核心边界，不作为工具数量清单。
-- `legacy-build-baseline.json` 保存一份既有脚本数、体积和产物哈希测量资料，仅作为文本附件；不代表当前生产输出或当前通过的测试数。
 - 自动业务测试的期望值是可复核的行为证据。只改模块装配、类型或构建时，不得放宽或改变业务期望；授权修改业务规则时同步更新对应规格和测试。
-- 私人业务输入的结果哈希没有随仓输入，不能作为新环境可复现的验收条件。重建验收使用公开测试中的合成输入、明确期望与 owner 本地复核。
+- 重建验收使用公开测试中的合成输入和明确期望；真实业务样本由 owner 在本地复核。
 
 仓库不再维护真实浏览器启动或临时性能采样入口。页面视觉由 owner 人工检查，业务正确性由 TypeScript/Python 核心测试、构建产物检查和确定性构建保护。

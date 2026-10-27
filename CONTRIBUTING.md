@@ -20,7 +20,7 @@ npm.cmd run verify
 ## 文档
 
 - 文档总入口为 `spec/README.md`：系统架构与重建验收在 `spec/system/`，业务开发规格在 `spec/dev/`，操作手册在 `spec/user/`。
-- 标准构建与测试递归扫描 `spec/`，生成单个 UTF-8 合并文档 `dist/downloads/watchdog-development-documentation.md`，首页与开发者页提供下载；新增、删除文档不维护另一份打包清单。
+- 标准构建与测试递归扫描 `spec/` 的 Markdown，生成单个 UTF-8 合并文档 `dist/downloads/watchdog-development-documentation.md`，首页与开发者页下载保存为 `watchdog开发者文档-YYYY-MM-DD.md`；新增、删除文档不维护另一份打包清单。
 - 根目录 `README.md` 只放项目入口和当前功能概览。
 - 不要把未实现功能写成已实现功能。
 

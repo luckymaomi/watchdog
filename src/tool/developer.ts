@@ -1,4 +1,5 @@
 import "./support-shell";
+import { bindDocumentationDownloads } from "./documentation-download";
 import type { SkillItem } from "./models";
 
 type VersionInfo = {
@@ -17,6 +18,7 @@ const commitList = document.getElementById("commitList");
 const copyToastElement = document.getElementById("copyToast");
 const copyToastBody = document.getElementById("copyToastBody");
 
+bindDocumentationDownloads();
 initializeSkills();
 renderCommits();
 

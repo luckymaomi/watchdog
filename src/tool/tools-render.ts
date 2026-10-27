@@ -1,7 +1,10 @@
 import { coolingGateLogic, type CoolingClickState } from "./cooling-gate-logic";
+import { bindDocumentationDownloads } from "./documentation-download";
 import { bindHabitatsBackground } from "./habitats-background";
 import type { ToolCategory, ToolHomepageState, ToolItem } from "./models";
 import { tools } from "./tools-data";
+
+bindDocumentationDownloads();
 
 const allToolRows: ToolItem[] = tools;
 const categoryLabels: Record<ToolCategory, string> = {

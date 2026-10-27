@@ -20,4 +20,4 @@
 
 ## 合并开发文档下载
 
-首页与开发者页直接下载同一份 `downloads/watchdog-development-documentation.md`，英文文件名，UTF-8 中文正文。生产构建递归扫描全部 `spec` 文档，合并系统说明、开发规格、用户手册和文本附件，转换内部链接为唯一锚点并附来源与哈希。标准测试的构建前置重新生成，具体契约见[文档维护与合并下载](../../system/documentation.md)。这份单文件文档与每工具独立 ZIP 是两个不同输出，文档不包含工具代码和业务模板。
+首页与开发者页直接下载同一份 `downloads/watchdog-development-documentation.md`，保存名为 `watchdog开发者文档-YYYY-MM-DD.md`，日期取下载当天浏览器本地日历日，中文正文使用 UTF-8。生产构建递归扫描全部 `spec` Markdown，合并系统说明、开发规格与用户手册，转换内部链接为唯一锚点并保留来源路径；测量 JSON 不参与合并。标准测试的构建前置重新生成，具体契约见[文档维护与合并下载](../../system/documentation.md)。合并文档不包含工具代码和业务模板。

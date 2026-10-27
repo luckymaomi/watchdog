@@ -16,9 +16,9 @@
 - `tool/app/proof-king/comparison-worker.js`；
 - Python APP 资产；
 - 按工具清单生成的 `exports/<entry>.zip`；
-- `downloads/watchdog-development-documentation.md`，扫描全部 spec 后生成的单个 UTF-8 合并文档；
+- `downloads/watchdog-development-documentation.md`，扫描全部 spec Markdown 后生成的单个 UTF-8 合并文档；网页下载名为 `watchdog开发者文档-YYYY-MM-DD.md`；
 - `tool/skills-data.json` 与 `tool/beginner-tutorial-data.json`；
-- `build-manifest.json`，记录页面源码、页面路径、输出文件和 SHA-256；
+- `build-manifest.json`，记录页面源码、页面路径和输出文件的构建清单；
 - `version.json`，只记录提交事实，不写本地分支或构建时间。
 
 构建不会逐文件发布 `src/**/*.ts` 对应的普通脚本，也不从 HTML 脚本顺序推断依赖。
@@ -33,7 +33,7 @@ npm.cmd run verify:deterministic
 ```
 
 - `verify` 执行 README 工具清单检查、类型检查、全量 TypeScript/Python 测试和确定性双构建。标准测试的构建前置重新生成合并文档。
-- `verify:deterministic` 在两个独立系统临时目录执行生产构建并比较全部文件路径和内容哈希，不读写当前 `dist/`，避免与并行构建相互覆盖。
+- `verify:deterministic` 在两个独立系统临时目录执行生产构建并比较全部文件路径和内容是否一致，不读写当前 `dist/`，避免与并行构建相互覆盖。
 - 页面视觉效果由 owner 人工检查。
 
 ## 从零恢复

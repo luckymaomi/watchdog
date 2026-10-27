@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -7,8 +6,6 @@ export const DOCUMENTATION_FILENAME = "watchdog-development-documentation.md";
 type SourceDocument = {
     path: string;
     anchor: string;
-    bytes: number;
-    sha256: string;
     text: string;
     headings: Map<string, string>;
 };
@@ -16,17 +13,11 @@ type SourceDocument = {
 export type DocumentationOptions = {
     specRoot: string;
     outputFile: string;
-    commit?: string;
 };
 
 export type DocumentationResult = {
-    files: Array<Pick<SourceDocument, "path" | "anchor" | "bytes" | "sha256">>;
-    sha256: string;
+    files: Array<Pick<SourceDocument, "path" | "anchor">>;
 };
-
-function hash(value: string | Uint8Array): string {
-    return createHash("sha256").update(value).digest("hex");
-}
 
 async function collectFiles(directory: string, relative = ""): Promise<string[]> {
     const files: string[] = [];
@@ -34,7 +25,7 @@ async function collectFiles(directory: string, relative = ""): Promise<string[]>
         const name = path.posix.join(relative, entry.name);
         if (entry.isSymbolicLink()) throw new Error(`Documentation symbolic link is not supported: ${name}`);
         if (entry.isDirectory()) files.push(...await collectFiles(path.join(directory, entry.name), name));
-        else if (entry.isFile()) files.push(name);
+        else if (entry.isFile() && path.extname(name).toLowerCase() === ".md") files.push(name);
     }
     return files;
 }
@@ -98,13 +89,6 @@ function rewriteLinks(source: string, document: SourceDocument, documents: Map<s
     }).join(""));
 }
 
-function fencedText(source: string, extension: string): string {
-    const longestFence = Math.max(2, ...[...source.matchAll(/`+/g)].map((match) => match[0].length));
-    const fence = "`".repeat(longestFence + 1);
-    const language = extension.replace(/[^a-z0-9]/gi, "");
-    return `${fence}${language}\n${source}${source.endsWith("\n") ? "" : "\n"}${fence}`;
-}
-
 export async function buildDocumentation(options: DocumentationOptions): Promise<DocumentationResult> {
     const specRoot = path.resolve(options.specRoot);
     const relativeOutput = path.relative(specRoot, path.resolve(options.outputFile));
@@ -128,30 +112,26 @@ export async function buildDocumentation(options: DocumentationOptions): Promise
         }
         if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text)) throw new Error(`Cannot merge binary documentation: spec/${relativePath}`);
         documents.set(relativePath, {
-            path: relativePath, anchor: `doc-${hash(relativePath).slice(0, 24)}`,
-            bytes: bytes.length, sha256: hash(bytes), text, headings: new Map()
+            path: relativePath, anchor: `doc-${documents.size + 1}`,
+            text, headings: new Map()
         });
     }
 
     const markdown = new Map<string, string>();
     for (const document of documents.values()) {
-        if (path.extname(document.path).toLowerCase() === ".md") markdown.set(document.path, withHeadingAnchors(document));
+        markdown.set(document.path, withHeadingAnchors(document));
     }
-    const files = [...documents.values()].map(({ path: sourcePath, anchor, bytes, sha256 }) => ({ path: sourcePath, anchor, bytes, sha256 }));
-    const sha256 = hash(JSON.stringify(files));
+    const files = [...documents.values()].map(({ path: sourcePath, anchor }) => ({ path: sourcePath, anchor }));
     const sections = [
-        "# Watchdog Development Documentation",
-        "中文正文 · UTF-8 · 本文件合并 spec 下的全部文档与文本附件。",
-        `Source commit: ${options.commit || "unavailable"} (working-tree documents included)\n\nDocumentation SHA-256: ${sha256}\n\nSource files: ${files.length}`,
-        "## Contents and source checksums\n\n| Source | Bytes | SHA-256 |\n| --- | ---: | --- |\n" + files.map((file) => `| [spec/${file.path}](#${file.anchor}) | ${file.bytes} | ${file.sha256} |`).join("\n")
+        "# Watchdog 开发者文档",
+        "本文件合并系统说明、开发规格与用户手册，正文使用 UTF-8。",
+        "## 目录\n\n" + files.map((file) => `- [spec/${file.path}](#${file.anchor})`).join("\n")
     ];
     for (const document of documents.values()) {
-        const content = markdown.has(document.path)
-            ? rewriteLinks(markdown.get(document.path)!, document, documents)
-            : fencedText(document.text, path.extname(document.path));
+        const content = rewriteLinks(markdown.get(document.path)!, document, documents);
         sections.push(`---\n\n<a id="${document.anchor}"></a>\n\n## Source: spec/${document.path}\n\n${content}`);
     }
     await fs.mkdir(path.dirname(options.outputFile), { recursive: true });
     await fs.writeFile(options.outputFile, `${sections.join("\n\n")}\n`, "utf8");
-    return { files, sha256 };
+    return { files };
 }

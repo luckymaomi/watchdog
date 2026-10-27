@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 
 from .common import APP_DIR  # noqa: F401; ensures the app modules are importable
@@ -30,14 +32,16 @@ class LockEntryRunnerTest(unittest.TestCase):
 
             workbench_runner.submit_original_result = submit
             workbench_runner.original_go_back_to_form = lambda _page: None
-            with tempfile.TemporaryDirectory() as directory:
-                output = create_result_excel("runner", directory)
+            with tempfile.TemporaryDirectory(prefix="watchdog-lock-runner-test-") as directory:
+                with redirect_stdout(StringIO()):
+                    output = create_result_excel("runner", directory)
                 events = []
                 summary = workbench_runner.run_original_records(records, object(), output, "", events.append)
                 self.assertEqual(summary.success, 1)
                 self.assertEqual(summary.failed, 1)
                 results = [event for event in events if event.get("type") == "record_result"]
                 self.assertEqual([result["status"] for result in results], ["异常", "成功"])
+            self.assertFalse(Path(directory).exists(), "测试结束后必须删除结果文件和临时目录")
         finally:
             workbench_runner.fill_original_form = original_fill
             workbench_runner.submit_original_result = original_submit
@@ -62,8 +66,9 @@ class LockEntryRunnerTest(unittest.TestCase):
                 return True, ""
 
             workbench_runner.process_smart_record = process
-            with tempfile.TemporaryDirectory() as directory:
-                output = create_smart_result("smart-runner", directory)
+            with tempfile.TemporaryDirectory(prefix="watchdog-lock-runner-test-") as directory:
+                with redirect_stdout(StringIO()):
+                    output = create_smart_result("smart-runner", directory)
                 events = []
                 summary = workbench_runner.run_smart_records(
                     [record], object(), output, "", False, events.append
@@ -72,6 +77,7 @@ class LockEntryRunnerTest(unittest.TestCase):
                 results = [event for event in events if event.get("type") == "record_result"]
                 self.assertEqual([result["segmentIndex"] for result in results], [1, 2])
                 self.assertEqual(results[1]["actualType"], "健康疗养")
+            self.assertFalse(Path(directory).exists(), "测试结束后必须删除结果文件和临时目录")
         finally:
             workbench_runner.process_smart_record = original_process
 

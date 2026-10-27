@@ -34,7 +34,7 @@ flowchart TD
 | `public/template/` | 固定花名册与业务模板 | 结构、公式、样式和归档项有业务意义，不能只留空表头 |
 | `scripts/build.mts` | 页面与 Worker 清单、复制、编译、数据和离线产物 | 每个生产页面一个应用 ESM；第三方 UMD 在适配边界使用 |
 | `scripts/tool-exports.mts` | 每工具 IIFE 与离线资源组装 | 每个工具单独 ZIP，根 index 可打开；本地 fetch/Worker 有离线适配 |
-| `src/tool/project-archive.ts` | 审计、校对完整项目归档 | 先验证版本、路径、大小和 SHA-256，再替换状态 |
+| `src/tool/project-archive.ts` | 审计、校对完整项目归档 | 先验证版本、路径、大小和文件完整性，再替换状态 |
 | `spec/` | 系统、开发规格、用户手册与核查证据 | 单一业务事实源、合并文档输入 |
 | `tests/tool/`、`tests/python/`、`tests/smoke/` | 业务规则、Python 及交付接线证据 | 自动测试不依赖真实业务表或登录内网 |
 
@@ -66,6 +66,6 @@ Python 工作台：loopback HTTP → 单 worker/浏览器会话 → 人工认证
 
 `npm.cmd run build` 的 prebuild 同步 README 工具表，再清理并生成 `dist`：静态文件、页面 ESM、source map、比较 Worker、Python 资源、教程与 Skill 数据、独立工具 ZIP、合并开发文档、构建清单和 Git 版本。`.standalone` 中间产物在构建后清除。新增页面需同时登记 `pageEntries`，新增工具需登记工具清单。
 
-`npm.cmd test` 先构建再运行全部 Vitest，随后运行 Python unittest；因此每次标准测试重新扫描文档。直接执行 `npx.cmd vitest run` 不等价于标准测试前置流程。`verify` 还执行 README 一致性、类型检查和两个隔离临时目录的确定性构建。`build-manifest.json` 记录页面源码、页面、输出和 SHA-256，不是完整站点文件清单。
+`npm.cmd test` 先构建再运行全部 Vitest，随后运行 Python unittest；因此每次标准测试重新扫描文档。直接执行 `npx.cmd vitest run` 不等价于标准测试前置流程。`verify` 还执行 README 一致性、类型检查和两个隔离临时目录的确定性构建。`build-manifest.json` 记录页面源码、页面和输出的构建清单，不是完整站点文件清单。
 
 Pages 工作流 `.github/workflows/deploy-pages.yml` 在 master 推送或手工触发后安装依赖、执行 verify、只上传 dist 并部署。源码恢复、业务重建和发布验收见[重建与验收](reconstruction.md)。
