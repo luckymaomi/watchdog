@@ -16,20 +16,20 @@
 | 姓名匹配员工号 | 文本姓名识别、员工号映射、未匹配/多匹配、编辑状态、Excel 与图片导出 | `tests/tool/crew-match-name-id/logic.test.ts` |
 | 文本拼接助手 | 分隔符识别、空项处理、顺序与输出拼接 | `tests/tool/text-joiner/logic.test.ts` |
 | 珠海皇帝 | 场次/账单表头读取、姓名规范化、人次统计、状态与图表输入 | `tests/tool/session-bill-check/logic.test.ts` |
-| 人员结构统计 | 人员表识别、等级/资质/原单位等统计闭合、前端表格复制与 Excel 导出 | `tests/tool/personnel-structure-stats/` 2 个测试文件 |
+| 人员结构统计 | 人员表识别、等级/资质/原单位等统计闭合、前端表格复制、Excel 导出和 Word 指定表填报 | `tests/tool/personnel-structure-stats/` |
 | 图片工具 | 文件类型、Blob URL 生命周期、转换、压缩、裁剪、缩放和 Base64 输入输出 | `tests/tool/image-tool/shared.test.ts` |
-| PDF 工具 | PDF 拆分、合并、转图片、图片转 PDF 的页序、尺寸和文件输出 | 第三方适配器启动测试 |
+| PDF 工具 | PDF 拆分、合并、转图片、图片转 PDF 的页序、尺寸和文件输出 | `tests/tool/pdf-tool/shared.test.ts` 只直接覆盖页码；其余结果需专项验收 |
 | PDF 加水印 | 页尺寸与水印位置换算、规则校验、页面渲染和导出 PDF | `tests/tool/pdf-stamp/logic.test.ts` |
 | Word 模板填充器 | 配置字段解析、模板/循环/日期/批量填充、独立 HTML 生成与打包结构 | `tests/tool/word-template-filler/generated-batch.test.ts` |
-| 锁班乞丐 | 下载页面、命令复制和 Python APP 文件边界；Python 业务实现不在重构范围 | 静态资源测试与 Python 测试 |
-| 飞行经历查询（乞丐版） | 下载页面、命令复制和 Python APP 文件边界；Python 业务实现不在重构范围 | 静态资源测试与 Python 测试 |
+| 锁班乞丐 | 下载、本机分步接口、原始/智能路由、唯一冲突回退和逐片段证据落盘 | 静态资源、工具测试与 Python 测试；内网提交另行验证 |
+| 飞行经历查询（乞丐版） | 下载、本机接口、输入、动态表格读取、双结果保存和 worker 复用 | 静态资源与 Python 测试；内网查询另行验证 |
 | 自动点 OA 助手 | 下载页面、命令复制和 Python APP 文件边界；Python 业务实现不在重构范围 | 静态资源测试 |
 
-## 金样与自动验证证据
+## 自动验证证据与边界
 
-- 迁移前全量测试基线：Vitest 62 个文件、253 项断言；Python unittest 7 项，全部通过。
-- `legacy-build-baseline.json` 固化各 HTML 的应用脚本数、原始体积、gzip 体积和核心产物哈希。
-- 自动业务测试的期望值是金样的一部分。迁移只可改为直接导入源码，不得删除、放宽或改变业务期望。
-- 当前 owner 本地培训表、换季表和生成 DOCX 工作流的结果 SHA-256 分别为 `36f72df2caa826ef9d27246f90503da605437ba0ff5dc94a2496703ef6a86434`、`926d9695af95e4b6216dc0599eb4430fac9f0163484919ffee3902746eacdda3`、`123d95246be4bfb6ca84baf8090085de514468ea159485553f13ef684fdeacbd`、`eee5043dceb616b950ce2feb312425e97be943ebe461e306175db910efbce4ad`。
+- 全部工具与现有测试的对应关系见[规格核对](../../system/alignment.md)，上表列出核心边界，不作为工具数量清单。
+- `legacy-build-baseline.json` 保存一份既有脚本数、体积和产物哈希测量资料，仅作为文本附件；不代表当前生产输出或当前通过的测试数。
+- 自动业务测试的期望值是可复核的行为证据。只改模块装配、类型或构建时，不得放宽或改变业务期望；授权修改业务规则时同步更新对应规格和测试。
+- 私人业务输入的结果哈希没有随仓输入，不能作为新环境可复现的验收条件。重建验收使用公开测试中的合成输入、明确期望与 owner 本地复核。
 
 仓库不再维护真实浏览器启动或临时性能采样入口。页面视觉由 owner 人工检查，业务正确性由 TypeScript/Python 核心测试、构建产物检查和确定性构建保护。

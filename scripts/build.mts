@@ -10,6 +10,7 @@ import { build } from "esbuild";
 import ts from "typescript";
 import { loadBeginnerTutorialData } from "./beginner-tutorial-content.mjs";
 import { buildToolExports, type ToolExportDefinition } from "./tool-exports.mjs";
+import { buildDocumentation, DOCUMENTATION_FILENAME } from "./documentation-export.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -428,6 +429,11 @@ async function main() {
 
   await generateSkillsDataFile();
   await generateBeginnerTutorialDataFile();
+  const documentation = await buildDocumentation({
+    specRoot: path.join(projectRoot, "spec"),
+    outputFile: path.join(distRoot, "downloads", DOCUMENTATION_FILENAME),
+    commit: await readGitText(["rev-parse", "HEAD"])
+  });
   await buildPageEntries();
   const standaloneRoot = await buildStandaloneApplicationBundles();
   let exportCount = 0;
@@ -439,7 +445,7 @@ async function main() {
   await generateVersionFile();
 
   const outputLabel = distRoot === path.join(projectRoot, "dist") ? "dist/" : "an isolated output directory";
-  process.stdout.write(`Built ${pageEntries.length} page entries, ${workerEntries.length} worker, ${assetFiles.length} source assets and ${exportCount} standalone exports into ${outputLabel}\n`);
+  process.stdout.write(`Built ${pageEntries.length} page entries, ${workerEntries.length} worker, ${assetFiles.length} source assets, ${exportCount} standalone exports and ${documentation.files.length} combined documentation sources into ${outputLabel}\n`);
 }
 
 main().catch((error) => {

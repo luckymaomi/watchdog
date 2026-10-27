@@ -8,7 +8,8 @@
 
 - 接受一份或多份 PDF，每份文件独立配置页码。
 - 页码按从 `1` 开始的用户口径解析，支持单页和范围组合；越界或无有效页时不生成结果。
-- 使用 PDF-lib 按指定顺序复制页面，每份源文件分别下载提取结果。
+- 页码解析使用英文逗号分隔，范围使用 `-`；有效页码去重后按升序复制，不按输入顺序重复页面。例如 `3,1,3,8` 在总页数为 5 时得到第 1、3 页。解析各项使用 `parseInt`，不是严格整数字符串校验。
+- 使用 PDF-lib 复制页面，每份源文件分别下载提取结果。
 
 ## PDF 合并
 
@@ -40,5 +41,5 @@
 - 页面：`public/tool/app/pdf-tool/index.html`
 - 模式逻辑：`src/tool/app/pdf-tool/extract.ts`、`merge.ts`、`pdf-to-image.ts`、`image-to-pdf.ts`
 - 公共逻辑与入口：`src/tool/app/pdf-tool/shared.ts`、`main.ts`
-- 当前没有独立业务测试；修改页码、排序或打包规则时应补充 `tests/tool/pdf-tool/` 测试。
+- 当前 `tests/tool/pdf-tool/shared.test.ts` 保护页码解析和范围格式化；其余 PDF 转换、渲染和打包没有独立完整结果测试，页面接线另由公共静态测试覆盖。
 

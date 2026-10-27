@@ -23,7 +23,7 @@
 
 - 页面：`public/tool/app/oa-read-helper/index.html`
 - 分发 APP：`public/tool/app/oa-read-helper/app.py`
-- 构建源 APP：`src/tool/app/oa-read-helper/app.py`
+- APP 事实源为上述 `public` 文件，生产构建直接复制；`src/tool/app/oa-read-helper/` 当前只有页面壳，不存在另一份 Python APP。
 - 页面壳：`src/tool/app/oa-read-helper/shell.ts`
 - 依赖为 Playwright、colorama，并需安装 Chromium。
 - 当前无自动测试；验证依赖用户提供的页面日志、截图或内网实测结果。

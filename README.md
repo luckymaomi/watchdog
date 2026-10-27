@@ -2,7 +2,7 @@
 
 # 乡里人🐕
 
-[项目主页](https://luckymaomi.github.io/watchdog/) · [备忘录](https://luckymaomi.github.io/watchdog/memo/) · [GitHub](https://github.com/luckymaomi/watchdog)
+[项目主页](https://luckymaomi.github.io/watchdog/) · [备忘录](https://luckymaomi.github.io/watchdog/memo/) · [系统文档](./spec/README.md) · [GitHub](https://github.com/luckymaomi/watchdog)
 
 <p>
   <a href="https://github.com/luckymaomi/watchdog/actions/workflows/deploy-pages.yml"><img alt="Deploy Pages" src="https://img.shields.io/github/actions/workflow/status/luckymaomi/watchdog/deploy-pages.yml?branch=master&logo=githubactions&logoColor=white&label=Pages"></a>
