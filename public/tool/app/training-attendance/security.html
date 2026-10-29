@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>培训签到表 · 安保</title>
+    <script src="../../../theme.js"></script>
+    <link rel="stylesheet" href="../../../libs/bootstrap.min.css">
+    <link rel="stylesheet" href="../../../theme.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="app-header"><a class="back-link" href="./index.html">返回培训签到表</a><h1>安保初训 / 复训</h1></header>
+    <section class="panel">
+        <div class="section-head">
+            <div><h2>培训参数</h2><span id="appStatus" class="status-line" role="status">正在加载默认资源...</span></div>
+            <button id="exportButton" class="btn btn-primary" type="button" disabled>导出整套资料</button>
+        </div>
+        <div class="form-grid">
+            <label class="field-group"><span>培训类型</span><select id="kindInput" class="form-select" data-refresh><option value="initial">安保初训</option><option value="recurrent">安保复训</option></select></label>
+            <label class="field-group"><span>教员姓名</span><input id="instructorInput" class="form-control" type="text" data-refresh></label>
+            <label class="field-group"><span>中国安保开课日期（表1）</span><input id="chinaDateInput" class="form-control" type="date" data-refresh></label>
+            <label class="field-group"><span>TSA 培训日期（表2）</span><input id="tsaDateInput" class="form-control" type="date" data-refresh></label>
+            <label id="permitDateField" class="field-group"><span>登机证培训日期（表3）</span><input id="permitDateInput" class="form-control" type="date" data-refresh></label>
+        </div>
+        <p id="outputSummary" class="section-summary"></p>
+        <p class="section-summary">部门固定“飞行部”，职务固定“飞行员”。人数、表1名单页培训时间、证件编号、签字及个人记录培训结论均不自动填写；试题原样附带，姓名工号由学员自行填写。</p>
+        <label class="field-group source-field"><span>参训人员姓名文本</span><textarea id="sourceText" class="form-control" rows="5" placeholder="粘贴含姓名的通知或名单，自动匹配员工号并按出现顺序去重" data-refresh></textarea></label>
+        <details class="advanced-options"><summary>高级选项</summary><label class="field-group advanced-content"><span>替换默认机组花名册</span><input id="rosterFile" class="form-control" type="file" accept=".xlsx,.xls"></label></details>
+    </section>
+    <section class="panel"><div class="section-head compact-head"><h2>数据健康检查</h2></div><div id="healthList" class="health-list" aria-live="polite"></div></section>
+    <section class="panel">
+        <div class="section-head compact-head"><h2>参训人员</h2><span id="previewSummary" class="section-summary">尚未匹配人员</span></div>
+        <div class="table-shell"><table class="table table-sm align-middle mb-0"><thead><tr><th>序号</th><th>员工号</th><th>姓名</th><th>职务</th></tr></thead><tbody id="previewBody"><tr><td colspan="4" class="empty-cell">等待匹配人员</td></tr></tbody></table></div>
+    </section>
+</main>
+<script src="../../../libs/xlsx-js-style.min.js"></script>
+<script type="module" src="./security-app.js"></script>
+</body>
+</html>

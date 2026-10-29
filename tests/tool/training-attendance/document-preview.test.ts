@@ -68,4 +68,12 @@ describe("生成资料内容预览", () => {
     await expect(buildDocumentPreview({ fileName: "empty.docx", bytes: await zip.generateAsync({ type: "uint8array" }) }, XLSX)).rejects.toThrow(/正文/);
     await expect(buildDocumentPreview({ fileName: "data.exe", bytes: new Uint8Array() }, XLSX)).rejects.toThrow(/格式/);
   });
+
+  it("保留旧版 DOC 附件并提示下载查看，扩展名为 DOC 的实际 DOCX 可预览正文", async () => {
+    const html = await buildDocumentPreview({ fileName: "试题.doc", bytes: new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]) }, XLSX);
+    expect(html).toContain("旧版 Word");
+    const zip = new JSZip();
+    zip.file("word/document.xml", '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>原始试题正文</w:t></w:r></w:p></w:body></w:document>');
+    expect(await buildDocumentPreview({ fileName: "试题.doc", bytes: await zip.generateAsync({ type: "uint8array" }) }, XLSX)).toContain("原始试题正文");
+  });
 });

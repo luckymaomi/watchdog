@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { SECURITY_DOWNLOAD_TEMPLATES } from "./programs/security/templates";
 
 export interface TrainingTemplateFile {
     source: string;
@@ -6,6 +7,7 @@ export interface TrainingTemplateFile {
 }
 
 export const TRAINING_TEMPLATE_FILES: TrainingTemplateFile[] = [
+    ...SECURITY_DOWNLOAD_TEMPLATES,
     { source: "../../../template/training-attendance/emergency/initial.docx", target: "应急训练/应急初训签到表模板.docx" },
     { source: "../../../template/training-attendance/emergency/recurrent.docx", target: "应急训练/应急复训签到表模板.docx" },
     { source: "../../../template/training-attendance/crm/booking.xlsx", target: "CRM/预订报名表.xlsx" },

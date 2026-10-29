@@ -100,7 +100,10 @@ function excelHtml(bytes: Uint8Array, xlsx: PreviewXlsx): string {
 
 export async function buildDocumentPreview(file: PreviewFile, xlsx: PreviewXlsx): Promise<string> {
     if (/\.xlsx$/i.test(file.fileName)) return excelHtml(file.bytes, xlsx);
-    if (!/\.docx$/i.test(file.fileName)) throw new Error("暂不支持该文件格式的在线预览。");
+    if (/\.doc$/i.test(file.fileName) && !(file.bytes[0] === 0x50 && file.bytes[1] === 0x4b)) {
+        return "<p>这份附件是旧版 Word（.doc）文件，已保留原文件。请导出整套资料后使用 Word 或 WPS 查看，姓名、员工号由学员自行填写。</p>";
+    }
+    if (!/\.docx?$/i.test(file.fileName)) throw new Error("暂不支持该文件格式的在线预览。");
     const zip = await JSZip.loadAsync(file.bytes);
     const part = zip.file("word/document.xml");
     if (!part) throw new Error("Word 文件缺少正文。");
