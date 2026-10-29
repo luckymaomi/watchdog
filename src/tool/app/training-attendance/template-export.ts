@@ -6,6 +6,8 @@ export interface TrainingTemplateFile {
 }
 
 export const TRAINING_TEMPLATE_FILES: TrainingTemplateFile[] = [
+    { source: "../../../template/training-attendance/emergency/initial.docx", target: "应急训练/应急初训签到表模板.docx" },
+    { source: "../../../template/training-attendance/emergency/recurrent.docx", target: "应急训练/应急复训签到表模板.docx" },
     { source: "../../../template/training-attendance/crm/booking.xlsx", target: "CRM/预订报名表.xlsx" },
     { source: "../../../template/training-attendance/crm/attendance-day1.xlsx", target: "CRM/签到表1.xlsx" },
     { source: "../../../template/training-attendance/crm/attendance-day2.xlsx", target: "CRM/签到表2.xlsx" },
