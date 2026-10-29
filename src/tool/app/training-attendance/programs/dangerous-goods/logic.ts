@@ -42,7 +42,6 @@ export function buildDangerousGoodsDraft(roster: CrewRosterEntry[], input: Dange
     if (!taskDate) issues.push(issue("invalid-task-date", "error", "请选择任务模拟日期。"));
     if (!examDate) issues.push(issue("invalid-exam-date", "error", "请选择试卷考核日期。"));
     if (!clean(input.location)) issues.push(issue("missing-location", "error", "请填写培训地点。"));
-    if (participants.length > 26) issues.push(issue("too-many-participants", "error", "签到表模板最多支持 26 名学员。"));
     if (participants.length) issues.push(issue("summary", "info", `已匹配 ${participants.length} 名学员。`));
     return {
         instructor: clean(input.instructor),

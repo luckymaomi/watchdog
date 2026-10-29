@@ -20,9 +20,10 @@ describe("应急培训签到表", () => {
         expect(draft.participants.map(p => p.employeeId)).toEqual(["001002", "001001"]);
         expect(draft.trainingTime).toBe("2026年12月31日");
         expect(canExportEmergency(draft)).toBe(true);
-        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent" }).trainingTime).toBe("2026年12月31日至2027年1月1日");
-        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent", startDate: "2028-02-28" }).trainingTime).toBe("2028年2月28日至2028年2月29日");
-        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent", startDate: "2027-02-28" }).trainingTime).toBe("2027年2月28日至2027年3月1日");
+        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent" }).trainingTime).toBe("2026年12月31日-2027年01月01日");
+        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent", startDate: "2026-07-29" }).trainingTime).toBe("2026年07月29日-30日");
+        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent", startDate: "2028-02-28" }).trainingTime).toBe("2028年02月28日-29日");
+        expect(buildEmergencyDraft(roster, { ...input, kind: "recurrent", startDate: "2027-02-28" }).trainingTime).toBe("2027年02月28日-03月01日");
     });
 
     it("拒绝无效参数、重名和员工号冲突，重复花名册记录不增加人数", () => {

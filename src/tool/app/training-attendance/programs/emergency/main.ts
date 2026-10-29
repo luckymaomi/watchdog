@@ -5,6 +5,7 @@ import { buildEmergencyDraft } from "./logic";
 import { buildEmergencyFile, EMERGENCY_TEMPLATES } from "./export";
 import type { EmergencyDraft, EmergencyKind } from "./models";
 import { element, renderDraft, setStatus } from "./view";
+import { mountDocumentPreview } from "../../document-preview-view";
 
 const XLSX = window.XLSX as unknown as typeof XlsxRuntime;
 let roster: CrewRosterEntry[] = [];
@@ -14,6 +15,11 @@ let rosterLoad = 0;
 let exporting = false;
 let currentDraft: EmergencyDraft;
 const templateErrors = new Map<EmergencyKind, string>();
+const preview = mountDocumentPreview(async () => {
+    const source = templates[currentDraft.kind];
+    if (!rosterReady || !source || element("exportButton", HTMLButtonElement).disabled) throw new Error("请先完成培训参数和人员名单。");
+    return [await buildEmergencyFile(source, currentDraft)];
+}, XLSX);
 
 function parseRoster(bytes: Uint8Array): CrewRosterEntry[] {
     const workbook = XLSX.read(bytes, { type: "array" });
@@ -33,6 +39,7 @@ function refresh(): void {
     renderDraft(currentDraft, rosterReady && Boolean(templates[currentDraft.kind]), exporting);
     const templateError = templateErrors.get(currentDraft.kind);
     if (templateError) setStatus(templateError, true);
+    preview.update(JSON.stringify(currentDraft), !element("exportButton", HTMLButtonElement).disabled);
 }
 async function fetchBytes(path: string): Promise<Uint8Array> {
     const response = await fetch(path);

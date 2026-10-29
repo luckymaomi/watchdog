@@ -5,6 +5,7 @@ import { buildCourseNoticeFile, COURSE_NOTICE_TEMPLATES } from "./export";
 import { buildCourseNoticeDraft, canExportCourseNotice } from "./logic";
 import type { CourseNoticeDraft, CourseNoticeInput } from "./models";
 import * as view from "./view";
+import { mountDocumentPreview } from "../../document-preview-view";
 
 const ROSTER_PATH = "../../../template/机组花名册.xlsx";
 const XLSX = window.XLSX as unknown as typeof XlsxRuntime;
@@ -16,6 +17,11 @@ const templates = new Map<string, Uint8Array>();
 const templateErrors = new Map<string, string>();
 let draft: CourseNoticeDraft;
 let exporting = false;
+const preview = mountDocumentPreview(async () => {
+    const source = templates.get(draft.role);
+    if (!rosterReady || !source || !canExportCourseNotice(draft)) throw new Error("请先完成通知参数和人员名单。");
+    return [await buildCourseNoticeFile(source, draft)];
+}, XLSX);
 
 function value(id: string): string { return view.requireElement(id, HTMLInputElement).value; }
 function input(): CourseNoticeInput {
@@ -32,6 +38,7 @@ function refresh(): void {
     if (!rosterReady) messages.push(rosterError);
     if (!templates.has(draft.role)) messages.push(templateErrors.get(draft.role) || "正在加载通知模板。");
     view.renderDraft(draft, rosterReady && templates.has(draft.role), exporting, messages);
+    preview.update(JSON.stringify(draft), !view.requireElement("exportButton", HTMLButtonElement).disabled);
 }
 async function fetchBytes(path: string): Promise<Uint8Array> {
     const response = await fetch(path);

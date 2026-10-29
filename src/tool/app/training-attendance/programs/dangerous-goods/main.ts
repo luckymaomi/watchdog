@@ -6,6 +6,7 @@ import { buildDangerousGoodsFiles } from "./export";
 import { DangerousGoodsLogic } from "./logic";
 import type { DangerousGoodsDraft, DangerousGoodsInput, DangerousGoodsTemplates } from "./models";
 import * as view from "./view";
+import { mountDocumentPreview } from "../../document-preview-view";
 
 const ROSTER_PATH = "../../../template/机组花名册.xlsx";
 const TEMPLATE_ROOT = "../../../template/training-attendance/dangerous-goods";
@@ -19,6 +20,10 @@ let roster: CrewRosterEntry[] = [];
 let templates: DangerousGoodsTemplates | null = null;
 let currentDraft: DangerousGoodsDraft | null = null;
 let exporting = false;
+const preview = mountDocumentPreview(async () => {
+    if (!templates || !currentDraft || !DangerousGoodsLogic.canExportDangerousGoods(currentDraft)) throw new Error("请先完成培训参数和人员名单。");
+    return buildDangerousGoodsFiles(templates, currentDraft);
+}, XLSX);
 
 function workbookRows(bytes: Uint8Array): unknown[][] {
     const workbook = XLSX.read(bytes, { type: "array" });
@@ -37,6 +42,7 @@ function formInput(): DangerousGoodsInput {
 function refresh(): void {
     currentDraft = DangerousGoodsLogic.buildDangerousGoodsDraft(roster, formInput());
     view.renderDraft(currentDraft, Boolean(templates), exporting);
+    preview.update(JSON.stringify(currentDraft), !view.requireElement("exportButton", HTMLButtonElement).disabled);
 }
 async function loadDefaults(): Promise<void> {
     try {

@@ -7,6 +7,7 @@ import { buildCrmFiles } from "./export";
 import { TrainingAttendanceLogic as logic } from "./logic";
 import type { CrmTemplateBuffers, TrainingAttendanceDraft, TrainingAttendanceInput } from "./models";
 import * as view from "./view";
+import { mountDocumentPreview } from "../../document-preview-view";
 
 const ROSTER_PATH = "../../../template/机组花名册.xlsx";
 const TEMPLATE_PATHS = {
@@ -20,6 +21,10 @@ let roster: CrewRosterEntry[] = [];
 let templates: CrmTemplateBuffers | null = null;
 let currentDraft: TrainingAttendanceDraft | null = null;
 let exporting = false;
+const preview = mountDocumentPreview(async () => {
+    if (!templates || !currentDraft || !logic.canExportTrainingAttendance(currentDraft)) throw new Error("请先完成培训参数和人员名单。");
+    return buildCrmFiles(templates, currentDraft);
+}, XLSX);
 
 function workbookRows(bytes: Uint8Array): unknown[][] {
     const workbook = XLSX.read(bytes, { type: "array" });
@@ -53,6 +58,7 @@ function refresh(): void {
     currentDraft = logic.buildTrainingAttendanceDraft(roster, formInput());
     view.renderDraft(currentDraft, Boolean(templates));
     if (exporting) view.requireElement("exportButton", HTMLButtonElement).disabled = true;
+    preview.update(JSON.stringify(currentDraft), !view.requireElement("exportButton", HTMLButtonElement).disabled);
 }
 
 async function loadDefaults(): Promise<void> {
@@ -104,6 +110,7 @@ async function exportFiles(): Promise<void> {
     const button = view.requireElement("exportButton", HTMLButtonElement);
     button.disabled = true;
     button.textContent = "正在生成...";
+    preview.update(JSON.stringify(currentDraft), false);
     const draft = currentDraft;
     const templateBuffers = templates;
     try {

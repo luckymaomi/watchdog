@@ -10,6 +10,13 @@ function parseDate(value: string): Date | null {
     return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
 }
 function dateText(date: Date): string { return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`; }
+function recurrentTime(start: Date, end: Date): string {
+    const monthDay = (date: Date): string => `${String(date.getMonth() + 1).padStart(2, "0")}月${String(date.getDate()).padStart(2, "0")}日`;
+    const first = `${start.getFullYear()}年${monthDay(start)}`;
+    if (start.getFullYear() !== end.getFullYear()) return `${first}-${end.getFullYear()}年${monthDay(end)}`;
+    if (start.getMonth() !== end.getMonth()) return `${first}-${monthDay(end)}`;
+    return `${first}-${String(end.getDate()).padStart(2, "0")}日`;
+}
 function dateInput(date: Date): string { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
 
 export function buildEmergencyDraft(roster: CrewRosterEntry[], input: EmergencyInput): EmergencyDraft {
@@ -49,7 +56,7 @@ export function buildEmergencyDraft(roster: CrewRosterEntry[], input: EmergencyI
     if (participants.length) issues.push({ severity: "info", message: `已匹配 ${participants.length} 人，${kind === "initial" ? "初训 1 天" : "复训 2 天"}，导出一份签到表。` });
     return {
         kind, startDate: start ? dateInput(start) : "", endDate: end ? dateInput(end) : "",
-        trainingTime: start && end ? (kind === "initial" ? dateText(start) : `${dateText(start)}至${dateText(end)}`) : "",
+        trainingTime: start && end ? (kind === "initial" ? dateText(start) : recurrentTime(start, end)) : "",
         location, participants, issues
     };
 }

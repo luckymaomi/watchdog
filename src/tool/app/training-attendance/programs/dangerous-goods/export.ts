@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { parseWordXml, serializeWordXml, setWordText, wordChildren, wordRows, type WordDocument, type WordElement } from "../../../personnel-structure-stats/docx-xml";
+import { parseWordXml, serializeWordXml, setWordText, wordChildren, wordRows, wordText, type WordDocument, type WordElement, type WordRow } from "../../../personnel-structure-stats/docx-xml";
 import type { DangerousGoodsDraft, DangerousGoodsFile, DangerousGoodsTemplates } from "./models";
 
 const WORD_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
@@ -57,12 +57,23 @@ function worksheetTable(document: WordDocument, index: number): WordElement {
     return table;
 }
 
+function prepareParticipantRows(table: WordElement, start: number, count: number, footer?: WordElement): WordRow[] {
+    const rows = wordRows(table);
+    const end = footer ? rows.findIndex(row => row.element === footer) : rows.length;
+    if (end <= start || !rows[start]) throw new Error("Word 模板缺少名单样板行。");
+    const sample = rows[start].element.cloneNode(true) as WordElement;
+    for (const row of rows.slice(start, end)) table.removeChild(row.element);
+    for (let i = 0; i < count; i++) table.insertBefore(sample.cloneNode(true), footer || null);
+    return wordRows(table).slice(start, start + count);
+}
+
 async function fillAttitude(source: Uint8Array, draft: DangerousGoodsDraft): Promise<Uint8Array> {
     const { zip, document } = await openDocument(source);
     const table = worksheetTable(document, 0);
     const rows = wordRows(table);
-    const dataRows = rows.slice(3, 24);
-    if (draft.participants.length > dataRows.length) throw new Error("学员态度评价表模板最多支持 21 名学员。");
+    const footer = rows.find(row => wordText(row.cells[0]).trim().startsWith("说明："))?.element;
+    if (!footer) throw new Error("学员态度评价表模板缺少表尾说明。");
+    const dataRows = prepareParticipantRows(table, 3, draft.participants.length, footer);
     draft.participants.forEach((person, index) => {
         const cells = dataRows[index].cells;
         setWordText(cells[0], String(index + 1));
@@ -86,8 +97,7 @@ async function fillAttendance(source: Uint8Array, draft: DangerousGoodsDraft): P
     if (!header || header.length < 5) throw new Error("签到表模板缺少学员表头。");
     replacePlaceholder(document, "{上午签名}", shortDate(draft.examDate));
     replacePlaceholder(document, "{下午签名}", shortDate(draft.examDate));
-    const dataRows = rows.slice(9);
-    if (draft.participants.length > dataRows.length) throw new Error("签到表模板预留行不足。");
+    const dataRows = prepareParticipantRows(table, 9, draft.participants.length);
     draft.participants.forEach((person, index) => {
         const cells = dataRows[index].cells;
         setWordText(cells[0], String(index + 1));
