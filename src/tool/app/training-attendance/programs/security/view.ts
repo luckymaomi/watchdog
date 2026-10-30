@@ -34,7 +34,7 @@ export function renderDraft(draft: SecurityDraft, resourceMessages: string[], ex
     }
     element("previewSummary", HTMLElement).textContent = `共 ${draft.participants.length} 人`;
     element("outputSummary", HTMLElement).textContent = draft.kind === "initial"
-        ? "初训：安保中国签到表、TSA 签到表、登机证培训登记表各 1 份，申办登机证人员记录每人 1 份，原始试题各 1 份。"
+        ? "初训：安保中国签到表、TSA 签到表、登机证培训登记表各 1 份，另附空白申办登机证人员记录 1 份，原始试题各 1 份。"
         : "复训：安保中国签到表和 TSA 签到表各 1 份，原始试题各 1 份。";
     const button = element("exportButton", HTMLButtonElement);
     button.disabled = exporting || resourceMessages.length > 0 || !canExportSecurity(draft);

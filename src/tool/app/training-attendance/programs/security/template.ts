@@ -1,16 +1,15 @@
 import JSZip from "jszip";
 import { parseWordXml, serializeWordXml, wordChildren, wordRows, wordText, WORD_NS, type WordElement } from "../../../personnel-structure-stats/docx-xml";
 
-export type SecurityDocumentType = "china" | "tsa" | "permitRegister" | "permitRecord";
+export type SecurityDocumentType = "china" | "tsa" | "permitRegister";
 export interface SecurityPerson {
     employeeId: string;
     name: string;
     duty: string;
 }
-export type SecurityFields = Partial<Record<"教员" | "开课日期" | "TSA日期" | "登机证日期" | "姓名" | "部门" | "职务", string>>;
+export type SecurityFields = Partial<Record<"教员" | "开课日期" | "TSA日期" | "登机证日期", string>>;
 const DOCUMENT_FIELDS: Record<SecurityDocumentType, string[]> = {
-    china: ["教员", "开课日期"], tsa: ["TSA日期"], permitRegister: ["登机证日期"],
-    permitRecord: ["姓名", "部门", "职务", "教员"]
+    china: ["教员", "开课日期"], tsa: ["TSA日期"], permitRegister: ["登机证日期"]
 };
 
 function fill(target: WordElement, values: Record<string, string>, required: string[]): void {
@@ -38,22 +37,20 @@ export async function fillSecurityTemplate(source: Uint8Array, type: SecurityDoc
     const document = parseWordXml(await part.async("string"));
     const body = wordChildren(document.documentElement!, "body")[0];
     if (!body) throw new Error("安保模板缺少正文。");
-    if (type !== "permitRecord") {
-        if (!participants.length) throw new Error("请提供参训人员名单。");
-        const table = wordChildren(body, "tbl").find(t => wordRows(t).some(row => wordText(row.cells[0]) === "{序号}"));
-        const rows = table && wordRows(table);
-        const sample = rows?.find(row => wordText(row.cells[0]) === "{序号}")?.element;
-        if (!table || !sample || sample !== rows?.at(-1)?.element) throw new Error("安保模板缺少末尾名单样板行。");
-        table.removeChild(sample);
-        fill(body, values, DOCUMENT_FIELDS[type]);
-        participants.forEach((person, index) => {
-            const row = sample.cloneNode(true) as WordElement;
-            const data: Record<string, string> = { 序号: String(index + 1), 员工号: person.employeeId, 姓名: person.name };
-            if (type === "china") data.职务 = person.duty;
-            fill(row, data, Object.keys(data));
-            table.appendChild(row);
-        });
-    } else fill(body, values, DOCUMENT_FIELDS[type]);
+    if (!participants.length) throw new Error("请提供参训人员名单。");
+    const table = wordChildren(body, "tbl").find(t => wordRows(t).some(row => wordText(row.cells[0]) === "{序号}"));
+    const rows = table && wordRows(table);
+    const sample = rows?.find(row => wordText(row.cells[0]) === "{序号}")?.element;
+    if (!table || !sample || sample !== rows?.at(-1)?.element) throw new Error("安保模板缺少末尾名单样板行。");
+    table.removeChild(sample);
+    fill(body, values, DOCUMENT_FIELDS[type]);
+    participants.forEach((person, index) => {
+        const row = sample.cloneNode(true) as WordElement;
+        const data: Record<string, string> = { 序号: String(index + 1), 员工号: person.employeeId, 姓名: person.name };
+        if (type === "china") data.职务 = person.duty;
+        fill(row, data, Object.keys(data));
+        table.appendChild(row);
+    });
     zip.file("word/document.xml", serializeWordXml(document));
     return zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
 }

@@ -15,10 +15,7 @@ export async function buildSecurityFiles(templates: SecurityTemplates, draft: Se
     ];
     if (initial) {
         files.push({ fileName: "签到表3空勤登机证管理规定培训登记表.docx", bytes: await fillSecurityTemplate(source("permitRegister"), "permitRegister", { 登机证日期: draft.permitDate }, draft.participants) });
-        for (const [i, p] of draft.participants.entries()) {
-            const name = `${i + 1}_${p.employeeId}_${p.name}`.replace(/[\\/:*?"<>|]/g, "_");
-            files.push({ fileName: `签到表4申办空勤登机证人员培训记录_${name}.docx`, bytes: await fillSecurityTemplate(source("permitRecord"), "permitRecord", { 姓名: p.name, 部门: "飞行部", 职务: "飞行员", 教员: draft.instructor }) });
-        }
+        files.push({ fileName: "签到表4申办空勤登机证人员培训记录.docx", bytes: source("permitRecord").slice() });
     }
     const examKeys = initial ? ["initialExam", "tsaExam", "permitExam"] as const : ["recurrentExam", "tsaExam"] as const;
     for (const key of examKeys) files.push({ fileName: SECURITY_EXAM_NAMES[key], bytes: source(key).slice() });

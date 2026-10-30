@@ -41,9 +41,9 @@ describe("安保初训复训资料", () => {
         expect(buildSecurityDraft([...roster, roster[0]], input).participants).toHaveLength(2);
     });
 
-    it("初训保留四类表，个人记录一人一份，人数时间和签字栏按要求留空，三类试题保持原文件", async () => {
+    it("初训保留四类表，表4原样一份，人数时间和签字栏按要求留空，三类试题保持原文件", async () => {
         const files = await buildSecurityFiles(templates, buildSecurityDraft(roster, input));
-        expect(files).toHaveLength(8);
+        expect(files).toHaveLength(7);
         const china = await tableRows(files[0].bytes, 0);
         const chinaList = await tableRows(files[0].bytes, 2);
         expect(wordText(china[0].cells[4])).toBe("测试教员");
@@ -58,18 +58,9 @@ describe("安保初训复训资料", () => {
         const register = await tableRows(files[2].bytes, 0);
         expect(wordText(register[1].cells[2])).toBe("2026年10月28日");
         const records = files.filter(f => f.fileName.includes("签到表4"));
-        expect(records).toHaveLength(2);
-        for (const [i, file] of records.entries()) {
-            const rows = await tableRows(file.bytes, 0);
-            expect(wordText(rows[0].cells[0])).toBe(`姓名：${i ? "测试甲" : "测试乙"}`);
-            expect(wordText(rows[0].cells[4])).toBe("");
-            expect(wordText(rows[1].cells[1])).toBe("飞行部");
-            expect(wordText(rows[1].cells[4])).toBe("飞行员");
-            expect(wordText(rows[12].cells[1])).toBe("");
-            expect(wordText(rows[11].cells[1])).toBe("");
-            expect(wordText(rows[11].cells[4])).toBe("");
-            expect(wordText(rows[3].cells[3])).toBe("测试教员");
-        }
+        expect(records).toHaveLength(1);
+        expect(records[0].fileName).toBe("签到表4申办空勤登机证人员培训记录.docx");
+        expect(records[0].bytes).toEqual(templates.permitRecord);
         expect(files.find(f => f.fileName.includes("试题1"))!.bytes).toEqual(templates.initialExam);
         expect(files.find(f => f.fileName.includes("试题2"))!.bytes).toEqual(templates.tsaExam);
         expect(files.find(f => f.fileName.includes("试题3"))!.bytes).toEqual(templates.permitExam);
@@ -78,6 +69,17 @@ describe("安保初训复训资料", () => {
             expect(html.length).toBeGreaterThan(30);
             if (file.fileName.endsWith(".doc") && file.bytes[0] !== 0x50) expect(html).toContain("Word 或 WPS");
         }
+    });
+
+    it.each([1, 60])("初训%d人及不同教员均只附带一份原始表4", async count => {
+        const many = Array.from({ length: count }, (_, i) => ({ ...roster[0], id: `00${i}`, name: `人员${String.fromCharCode(0x4e00 + i)}` }));
+        const draft = buildSecurityDraft(many, { ...input, instructor: "另一教员", sourceText: many.map(p => p.name).join("、") });
+        const files = await buildSecurityFiles(templates, draft);
+        expect(files).toHaveLength(7);
+        const records = files.filter(f => f.fileName.includes("签到表4"));
+        expect(records).toHaveLength(1);
+        expect(records[0].bytes).toEqual(templates.permitRecord);
+        expect(records[0].bytes).not.toBe(templates.permitRecord);
     });
 
     it("复训只生成两份签到表和两份未填写试题，60人名单完整且初复训模板互不替代", async () => {

@@ -45,7 +45,7 @@ export function buildSecurityDraft(roster: CrewRosterEntry[], input: SecurityInp
     for (const value of [instructor, ...participants.flatMap(p => [p.employeeId, p.name])]) {
         if (/[\u0000-\u001F\uFFFE\uFFFF{}]/.test(value)) error("教员或人员信息包含控制字符或花括号，请清理后重试。");
     }
-    if (participants.length) issues.push({ severity: "info", message: `已匹配 ${participants.length} 人。${kind === "initial" ? "生成三份汇总表、每人一份申办记录和三类原始试题。" : "生成两份签到表和两类原始试题。"}` });
+    if (participants.length) issues.push({ severity: "info", message: `已匹配 ${participants.length} 人。${kind === "initial" ? "生成三份汇总表，附带一份空白申办记录和三类原始试题。" : "生成两份签到表和两类原始试题。"}` });
     return { kind, instructor, chinaDate, tsaDate, permitDate, participants, issues };
 }
 export function canExportSecurity(draft: SecurityDraft): boolean {

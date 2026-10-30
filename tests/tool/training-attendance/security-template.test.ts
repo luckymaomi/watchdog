@@ -38,25 +38,23 @@ describe("安保模板字段填充", () => {
         }
     });
 
-    it("个人记录填写姓名、部门、教员学员列，结论、证件编号及签字栏留空", async () => {
-        const bytes = await fillSecurityTemplate(load("initial-permit-record.docx"), "permitRecord", {
-            教员: "测试教员", 姓名: "测试学员", 部门: "飞行部", 职务: "飞行员"
-        });
+    it("表4保留原表姓名栏、固定部门职务教员和结论，日期留年月日空位", async () => {
+        const bytes = load("initial-permit-record.docx");
         const zip = await JSZip.loadAsync(bytes);
         const doc = parseWordXml(await zip.file("word/document.xml")!.async("string"));
         const rows = wordRows(wordChildren(wordChildren(doc.documentElement!, "body")[0], "tbl")[0]);
-        expect(wordText(rows[0].cells[0])).toBe("姓名：测试学员");
+        expect(wordText(rows[0].cells[0])).toBe("姓名");
         expect(wordText(rows[0].cells[4])).toBe("");
         expect(wordText(rows[1].cells[1])).toBe("飞行部");
         for (const row of rows.slice(3, 9)) {
             expect(wordText(row.cells[1])).toBe("");
             expect(wordText(row.cells[2])).toBe("2");
-            expect(wordText(row.cells[3])).toBe("测试教员");
-            expect(wordText(row.cells[4])).toBe("测试学员");
+            expect(wordText(row.cells[3])).toBe("张鹏");
+            expect(wordText(row.cells[4])).toBe("");
         }
         expect(wordText(rows[11].cells[1])).toBe("");
         expect(wordText(rows[11].cells[4])).toBe("");
-        expect(wordText(rows[12].cells[1])).toBe("");
+        expect(wordText(rows[12].cells[1])).toBe("因　年　月　日申办空勤登机证，参加航空安保教育和证件管理培训，于　年　月　日通过考核，培训合格。");
     });
 
     it("缺少模板字段、空名单或缺少填写值时拒绝生成", async () => {
